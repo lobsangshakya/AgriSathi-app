@@ -29,7 +29,10 @@ const Chat = () => {
   const [isTyping, setIsTyping] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [isCameraOpen, setIsCameraOpen] = useState(false);
-  const [chatContext, setChatContext] = useState<ChatContext>({ language });
+  const [chatContext, setChatContext] = useState<ChatContext>({ 
+    language,
+    lastMessage: ''
+  });
   const [apiStatus, setApiStatus] = useState<'mock' | 'real' | 'error'>('mock');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -37,6 +40,11 @@ const Chat = () => {
   useEffect(() => {
     checkApiStatus();
   }, []);
+
+  // Update chat context when language changes
+  useEffect(() => {
+    setChatContext(prev => ({ ...prev, language }));
+  }, [language]);
 
   const checkApiStatus = async () => {
     try {
@@ -67,7 +75,7 @@ const Chat = () => {
         // Process with NLP first
         const nlpResult = await aiService.processNaturalLanguage(newMessage, language);
         
-        // Send to chatbot API
+        // Send to chatbot API with proper language context
         const botResponse = await apiService.sendChatMessage(newMessage, {
           ...chatContext,
           language,
@@ -75,7 +83,7 @@ const Chat = () => {
         });
         
         setMessages(prev => [...prev, botResponse]);
-        setChatContext(prev => ({ ...prev, lastMessage: newMessage }));
+        setChatContext(prev => ({ ...prev, lastMessage: newMessage, language }));
         
         // Show success toast for real API usage
         if (apiStatus === 'real') {
@@ -93,8 +101,8 @@ const Chat = () => {
           id: Date.now().toString(),
           sender: "bot",
           content: language === 'hindi' 
-            ? "माफ़ करें, मैं आपके सवाल का जवाब नहीं दे पा रहा हूं। कृपया फिर से कोशिश करें।"
-            : "Sorry, I couldn't process your question. Please try again.",
+            ? "माफ़ करें, मैं आपके सवाल का जवाब नहीं दे पा रहा हूं। कृपया फिर से कोशिश करें।\n\n💡 आप इन विषयों पर पूछ सकते हैं:\n• फसल (टमाटर, गेहूं, धान, मक्का)\n• मौसम और जलवायु\n• खाद और पोषण\n• कीट और रोग नियंत्रण\n• सिंचाई तरीके\n• जैविक खेती\n• बाजार भाव\n• सरकारी योजनाएं"
+            : "Sorry, I couldn't process your question. Please try again.\n\n💡 You can ask about:\n• Crops (tomato, wheat, rice, maize)\n• Weather and climate\n• Fertilizers and nutrition\n• Pest and disease control\n• Irrigation methods\n• Organic farming\n• Market rates\n• Government schemes",
           timestamp: new Date(),
           type: "text"
         };
@@ -120,10 +128,27 @@ const Chat = () => {
     setIsListening(true);
     setTimeout(() => {
       setIsListening(false);
-      setNewMessage(language === 'hindi' 
-        ? "गेहूं की बुआई के लिए सबसे अच्छा समय कौन सा है?"
-        : "What is the best time for wheat sowing?"
-      );
+      // Simulate different voice inputs based on language
+      const voiceInputs = {
+        hindi: [
+          "गेहूं की बुआई के लिए सबसे अच्छा समय कौन सा है?",
+          "टमाटर में कीट नियंत्रण कैसे करें?",
+          "जैविक खेती के फायदे क्या हैं?",
+          "मौसम कैसा रहेगा?",
+          "बाजार में गेहूं का भाव क्या है?"
+        ],
+        english: [
+          "What is the best time for wheat sowing?",
+          "How to control pests in tomato?",
+          "What are the benefits of organic farming?",
+          "How is the weather today?",
+          "What is the market price of wheat?"
+        ]
+      };
+      
+      const inputs = voiceInputs[language as keyof typeof voiceInputs];
+      const randomInput = inputs[Math.floor(Math.random() * inputs.length)];
+      setNewMessage(randomInput);
     }, 3000);
   };
 
@@ -180,7 +205,7 @@ const Chat = () => {
 
   const clearChat = () => {
     setMessages([]);
-    setChatContext({ language });
+    setChatContext({ language, lastMessage: '' });
     toast({
       title: t('chat.cleared') || 'Chat Cleared',
       description: t('chat.startNewConversation') || 'Start a new conversation',
@@ -203,8 +228,8 @@ const Chat = () => {
     });
 
     return language === 'hindi'
-      ? `🌾 नमस्ते! मैं AgriSathi AI हूं।\n📅 आज: ${today}\n\n💡 आप इन विषयों पर पूछ सकते हैं:\n• फसल (टमाटर, गेहूं, धान, मक्का)\n• मौसम और जलवायु\n• खाद और पोषण\n• कीट और रोग नियंत्रण\n• सिंचाई तरीके\n• जैविक खेती\n• बाजार भाव\n• सरकारी योजनाएं\n\n📸 तस्वीर भेजकर रोग की पहचान भी कर सकते हैं!`
-      : `🌾 Hello! I'm AgriSathi AI.\n📅 Today: ${today}\n\n💡 You can ask about:\n• Crops (tomato, wheat, rice, maize)\n• Weather and climate\n• Fertilizers and nutrition\n• Pest and disease control\n• Irrigation methods\n• Organic farming\n• Market rates\n• Government schemes\n\n📸 You can also send photos to identify diseases!`;
+      ? `🌾 नमस्ते! मैं AgriSathi AI हूं।\n📅 आज: ${today}\n\n💡 आप इन विषयों पर पूछ सकते हैं:\n• फसल (टमाटर, गेहूं, धान, मक्का)\n• मौसम और जलवायु\n• खाद और पोषण\n• कीट और रोग नियंत्रण\n• सिंचाई तरीके\n• जैविक खेती\n• बाजार भाव\n• सरकारी योजनाएं\n\n📸 तस्वीर भेजकर रोग की पहचान भी कर सकते हैं!\n\n🌐 भाषा बदलने के लिए ऊपर दाईं तरफ का बटन दबाएं।`
+      : `🌾 Hello! I'm AgriSathi AI.\n📅 Today: ${today}\n\n💡 You can ask about:\n• Crops (tomato, wheat, rice, maize)\n• Weather and climate\n• Fertilizers and nutrition\n• Pest and disease control\n• Irrigation methods\n• Organic farming\n• Market rates\n• Government schemes\n\n📸 You can also send photos to identify diseases!\n\n🌐 Click the button on the top right to change language.`;
   };
 
   // Initialize with welcome message if no messages
@@ -219,7 +244,7 @@ const Chat = () => {
       };
       setMessages([welcomeMessage]);
     }
-  }, [language]);
+  }, [language, messages.length]);
 
   return (
     <div className="min-h-screen bg-gradient-earth">
