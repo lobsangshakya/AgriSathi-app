@@ -16,8 +16,7 @@ import {
   Globe,
   TrendingUp,
   LogOut,
-  Users,
-  Edit
+  Users
 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useUser } from "@/contexts/UserContext";
@@ -26,12 +25,12 @@ import { toast } from "@/hooks/use-toast";
 
 const Profile = () => {
   const { t } = useLanguage();
-  const { user, logout, addAgriCreds, updateUser } = useUser();
+  const { user, logout, addAgriCreds } = useUser();
   const navigate = useNavigate();
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-gradient-app flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-earth flex items-center justify-center">
         <div className="text-center">
           <h2 className="text-xl font-bold mb-4">Please log in to view your profile</h2>
           <Button onClick={() => navigate('/auth')}>Go to Login</Button>
@@ -41,40 +40,12 @@ const Profile = () => {
   }
 
   const handleRedeemCredits = () => {
-    if (user.agriCreds < 50) {
-      toast({
-        title: t('profile.insufficientCredits') || 'Insufficient Credits',
-        description: t('profile.need50Credits') || 'You need at least 50 AgriCreds to chat with experts',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    // Deduct 50 credits for expert consultation
-    addAgriCreds(-50, 'Expert consultation');
-    
-    toast({
-      title: t('profile.expertChatStarted') || 'Expert Chat Started',
-      description: t('profile.redirectingToExpert') || 'Redirecting to expert consultation...',
-    });
-
-    // Navigate to expert consultation page
-    setTimeout(() => {
-      navigate('/expert-consultation');
-    }, 1000);
-  };
-
-  const handleChangeLocation = () => {
-    updateUser({ location: 'Bangalore, India' });
-    toast({
-      title: t('profile.locationUpdated') || 'Location Updated',
-      description: t('profile.locationChangedToBangalore') || 'Your location has been changed to Bangalore, India',
-      variant: 'default',
-    });
+    // Navigate to AgriCreds redemption page
+    navigate('/agri-credits');
   };
 
   return (
-    <div className="min-h-screen bg-gradient-app">
+    <div className="min-h-screen bg-gradient-earth">
       <Header title={t('profile.title')} />
       
       <div className="p-4 space-y-4">
@@ -97,14 +68,6 @@ const Profile = () => {
           <div className="flex items-center justify-center gap-2 text-muted-foreground mb-4">
             <MapPin className="h-4 w-4" />
             <span className="text-sm">{user.location}</span>
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={handleChangeLocation}
-              className="h-6 w-6 p-0"
-            >
-              <Edit className="h-3 w-3" />
-            </Button>
           </div>
           
           {/* AgriCreds Display */}
@@ -226,8 +189,8 @@ const Profile = () => {
           </Button>
           <Button 
             className="w-full bg-destructive hover:bg-destructive/90 text-white" 
-            onClick={async () => {
-              await logout();
+            onClick={() => {
+              logout();
               navigate('/auth');
             }}
           >

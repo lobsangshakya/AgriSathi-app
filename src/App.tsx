@@ -9,6 +9,8 @@ import Profile from "./pages/Profile";
 import DiseaseDetection from "./pages/DiseaseDetection";
 import Chat from "./pages/Chat";
 import ExpertConsultation from "./pages/ExpertConsultation";
+import AgriCredits from "./pages/AgriCredits";
+import ServiceConfirmation from "./pages/ServiceConfirmation";
 import NotFound from "./pages/NotFound";
 import { Layout } from "./components/Layout";
 import { LanguageProvider } from "./contexts/LanguageContext";
@@ -33,6 +35,8 @@ const AppContent = () => {
         <Route path="/disease-detection" element={<DiseaseDetection />} />
         <Route path="/chat" element={<Chat />} />
         <Route path="/expert-consultation" element={<ExpertConsultation />} />
+        <Route path="/agri-credits" element={<AgriCredits />} />
+        <Route path="/service-confirmation" element={<ServiceConfirmation />} />
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />
       </Routes>
