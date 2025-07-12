@@ -2,23 +2,65 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>AgriSathi - किसान का डिजिटल साथी</title>
     <meta name="description" content="AgriSathi - A comprehensive farming assistance app for Indian farmers with AI-powered crop disease detection, community support, and expert consultation" />
     <meta name="author" content="AgriSathi Team" />
 
-    <meta property="og:title" content="c1f09f45-8ac8-41d7-bfe5-e2bb72a75924" />
-    <meta property="og:description" content="Lovable Generated Project" />
+    <!-- Mobile optimizations -->
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="AgriSathi" />
+    <meta name="theme-color" content="#22c55e" />
+    <meta name="msapplication-TileColor" content="#22c55e" />
+
+    <!-- Prevent zoom on input focus -->
+    <meta name="format-detection" content="telephone=no" />
+
+    <meta property="og:title" content="AgriSathi - किसान का डिजिटल साथी" />
+    <meta property="og:description" content="AgriSathi - A comprehensive farming assistance app for Indian farmers" />
     <meta property="og:type" content="website" />
     <meta property="og:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
 
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:site" content="@lovable_dev" />
+    <meta name="twitter:site" content="@agrisathi" />
     <meta name="twitter:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
+
+    <style>
+      /* Prevent flash of unstyled content */
+      body {
+        margin: 0;
+        padding: 0;
+        background-color: #f8fafc;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+      }
+      
+      /* Loading spinner */
+      .loading {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 40px;
+        height: 40px;
+        border: 4px solid #e5e7eb;
+        border-top: 4px solid #22c55e;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+      
+      @keyframes spin {
+        0% { transform: translate(-50%, -50%) rotate(0deg); }
+        100% { transform: translate(-50%, -50%) rotate(360deg); }
+      }
+    </style>
   </head>
 
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <div class="loading"></div>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
