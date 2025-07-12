@@ -190,8 +190,6 @@ const translations = {
     'profile.credits': 'क्रेडिट',
     'profile.noAchievements': 'अभी तक कोई उपलब्धि नहीं',
     'profile.keepParticipating': 'उपलब्धियां कमाने के लिए भाग लेते रहें!',
-    'profile.locationUpdated': 'स्थान अपडेट किया गया',
-    'profile.locationChangedToBangalore': 'आपका स्थान बैंगलोर, भारत में बदल दिया गया है',
     
     // Expert Consultation
     'expert.title': 'विशेषज्ञ परामर्श',
@@ -408,8 +406,6 @@ const translations = {
     'profile.credits': 'Credits',
     'profile.noAchievements': 'No achievements yet',
     'profile.keepParticipating': 'Keep participating to earn achievements!',
-    'profile.locationUpdated': 'Location Updated',
-    'profile.locationChangedToBangalore': 'Your location has been changed to Bangalore, India',
     
     // Expert Consultation
     'expert.title': 'Expert Consultation',

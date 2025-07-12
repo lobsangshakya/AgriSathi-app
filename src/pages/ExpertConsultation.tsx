@@ -60,7 +60,7 @@ const ExpertConsultation = () => {
     {
       id: '1',
       name: 'डॉ. राजेश कुमार',
-      specialization: 'फसल रोग विज्ञान',
+      specialization: 'फसल रोग विज्ञान (Crop Disease Expert)',
       experience: '15+ वर्ष',
       rating: 4.8,
       isOnline: true,
@@ -71,7 +71,7 @@ const ExpertConsultation = () => {
     {
       id: '2',
       name: 'Dr. Priya Sharma',
-      specialization: 'Soil Science',
+      specialization: 'मिट्टी विज्ञान (Soil Science Expert)',
       experience: '12+ years',
       rating: 4.9,
       isOnline: true,
@@ -82,12 +82,45 @@ const ExpertConsultation = () => {
     {
       id: '3',
       name: 'डॉ. अमित सिंह',
-      specialization: 'कीट प्रबंधन',
+      specialization: 'कीट प्रबंधन (Pest Management Expert)',
       experience: '18+ वर्ष',
       rating: 4.7,
       isOnline: false,
       avatar: '',
       languages: ['हिंदी'],
+      consultationFee: 50
+    },
+    {
+      id: '4',
+      name: 'Dr. Meera Patel',
+      specialization: 'Organic Farming Expert',
+      experience: '10+ years',
+      rating: 4.6,
+      isOnline: true,
+      avatar: '',
+      languages: ['English', 'हिंदी'],
+      consultationFee: 50
+    },
+    {
+      id: '5',
+      name: 'डॉ. सुरेश वर्मा',
+      specialization: 'उर्वरक विज्ञान (Fertilizer Expert)',
+      experience: '20+ वर्ष',
+      rating: 4.9,
+      isOnline: true,
+      avatar: '',
+      languages: ['हिंदी', 'English'],
+      consultationFee: 50
+    },
+    {
+      id: '6',
+      name: 'Dr. Anjali Reddy',
+      specialization: 'Irrigation & Water Management',
+      experience: '14+ years',
+      rating: 4.5,
+      isOnline: false,
+      avatar: '',
+      languages: ['English'],
       consultationFee: 50
     }
   ];
@@ -236,7 +269,7 @@ const ExpertConsultation = () => {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-gradient-app flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-earth flex items-center justify-center">
         <div className="text-center">
           <h2 className="text-xl font-bold mb-4">Please log in to access expert consultation</h2>
           <Button onClick={() => navigate('/auth')}>Go to Login</Button>
@@ -246,7 +279,7 @@ const ExpertConsultation = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-app">
+    <div className="min-h-screen bg-gradient-earth">
       <Header title={t('expert.title') || 'Expert Consultation'} />
       
       <div className="p-4 space-y-4">
