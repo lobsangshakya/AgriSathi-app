@@ -3,8 +3,10 @@ import { Header } from "@/components/Header";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Camera, Upload, Scan, AlertTriangle, CheckCircle } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const DiseaseDetection = () => {
+  const { t } = useLanguage();
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<any>(null);
@@ -47,7 +49,7 @@ const DiseaseDetection = () => {
 
   return (
     <div className="min-h-screen bg-gradient-earth">
-      <Header title="फसल स्कैन करें" />
+      <Header title={t('disease.title')} />
       
       <div className="p-4 space-y-4">
         {/* Upload Section */}
@@ -55,10 +57,10 @@ const DiseaseDetection = () => {
           <div className="mb-4">
             <Camera className="h-16 w-16 mx-auto text-primary mb-4" />
             <h2 className="text-lg font-semibold text-foreground mb-2">
-              फसल की फोटो अपलोड करें
+              {t('disease.uploadPhoto')}
             </h2>
             <p className="text-sm text-muted-foreground">
-              पत्तियों, फूलों या फलों की स्पष्ट तस्वीर लें
+              {t('disease.uploadDescription')}
             </p>
           </div>
           
@@ -66,7 +68,7 @@ const DiseaseDetection = () => {
             <label htmlFor="image-upload">
               <Button className="w-full" variant="gradient">
                 <Upload className="h-4 w-4 mr-2" />
-                गैलरी से चुनें
+                {t('disease.gallery')}
               </Button>
               <input
                 id="image-upload"
@@ -79,7 +81,7 @@ const DiseaseDetection = () => {
             
             <Button className="w-full" variant="outline">
               <Camera className="h-4 w-4 mr-2" />
-              कैमरा खोलें
+              {t('disease.camera')}
             </Button>
           </div>
         </Card>
@@ -87,7 +89,7 @@ const DiseaseDetection = () => {
         {/* Image Preview */}
         {selectedImage && (
           <Card className="p-4">
-            <h3 className="font-semibold text-foreground mb-3">अपलोड की गई फोटो</h3>
+            <h3 className="font-semibold text-foreground mb-3">{t('disease.uploadedPhoto')}</h3>
             <img 
               src={selectedImage} 
               alt="Uploaded crop" 
@@ -97,7 +99,7 @@ const DiseaseDetection = () => {
             {!analysisResult && !isAnalyzing && (
               <Button onClick={analyzeImage} className="w-full" variant="success">
                 <Scan className="h-4 w-4 mr-2" />
-                AI विश्लेषण शुरू करें
+                {t('disease.startAnalysis')}
               </Button>
             )}
           </Card>
@@ -107,8 +109,8 @@ const DiseaseDetection = () => {
         {isAnalyzing && (
           <Card className="p-6 text-center">
             <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4"></div>
-            <p className="text-foreground font-medium">AI विश्लेषण चल रहा है...</p>
-            <p className="text-sm text-muted-foreground">कृपया प्रतीक्षा करें</p>
+            <p className="text-foreground font-medium">{t('disease.analyzing')}</p>
+            <p className="text-sm text-muted-foreground">{t('disease.pleaseWait')}</p>
           </Card>
         )}
 
@@ -121,7 +123,7 @@ const DiseaseDetection = () => {
                 <div>
                   <h3 className="font-semibold text-foreground">{analysisResult.disease}</h3>
                   <p className="text-sm text-muted-foreground">
-                    आत्मविश्वास: {analysisResult.confidence}% | गंभीरता: {analysisResult.severity}
+                    {t('disease.confidence')}: {analysisResult.confidence}% | {t('disease.severity')}: {analysisResult.severity}
                   </p>
                 </div>
               </div>
@@ -130,7 +132,7 @@ const DiseaseDetection = () => {
             <Card className="p-4">
               <h4 className="font-semibold text-foreground mb-3 flex items-center gap-2">
                 <CheckCircle className="h-5 w-5 text-success" />
-                तुरंत करने योग्य उपाय
+                {t('disease.immediateActions')}
               </h4>
               <ul className="space-y-2">
                 {analysisResult.recommendations.map((rec: string, index: number) => (
@@ -143,7 +145,7 @@ const DiseaseDetection = () => {
             </Card>
 
             <Card className="p-4">
-              <h4 className="font-semibold text-foreground mb-3">भविष्य में बचाव</h4>
+              <h4 className="font-semibold text-foreground mb-3">{t('disease.futurePrevention')}</h4>
               <ul className="space-y-2">
                 {analysisResult.preventiveMeasures.map((measure: string, index: number) => (
                   <li key={index} className="flex items-start gap-2">
@@ -156,10 +158,10 @@ const DiseaseDetection = () => {
 
             <div className="flex gap-3">
               <Button className="flex-1" variant="outline">
-                विशेषज्ञ से संपर्क करें
+                {t('disease.contactExpert')}
               </Button>
               <Button className="flex-1" variant="gradient">
-                दवाई खरीदें
+                {t('disease.buyMedicine')}
               </Button>
             </div>
           </div>
@@ -167,12 +169,12 @@ const DiseaseDetection = () => {
 
         {/* Tips Section */}
         <Card className="p-4 bg-accent/10">
-          <h4 className="font-semibold text-foreground mb-2">बेहतर परिणाम के लिए टिप्स</h4>
+          <h4 className="font-semibold text-foreground mb-2">{t('disease.tips')}</h4>
           <ul className="text-sm text-muted-foreground space-y-1">
-            <li>• प्राकृतिक रोशनी में फोटो लें</li>
-            <li>• पत्ती को पास से फोकस करें</li>
-            <li>• साफ़ और स्पष्ट तस्वीर लें</li>
-            <li>• एक से अधिक कोण से फोटो लें</li>
+            <li>• {t('disease.tip1')}</li>
+            <li>• {t('disease.tip2')}</li>
+            <li>• {t('disease.tip3')}</li>
+            <li>• {t('disease.tip4')}</li>
           </ul>
         </Card>
       </div>
