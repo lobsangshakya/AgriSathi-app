@@ -236,7 +236,7 @@ const ExpertConsultation = () => {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-gradient-app flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-earth flex items-center justify-center">
         <div className="text-center">
           <h2 className="text-xl font-bold mb-4">Please log in to access expert consultation</h2>
           <Button onClick={() => navigate('/auth')}>Go to Login</Button>
@@ -246,7 +246,7 @@ const ExpertConsultation = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-app">
+    <div className="min-h-screen bg-gradient-earth">
       <Header title={t('expert.title') || 'Expert Consultation'} />
       
       <div className="p-4 space-y-4">

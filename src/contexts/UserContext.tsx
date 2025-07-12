@@ -1,6 +1,4 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { auth } from '@/lib/supabaseClient';
-import { User as SupabaseUser } from '@supabase/supabase-js';
 
 export interface User {
   id: string;
@@ -29,13 +27,9 @@ export interface User {
 
 interface UserContextType {
   user: User | null;
-  supabaseUser: SupabaseUser | null;
   isLoggedIn: boolean;
-  isLoading: boolean;
-  login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
-  signUp: (email: string, password: string, userData: Partial<User>) => Promise<{ success: boolean; error?: string }>;
-  signInWithOtp: (email: string) => Promise<{ success: boolean; error?: string }>;
-  logout: () => Promise<void>;
+  login: (userData: Partial<User>) => void;
+  logout: () => void;
   addAgriCreds: (amount: number, reason: string) => void;
   updateStats: (type: 'post' | 'answer' | 'question') => void;
   updateUser: (updates: Partial<User>) => void;
@@ -59,7 +53,7 @@ const defaultUser: User = {
   location: 'गाँव: रामपुर, जिला: मेरठ, उत्तर प्रदेश',
   landSize: '2.5 एकड़',
   experience: '15 साल',
-  agriCreds: 0,
+  agriCreds: 0, // Start with 0 credits
   joinDate: new Date().toLocaleDateString('hi-IN', { 
     year: 'numeric', 
     month: 'long' 
@@ -77,123 +71,29 @@ const defaultUser: User = {
 
 export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [supabaseUser, setSupabaseUser] = useState<SupabaseUser | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
 
-  // Initialize auth state
+  // Check for existing user data on mount
   useEffect(() => {
-    const initializeAuth = async () => {
-      try {
-        const { user } = await auth.getCurrentUser();
-        if (user) {
-          setSupabaseUser(user);
-          setIsLoggedIn(true);
-          
-          // Load user profile from Supabase or create default
-          const userProfile = user.user_metadata || defaultUser;
-          setUser({
-            ...defaultUser,
-            id: user.id,
-            email: user.email || '',
-            name: userProfile.name || defaultUser.name,
-            phone: userProfile.phone || defaultUser.phone,
-            location: userProfile.location || defaultUser.location,
-            landSize: userProfile.landSize || defaultUser.landSize,
-            experience: userProfile.experience || defaultUser.experience,
-            language: userProfile.language || defaultUser.language,
-            crops: userProfile.crops || defaultUser.crops,
-            agriCreds: userProfile.agriCreds || 0,
-            stats: userProfile.stats || defaultUser.stats,
-            achievements: userProfile.achievements || []
-          });
-        }
-      } catch (error) {
-        console.error('Auth initialization error:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    initializeAuth();
-
-    // Listen for auth state changes
-    const { data: { subscription } } = auth.onAuthStateChange(async (event, session) => {
-      if (event === 'SIGNED_IN' && session?.user) {
-        setSupabaseUser(session.user);
-        setIsLoggedIn(true);
-        
-        const userProfile = session.user.user_metadata || defaultUser;
-        setUser({
-          ...defaultUser,
-          id: session.user.id,
-          email: session.user.email || '',
-          name: userProfile.name || defaultUser.name,
-          phone: userProfile.phone || defaultUser.phone,
-          location: userProfile.location || defaultUser.location,
-          landSize: userProfile.landSize || defaultUser.landSize,
-          experience: userProfile.experience || defaultUser.experience,
-          language: userProfile.language || defaultUser.language,
-          crops: userProfile.crops || defaultUser.crops,
-          agriCreds: userProfile.agriCreds || 0,
-          stats: userProfile.stats || defaultUser.stats,
-          achievements: userProfile.achievements || []
-        });
-      } else if (event === 'SIGNED_OUT') {
-        setSupabaseUser(null);
-        setUser(null);
-        setIsLoggedIn(false);
-      }
-    });
-
-    return () => subscription.unsubscribe();
+    const savedUser = localStorage.getItem('agrisathi_user');
+    if (savedUser) {
+      const userData = JSON.parse(savedUser);
+      setUser(userData);
+      setIsLoggedIn(true);
+    }
   }, []);
 
-  const login = async (email: string, password: string) => {
-    try {
-      const { error } = await auth.signIn(email, password);
-      if (error) {
-        return { success: false, error: error.message };
-      }
-      return { success: true };
-    } catch (error) {
-      return { success: false, error: 'Login failed' };
-    }
+  const login = (userData: Partial<User>) => {
+    const newUser = { ...defaultUser, ...userData };
+    setUser(newUser);
+    setIsLoggedIn(true);
+    localStorage.setItem('agrisathi_user', JSON.stringify(newUser));
   };
 
-  const signUp = async (email: string, password: string, userData: Partial<User>) => {
-    try {
-      const { error } = await auth.signUp(email, password, userData);
-      if (error) {
-        return { success: false, error: error.message };
-      }
-      return { success: true };
-    } catch (error) {
-      return { success: false, error: 'Sign up failed' };
-    }
-  };
-
-  const signInWithOtp = async (email: string) => {
-    try {
-      const { error } = await auth.signInWithOtp(email);
-      if (error) {
-        return { success: false, error: error.message };
-      }
-      return { success: true };
-    } catch (error) {
-      return { success: false, error: 'OTP sign in failed' };
-    }
-  };
-
-  const logout = async () => {
-    try {
-      await auth.signOut();
-      setUser(null);
-      setSupabaseUser(null);
-      setIsLoggedIn(false);
-    } catch (error) {
-      console.error('Logout error:', error);
-    }
+  const logout = () => {
+    setUser(null);
+    setIsLoggedIn(false);
+    localStorage.removeItem('agrisathi_user');
   };
 
   const addAgriCreds = (amount: number, reason: string) => {
@@ -209,6 +109,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
 
     setUser(updatedUser);
+    localStorage.setItem('agrisathi_user', JSON.stringify(updatedUser));
 
     // Add achievement if criteria met
     const newAchievements = [...updatedUser.achievements];
@@ -240,6 +141,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (newAchievements.length > updatedUser.achievements.length) {
       const userWithAchievements = { ...updatedUser, achievements: newAchievements };
       setUser(userWithAchievements);
+      localStorage.setItem('agrisathi_user', JSON.stringify(userWithAchievements));
     }
   };
 
@@ -257,6 +159,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
 
     setUser(updatedUser);
+    localStorage.setItem('agrisathi_user', JSON.stringify(updatedUser));
 
     // Add credits for actions
     const creditRewards = {
@@ -273,16 +176,13 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const updatedUser = { ...user, ...updates };
     setUser(updatedUser);
+    localStorage.setItem('agrisathi_user', JSON.stringify(updatedUser));
   };
 
   const value: UserContextType = {
     user,
-    supabaseUser,
     isLoggedIn,
-    isLoading,
     login,
-    signUp,
-    signInWithOtp,
     logout,
     addAgriCreds,
     updateStats,
