@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Header } from "@/components/Header";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -12,38 +12,36 @@ import {
   Video,
   Clock,
   Star,
-  MessageSquare
+  MessageSquare,
+  Camera,
+  Image as ImageIcon,
+  Loader2
 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { apiService, aiService, ChatMessage } from "@/lib/api";
+import { toast } from "@/hooks/use-toast";
+import { CameraScanner } from "@/components/CameraScanner";
 
 const Chat = () => {
-  const { t } = useLanguage();
-  const [messages, setMessages] = useState([
+  const { t, language } = useLanguage();
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [messages, setMessages] = useState<ChatMessage[]>([
     {
-      id: 1,
+      id: "1",
       sender: "bot",
-      content: "नमस्ते! मैं AgriSathi AI हूं। आपकी खेती संबंधी किसी भी समस्या में आपकी मदद कर सकता हूं। आप हिंदी या अंग्रेजी में पूछ सकते हैं।",
-      time: t('common.now'),
-      type: "text"
-    },
-    {
-      id: 2,
-      sender: "user",
-      content: "मेरे टमाटर के पौधों में पीले धब्बे आ रहे हैं",
-      time: t('common.now'),
-      type: "text"
-    },
-    {
-      id: 3,
-      sender: "bot", 
-      content: "टमाटर में पीले धब्बे आमतौर पर 'अर्ली ब्लाइट' या 'लेट ब्लाइट' की वजह से होते हैं। कुछ सवाल:\n\n1. धब्बे पत्तियों पर हैं या फलों पर भी?\n2. क्या धब्बों के चारों ओर भूरे रंग का घेरा है?\n3. पिछले कुछ दिनों में बारिश हुई है?\n\nतुरंत उपाय:\n• संक्रमित पत्तियों को हटा दें\n• कॉपर सल्फेट का छिड़काव करें\n• पानी सीधे पत्तियों पर न डालें",
-      time: t('common.now'),
+      content: language === 'hindi' 
+        ? "नमस्ते! मैं AgriSathi AI हूं। आपकी खेती संबंधी किसी भी समस्या में आपकी मदद कर सकता हूं। आप हिंदी या अंग्रेजी में पूछ सकते हैं।"
+        : "Hello! I'm AgriSathi AI. I can help you with any farming-related problems. You can ask in Hindi or English.",
+      timestamp: new Date(),
       type: "text"
     }
   ]);
 
   const [newMessage, setNewMessage] = useState("");
   const [isListening, setIsListening] = useState(false);
+  const [isCameraOpen, setIsCameraOpen] = useState(false);
+  const [isTyping, setIsTyping] = useState(false);
+  const [chatContext, setChatContext] = useState<any>({});
 
   const experts = [
     {
@@ -62,40 +60,120 @@ const Chat = () => {
     }
   ];
 
-  const sendMessage = () => {
+  const sendMessage = async () => {
     if (newMessage.trim()) {
-      const userMessage = {
-        id: messages.length + 1,
-        sender: "user" as const,
+      const userMessage: ChatMessage = {
+        id: Date.now().toString(),
+        sender: "user",
         content: newMessage,
-        time: t('common.now'),
-        type: "text" as const
+        timestamp: new Date(),
+        type: "text"
       };
       
-      setMessages([...messages, userMessage]);
+      setMessages(prev => [...prev, userMessage]);
       setNewMessage("");
+      setIsTyping(true);
       
-      // Simulate bot response
-      setTimeout(() => {
-        const botMessage = {
-          id: messages.length + 2,
-          sender: "bot" as const,
-          content: "मैं आपके सवाल का विश्लेषण कर रहा हूं। कृपया थोड़ा इंतजार करें...",
-          time: t('common.now'),
-          type: "text" as const
+      try {
+        const nlpResult = await aiService.processNaturalLanguage(newMessage, language);
+        const botResponse = await apiService.sendChatMessage(newMessage, {
+          ...chatContext,
+          language,
+          nlpResult
+        });
+        
+        setMessages(prev => [...prev, botResponse]);
+        setChatContext(prev => ({ ...prev, lastMessage: newMessage }));
+        
+      } catch (error) {
+        console.error('Chat error:', error);
+        
+        const fallbackMessage: ChatMessage = {
+          id: Date.now().toString(),
+          sender: "bot",
+          content: language === 'hindi' 
+            ? "माफ़ करें, मैं आपके सवाल का जवाब नहीं दे पा रहा हूं। कृपया फिर से कोशिश करें।"
+            : "Sorry, I couldn't process your question. Please try again.",
+          timestamp: new Date(),
+          type: "text"
         };
-        setMessages(prev => [...prev, botMessage]);
-      }, 1000);
+        
+        setMessages(prev => [...prev, fallbackMessage]);
+        
+        toast({
+          title: t('common.error') || 'Error',
+          description: t('chat.error') || 'Failed to get response',
+          variant: 'destructive',
+        });
+      } finally {
+        setIsTyping(false);
+      }
     }
   };
 
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
   const startVoiceInput = () => {
     setIsListening(true);
-    // Simulate voice recognition
     setTimeout(() => {
       setIsListening(false);
-      setNewMessage("गेहूं की बुआई के लिए सबसे अच्छा समय कौन सा है?");
+      setNewMessage(language === 'hindi' 
+        ? "गेहूं की बुआई के लिए सबसे अच्छा समय कौन सा है?"
+        : "What is the best time for wheat sowing?"
+      );
     }, 3000);
+  };
+
+  const handleCameraCapture = (imageData: string) => {
+    const imageMessage: ChatMessage = {
+      id: Date.now().toString(),
+      sender: "user",
+      content: imageData,
+      timestamp: new Date(),
+      type: "image"
+    };
+    
+    setMessages(prev => [...prev, imageMessage]);
+    setIsCameraOpen(false);
+    analyzeImageForChat(imageData);
+  };
+
+  const analyzeImageForChat = async (imageData: string) => {
+    setIsTyping(true);
+    
+    try {
+      const analysis = await apiService.analyzeDisease(imageData);
+      
+      const botResponse: ChatMessage = {
+        id: Date.now().toString(),
+        sender: "bot",
+        content: language === 'hindi'
+          ? `मैंने आपकी तस्वीर का विश्लेषण किया है।\n\nरोग: ${analysis.disease}\nआत्मविश्वास: ${analysis.confidence}%\nगंभीरता: ${analysis.severity}\n\nतुरंत कार्रवाई:\n${analysis.recommendations.slice(0, 3).map(rec => `• ${rec}`).join('\n')}`
+          : `I've analyzed your image.\n\nDisease: ${analysis.disease}\nConfidence: ${analysis.confidence}%\nSeverity: ${analysis.severity}\n\nImmediate Actions:\n${analysis.recommendations.slice(0, 3).map(rec => `• ${rec}`).join('\n')}`,
+        timestamp: new Date(),
+        type: "text"
+      };
+      
+      setMessages(prev => [...prev, botResponse]);
+    } catch (error) {
+      console.error('Image analysis failed:', error);
+      
+      const errorMessage: ChatMessage = {
+        id: Date.now().toString(),
+        sender: "bot",
+        content: language === 'hindi'
+          ? "माफ़ करें, मैं आपकी तस्वीर का विश्लेषण नहीं कर पाया। कृपया फिर से कोशिश करें।"
+          : "Sorry, I couldn't analyze your image. Please try again.",
+        timestamp: new Date(),
+        type: "text"
+      };
+      
+      setMessages(prev => [...prev, errorMessage]);
+    } finally {
+      setIsTyping(false);
+    }
   };
 
   return (
@@ -173,15 +251,53 @@ const Chat = () => {
                 </Avatar>
                 
                 <Card className={`p-3 ${message.sender === 'user' ? 'bg-primary text-primary-foreground' : 'bg-card'}`}>
-                  <p className="text-sm whitespace-pre-line">{message.content}</p>
+                  {message.type === 'image' ? (
+                    <div>
+                      <img 
+                        src={message.content} 
+                        alt="Uploaded image" 
+                        className="w-full max-w-48 rounded mb-2"
+                      />
+                      <p className="text-xs opacity-80">
+                        {language === 'hindi' ? 'तस्वीर भेजी गई' : 'Image sent'}
+                      </p>
+                    </div>
+                  ) : (
+                    <p className="text-sm whitespace-pre-line">{message.content}</p>
+                  )}
                   <div className="flex items-center gap-1 mt-1">
                     <Clock className="h-3 w-3 opacity-60" />
-                    <span className="text-xs opacity-60">{message.time}</span>
+                    <span className="text-xs opacity-60">
+                      {message.timestamp.toLocaleTimeString()}
+                    </span>
                   </div>
                 </Card>
               </div>
             </div>
           ))}
+          
+          {/* Typing Indicator */}
+          {isTyping && (
+            <div className="flex justify-start">
+              <div className="flex gap-2 max-w-[80%]">
+                <Avatar className="w-8 h-8">
+                  <AvatarFallback className="bg-primary text-primary-foreground">
+                    <Bot className="h-4 w-4" />
+                  </AvatarFallback>
+                </Avatar>
+                <Card className="p-3 bg-card">
+                  <div className="flex items-center gap-2">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <span className="text-sm text-muted-foreground">
+                      {language === 'hindi' ? 'टाइप कर रहा है...' : 'Typing...'}
+                    </span>
+                  </div>
+                </Card>
+              </div>
+            </div>
+          )}
+          
+          <div ref={messagesEndRef} />
         </div>
 
         {/* Voice Listening Indicator */}
@@ -208,15 +324,25 @@ const Chat = () => {
               <Mic className="h-4 w-4" />
             </Button>
             
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsCameraOpen(true)}
+              disabled={isTyping}
+            >
+              <Camera className="h-4 w-4" />
+            </Button>
+            
             <Input
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}
               placeholder={t('chat.writeQuestion')}
               onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
               className="flex-1"
+              disabled={isTyping}
             />
             
-            <Button onClick={sendMessage} disabled={!newMessage.trim()}>
+            <Button onClick={sendMessage} disabled={!newMessage.trim() || isTyping}>
               <Send className="h-4 w-4" />
             </Button>
           </div>
@@ -245,6 +371,13 @@ const Chat = () => {
           </div>
         </div>
       </div>
+
+      {/* Camera Scanner */}
+      <CameraScanner
+        isOpen={isCameraOpen}
+        onClose={() => setIsCameraOpen(false)}
+        onImageCapture={handleCameraCapture}
+      />
     </div>
   );
 };

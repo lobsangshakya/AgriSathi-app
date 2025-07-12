@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { Header } from "@/components/Header";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -14,10 +14,14 @@ import {
   Search,
   TrendingUp,
   Coins,
-  Camera
+  Camera,
+  Loader2,
+  RefreshCw
 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { apiService, CommunityPost, CreatePostRequest, compressImage } from "@/lib/api";
+import { toast } from "@/hooks/use-toast";
 
 const categoryOptions = [
   { key: "community.category.problem" },
@@ -29,90 +33,122 @@ const categoryOptions = [
 const Community = () => {
   const { t } = useLanguage();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [posts, setPosts] = useState([
-    {
-      id: 1,
-      author: "राम कुमार",
-      location: "पंजाब",
-      time: "2 घंटे पहले",
-      content: "मेरे गेहूं की फसल में पीले धब्बे दिख रहे हैं। क्या यह कोई बीमारी है? कृपया सुझाव दें।",
-      image: "🌾",
-      likes: 12,
-      comments: 5,
-      agriCreds: 25,
-      category: "community.category.problem"
-    },
-    {
-      id: 2,
-      author: "सुनीता देवी",
-      location: "हरियाणा",
-      time: "4 घंटे पहले",
-      content: "जैविक खाद बनाने का आसान तरीका। गोबर + नीम की पत्ती + गुड़ मिलाकर 15 दिन में तैयार होती है।",
-      image: "🌱",
-      likes: 28,
-      comments: 8,
-      agriCreds: 50,
-      category: "community.category.tips"
-    },
-    {
-      id: 3,
-      author: "अजय सिंह",
-      location: "उत्तर प्रदेश", 
-      time: "6 घंटे पहले",
-      content: "ड्रिप सिंचाई लगाने के बाद 40% पानी की बचत हुई। बहुत फायदेमंद है!",
-      image: "💧",
-      likes: 35,
-      comments: 12,
-      agriCreds: 75,
-      category: "community.category.experience"
-    }
-  ]);
-
+  const [posts, setPosts] = useState<CommunityPost[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [posting, setPosting] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [newPost, setNewPost] = useState({
     content: "",
     category: "community.category.problem",
     image: null as string | null,
   });
 
-  const handleLike = (postId: number) => {
-    setPosts(posts.map(post => 
-      post.id === postId 
-        ? { ...post, likes: post.likes + 1 }
-        : post
-    ));
+  // Load posts from API
+  useEffect(() => {
+    loadPosts();
+  }, [selectedCategory]);
+
+  const loadPosts = async () => {
+    try {
+      setLoading(true);
+      const fetchedPosts = await apiService.getCommunityPosts(selectedCategory || undefined);
+      setPosts(fetchedPosts);
+    } catch (error) {
+      console.error('Failed to load posts:', error);
+      toast({
+        title: t('common.error') || 'Error',
+        description: 'Failed to load posts',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleLike = async (postId: string) => {
+    try {
+      const result = await apiService.likeCommunityPost(postId, "current_user");
+      if (result.success) {
+        setPosts(posts.map(post => 
+          post.id === postId 
+            ? { ...post, likes: result.likes }
+            : post
+        ));
+      }
+    } catch (error) {
+      console.error('Failed to like post:', error);
+      toast({
+        title: t('common.error') || 'Error',
+        description: 'Failed to like post',
+        variant: 'destructive',
+      });
+    }
   };
 
   const handleAddPhotoClick = () => {
     fileInputRef.current?.click();
   };
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onload = (ev) => {
-        setNewPost((prev) => ({ ...prev, image: ev.target?.result as string }));
-      };
-      reader.readAsDataURL(file);
+      try {
+        const compressedImage = await compressImage(file);
+        setNewPost((prev) => ({ ...prev, image: compressedImage }));
+      } catch (error) {
+        console.error('Failed to process image:', error);
+        toast({
+          title: t('common.error') || 'Error',
+          description: 'Failed to process image',
+          variant: 'destructive',
+        });
+      }
     }
   };
 
-  const addPost = () => {
-    if (newPost.content.trim()) {
-      const post = {
-        id: posts.length + 1,
-        author: "आप",
-        location: "आपका स्थान",
-        time: "अभी",
+  const addPost = async () => {
+    if (!newPost.content.trim()) {
+      toast({
+        title: 'Error',
+        description: 'Please write something to post',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    try {
+      setPosting(true);
+      
+      const postData: CreatePostRequest = {
         content: newPost.content,
+        category: newPost.category,
         image: newPost.image,
-        likes: 0,
-        comments: 0,
-        agriCreds: 10,
-        category: newPost.category
+        location: "आपका स्थान",
+        userId: "current_user"
       };
-      setPosts([post, ...posts]);
-      setNewPost({ content: "", category: "community.category.problem", image: null });
+
+      const response = await apiService.createCommunityPost(postData);
+      
+      if (response.success) {
+        setPosts([response.post, ...posts]);
+        setNewPost({ content: "", category: "community.category.problem", image: null });
+        setIsDialogOpen(false);
+        
+        toast({
+          title: 'Success',
+          description: response.message || 'Post created successfully!',
+        });
+      }
+    } catch (error) {
+      console.error('Failed to create post:', error);
+      toast({
+        title: t('common.error') || 'Error',
+        description: 'Failed to create post',
+        variant: 'destructive',
+      });
+    } finally {
+      setPosting(false);
     }
   };
 
@@ -127,7 +163,16 @@ const Community = () => {
             <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
             <Input placeholder={t('community.searchPosts')} className="pl-9" />
           </div>
-          <Dialog>
+          <Button 
+            variant="outline" 
+            onClick={loadPosts}
+            disabled={loading}
+            className="gap-2"
+          >
+            <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+            रिफ्रेश
+          </Button>
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
               <Button className="bg-primary hover:bg-primary/90">
                 <Plus className="h-4 w-4 mr-2" />
@@ -175,8 +220,15 @@ const Community = () => {
                     <Camera className="h-4 w-4 mr-2" />
                     {t('community.addPhoto')}
                   </Button>
-                  <Button onClick={addPost} className="flex-1">
-                    {t('community.postNow')}
+                  <Button onClick={addPost} className="flex-1" disabled={posting}>
+                    {posting ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        पोस्ट हो रही है...
+                      </>
+                    ) : (
+                      t('community.postNow')
+                    )}
                   </Button>
                 </div>
               </div>
@@ -186,8 +238,20 @@ const Community = () => {
 
         {/* Category Filter */}
         <div className="flex gap-2 overflow-x-auto pb-2">
+          <Badge 
+            variant={selectedCategory === null ? "default" : "outline"} 
+            className="whitespace-nowrap cursor-pointer hover:bg-primary hover:text-primary-foreground"
+            onClick={() => setSelectedCategory(null)}
+          >
+            सभी (All)
+          </Badge>
           {categoryOptions.map(opt => (
-            <Badge key={opt.key} variant="outline" className="whitespace-nowrap cursor-pointer hover:bg-primary hover:text-primary-foreground">
+            <Badge 
+              key={opt.key} 
+              variant={selectedCategory === opt.key ? "default" : "outline"} 
+              className="whitespace-nowrap cursor-pointer hover:bg-primary hover:text-primary-foreground"
+              onClick={() => setSelectedCategory(opt.key)}
+            >
               {t(opt.key)}
             </Badge>
           ))}
@@ -195,7 +259,17 @@ const Community = () => {
 
         {/* Posts */}
         <div className="space-y-4">
-          {posts.map(post => (
+          {loading ? (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              <span className="ml-2 text-muted-foreground">पोस्ट लोड हो रही हैं...</span>
+            </div>
+          ) : posts.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-muted-foreground">कोई पोस्ट नहीं मिली</p>
+            </div>
+          ) : (
+            posts.map(post => (
             <Card key={post.id} className="p-4 border-border/50">
               <div className="flex items-start gap-3">
                 <Avatar>
@@ -248,10 +322,11 @@ const Community = () => {
                       {t('community.share')}
                     </Button>
                   </div>
+                                  </div>
                 </div>
-              </div>
-            </Card>
-          ))}
+              </Card>
+            ))
+          )}
         </div>
       </div>
     </div>
