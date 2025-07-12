@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Header } from "@/components/Header";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Camera, Upload, Scan, AlertTriangle, CheckCircle, RefreshCw, Info } from "lucide-react";
+import { Camera, Upload, Scan, AlertTriangle, CheckCircle, RefreshCw, Info, FileImage } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { CameraScanner } from "@/components/CameraScanner";
 import { apiService, aiService, compressImage, DiseaseAnalysisResult } from "@/lib/api";
@@ -16,22 +16,86 @@ const DiseaseDetection = () => {
   const [isCameraOpen, setIsCameraOpen] = useState(false);
   const [selectedCropType, setSelectedCropType] = useState<string>('');
   const [analysisHistory, setAnalysisHistory] = useState<DiseaseAnalysisResult[]>([]);
+  const [isDragOver, setIsDragOver] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
+    console.log('File selected:', file); // Debug log
+    
     if (file) {
-      try {
-        const compressedImage = await compressImage(file);
-        setSelectedImage(compressedImage);
-        setAnalysisResult(null);
-      } catch (error) {
+      await processImageFile(file);
+    } else {
+      console.log('No file selected'); // Debug log
+    }
+  };
+
+  const processImageFile = async (file: File) => {
+    try {
+      console.log('Processing file:', file.name, file.size, file.type); // Debug log
+      
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
         toast({
           title: t('common.error') || 'Error',
-          description: t('disease.uploadError') || 'Failed to process image',
+          description: t('disease.invalidFileType') || 'Please select a valid image file',
           variant: 'destructive',
         });
+        return;
       }
+      
+      // Validate file size (max 10MB)
+      if (file.size > 10 * 1024 * 1024) {
+        toast({
+          title: t('common.error') || 'Error',
+          description: t('disease.fileTooLarge') || 'File size should be less than 10MB',
+          variant: 'destructive',
+        });
+        return;
+      }
+      
+      const compressedImage = await compressImage(file);
+      console.log('Image compressed successfully'); // Debug log
+      setSelectedImage(compressedImage);
+      setAnalysisResult(null);
+      
+      toast({
+        title: t('disease.imageUploaded') || 'Image Uploaded',
+        description: t('disease.imageReadyForAnalysis') || 'Image is ready for analysis',
+      });
+    } catch (error) {
+      console.error('Image processing error:', error); // Debug log
+      toast({
+        title: t('common.error') || 'Error',
+        description: t('disease.uploadError') || 'Failed to process image',
+        variant: 'destructive',
+      });
     }
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(false);
+  };
+
+  const handleDrop = async (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(false);
+    
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+      const file = files[0];
+      await processImageFile(file);
+    }
+  };
+
+  const handleFileSelect = () => {
+    fileInputRef.current?.click();
   };
 
   const handleCameraCapture = (imageData: string) => {
@@ -110,29 +174,66 @@ const DiseaseDetection = () => {
             </select>
           </div>
           
+          {/* Drag and Drop Area */}
+          <div
+            className={`border-2 border-dashed rounded-lg p-6 mb-4 transition-colors ${
+              isDragOver 
+                ? 'border-primary bg-primary/5' 
+                : 'border-border hover:border-primary/50'
+            }`}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+          >
+            <FileImage className="h-12 w-12 mx-auto text-muted-foreground mb-3" />
+            <p className="text-sm text-muted-foreground mb-2">
+              {t('disease.dragDropText') || 'Drag and drop an image here, or click to browse'}
+            </p>
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={handleFileSelect}
+            >
+              <Upload className="h-4 w-4 mr-2" />
+              {t('disease.browseFiles') || 'Browse Files'}
+            </Button>
+          </div>
+          
           <div className="space-y-3">
-            <label htmlFor="image-upload">
-              <Button className="w-full" variant="gradient">
-                <Upload className="h-4 w-4 mr-2" />
-                {t('disease.gallery')}
-              </Button>
+            <div className="relative">
+              <label htmlFor="image-upload" className="cursor-pointer">
+                <Button className="w-full" variant="gradient">
+                  <Upload className="h-4 w-4 mr-2" />
+                  {t('disease.gallery')}
+                </Button>
+              </label>
               <input
+                ref={fileInputRef}
                 id="image-upload"
                 type="file"
                 accept="image/*"
                 onChange={handleImageUpload}
                 className="hidden"
+                capture={false}
               />
-            </label>
+              <p className="text-xs text-muted-foreground mt-1 text-center">
+                {t('disease.supportedFormats') || 'Supported: JPG, PNG, WebP (Max 10MB)'}
+              </p>
+            </div>
             
-            <Button 
-              className="w-full" 
-              variant="outline"
-              onClick={() => setIsCameraOpen(true)}
-            >
-              <Camera className="h-4 w-4 mr-2" />
-              {t('disease.camera')}
-            </Button>
+            <div className="relative">
+              <Button 
+                className="w-full" 
+                variant="outline"
+                onClick={() => setIsCameraOpen(true)}
+              >
+                <Camera className="h-4 w-4 mr-2" />
+                {t('disease.camera')}
+              </Button>
+              <p className="text-xs text-muted-foreground mt-1 text-center">
+                {t('disease.cameraDescription') || 'Take a photo directly'}
+              </p>
+            </div>
           </div>
         </Card>
 

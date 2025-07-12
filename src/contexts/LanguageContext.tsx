@@ -103,6 +103,20 @@ const translations = {
     'disease.tip2': 'पत्ती को पास से फोकस करें',
     'disease.tip3': 'साफ़ और स्पष्ट तस्वीर लें',
     'disease.tip4': 'एक से अधिक कोण से फोटो लें',
+    'disease.selectCrop': 'फसल का प्रकार चुनें (वैकल्पिक)',
+    'disease.autoDetect': 'स्वचालित पहचान',
+    'disease.uploadError': 'छवि प्रोसेस करने में विफल',
+    'disease.invalidFileType': 'कृपया एक वैध छवि फ़ाइल चुनें',
+    'disease.fileTooLarge': 'फ़ाइल का आकार 10MB से कम होना चाहिए',
+    'disease.imageUploaded': 'छवि अपलोड की गई',
+    'disease.imageReadyForAnalysis': 'छवि विश्लेषण के लिए तैयार है',
+    'disease.supportedFormats': 'समर्थित: JPG, PNG, WebP (अधिकतम 10MB)',
+    'disease.cameraDescription': 'सीधे फोटो लें',
+    'disease.analysisComplete': 'विश्लेषण पूरा',
+    'disease.analysisError': 'छवि का विश्लेषण करने में विफल। कृपया पुनः प्रयास करें।',
+    'disease.recentAnalyses': 'हाल के विश्लेषण',
+    'disease.dragDropText': 'यहां छवि खींचें और छोड़ें, या ब्राउज़ करने के लिए क्लिक करें',
+    'disease.browseFiles': 'फ़ाइलें ब्राउज़ करें',
     
     // Chat
     'chat.title': 'AI चैट सहायक',
@@ -176,6 +190,8 @@ const translations = {
     'profile.credits': 'क्रेडिट',
     'profile.noAchievements': 'अभी तक कोई उपलब्धि नहीं',
     'profile.keepParticipating': 'उपलब्धियां कमाने के लिए भाग लेते रहें!',
+    'profile.locationUpdated': 'स्थान अपडेट किया गया',
+    'profile.locationChangedToBangalore': 'आपका स्थान बैंगलोर, भारत में बदल दिया गया है',
     
     // Expert Consultation
     'expert.title': 'विशेषज्ञ परामर्श',
@@ -305,6 +321,20 @@ const translations = {
     'disease.tip2': 'Focus closely on the leaf',
     'disease.tip3': 'Take clear and sharp photos',
     'disease.tip4': 'Take photos from multiple angles',
+    'disease.selectCrop': 'Select crop type (optional)',
+    'disease.autoDetect': 'Auto-detect',
+    'disease.uploadError': 'Image processing failed',
+    'disease.invalidFileType': 'Please select a valid image file',
+    'disease.fileTooLarge': 'File size must be less than 10MB',
+    'disease.imageUploaded': 'Image uploaded',
+    'disease.imageReadyForAnalysis': 'Image is ready for analysis',
+    'disease.supportedFormats': 'Supported: JPG, PNG, WebP (max 10MB)',
+    'disease.cameraDescription': 'Take a straight photo',
+    'disease.analysisComplete': 'Analysis complete',
+    'disease.analysisError': 'Image analysis failed. Please try again.',
+    'disease.recentAnalyses': 'Recent analyses',
+    'disease.dragDropText': 'Drag and drop an image here, or click to browse',
+    'disease.browseFiles': 'Browse Files',
     
     // Chat
     'chat.title': 'AI Chat Assistant',
@@ -378,6 +408,8 @@ const translations = {
     'profile.credits': 'Credits',
     'profile.noAchievements': 'No achievements yet',
     'profile.keepParticipating': 'Keep participating to earn achievements!',
+    'profile.locationUpdated': 'Location Updated',
+    'profile.locationChangedToBangalore': 'Your location has been changed to Bangalore, India',
     
     // Expert Consultation
     'expert.title': 'Expert Consultation',
