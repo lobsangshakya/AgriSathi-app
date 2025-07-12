@@ -15,8 +15,10 @@ import {
   Globe,
   TrendingUp
 } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const Profile = () => {
+  const { t } = useLanguage();
   const userProfile = {
     name: "राजेश कुमार",
     phone: "+91 98765 43210",
@@ -42,7 +44,7 @@ const Profile = () => {
 
   return (
     <div className="min-h-screen bg-gradient-earth">
-      <Header title="मेरी प्रोफाइल" />
+      <Header title={t('profile.title')} />
       
       <div className="p-4 space-y-4">
         {/* Profile Header */}
@@ -76,23 +78,23 @@ const Profile = () => {
         <Card className="p-4">
           <h3 className="font-semibold text-foreground mb-4 flex items-center gap-2">
             <Sprout className="h-5 w-5 text-primary" />
-            खेती की जानकारी
+            {t('profile.farmingInfo')}
           </h3>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <p className="text-sm text-muted-foreground">भूमि का आकार</p>
+              <p className="text-sm text-muted-foreground">{t('profile.landSize')}</p>
               <p className="font-medium">{userProfile.landSize}</p>
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">अनुभव</p>
+              <p className="text-sm text-muted-foreground">{t('profile.experience')}</p>
               <p className="font-medium">{userProfile.experience}</p>
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">सदस्य बने</p>
+              <p className="text-sm text-muted-foreground">{t('profile.memberSince')}</p>
               <p className="font-medium">{userProfile.joinDate}</p>
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">भाषा</p>
+              <p className="text-sm text-muted-foreground">{t('profile.language')}</p>
               <div className="flex items-center gap-2">
                 <Globe className="h-4 w-4" />
                 <p className="font-medium">{userProfile.language}</p>
@@ -101,7 +103,7 @@ const Profile = () => {
           </div>
           
           <div className="mt-4">
-            <p className="text-sm text-muted-foreground mb-2">मुख्य फसलें</p>
+            <p className="text-sm text-muted-foreground mb-2">{t('profile.mainCrops')}</p>
             <div className="flex flex-wrap gap-2">
               {userProfile.crops.map(crop => (
                 <Badge key={crop} variant="secondary">{crop}</Badge>
@@ -114,24 +116,24 @@ const Profile = () => {
         <Card className="p-4">
           <h3 className="font-semibold text-foreground mb-4 flex items-center gap-2">
             <TrendingUp className="h-5 w-5 text-accent" />
-            गतिविधि सांख्यिकी
+            {t('profile.activityStats')}
           </h3>
           <div className="grid grid-cols-2 gap-4">
             <div className="text-center">
               <p className="text-2xl font-bold text-primary">{userProfile.stats.postsShared}</p>
-              <p className="text-sm text-muted-foreground">पोस्ट साझा की</p>
+              <p className="text-sm text-muted-foreground">{t('profile.postsShared')}</p>
             </div>
             <div className="text-center">
               <p className="text-2xl font-bold text-success">{userProfile.stats.helpfulAnswers}</p>
-              <p className="text-sm text-muted-foreground">सहायक उत्तर</p>
+              <p className="text-sm text-muted-foreground">{t('profile.helpfulAnswers')}</p>
             </div>
             <div className="text-center">
               <p className="text-2xl font-bold text-accent">{userProfile.stats.questionsAsked}</p>
-              <p className="text-sm text-muted-foreground">प्रश्न पूछे</p>
+              <p className="text-sm text-muted-foreground">{t('profile.questionsAsked')}</p>
             </div>
             <div className="text-center">
               <p className="text-2xl font-bold text-warning">{userProfile.stats.creditsEarned}</p>
-              <p className="text-sm text-muted-foreground">Credits कमाए</p>
+              <p className="text-sm text-muted-foreground">{t('profile.creditsEarned')}</p>
             </div>
           </div>
         </Card>
@@ -140,7 +142,7 @@ const Profile = () => {
         <Card className="p-4">
           <h3 className="font-semibold text-foreground mb-4 flex items-center gap-2">
             <Award className="h-5 w-5 text-warning" />
-            उपलब्धियां
+            {t('profile.achievements')}
           </h3>
           <div className="space-y-3">
             {userProfile.achievements.map((achievement, index) => (
@@ -159,15 +161,15 @@ const Profile = () => {
         <div className="space-y-3">
           <Button className="w-full" variant="outline">
             <Settings className="h-4 w-4 mr-2" />
-            सेटिंग्स
+            {t('profile.settings')}
           </Button>
           <Button className="w-full" variant="outline">
             <Globe className="h-4 w-4 mr-2" />
-            भाषा बदलें
+            {t('profile.changeLanguage')}
           </Button>
           <Button className="w-full bg-primary hover:bg-primary/90">
             <Award className="h-4 w-4 mr-2" />
-            AgriCreds रिडीम करें
+            {t('profile.redeemCredits')}
           </Button>
         </div>
       </div>

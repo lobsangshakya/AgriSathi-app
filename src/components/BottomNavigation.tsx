@@ -1,17 +1,19 @@
 import { Home, Users, MessageCircle, User, Camera } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Button } from "./ui/button";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export const BottomNavigation = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { t } = useLanguage();
 
   const navItems = [
-    { icon: Home, label: "होम", path: "/", key: "home" },
-    { icon: Camera, label: "स्कैन", path: "/disease-detection", key: "scan" },
-    { icon: Users, label: "समुदाय", path: "/community", key: "community" },
-    { icon: MessageCircle, label: "चैट", path: "/chat", key: "chat" },
-    { icon: User, label: "प्रोफाइल", path: "/profile", key: "profile" },
+    { icon: Home, label: t('nav.home'), path: "/", key: "home" },
+    { icon: Camera, label: t('nav.scan'), path: "/disease-detection", key: "scan" },
+    { icon: Users, label: t('nav.community'), path: "/community", key: "community" },
+    { icon: MessageCircle, label: t('nav.chat'), path: "/chat", key: "chat" },
+    { icon: User, label: t('nav.profile'), path: "/profile", key: "profile" },
   ];
 
   const isActive = (path: string) => location.pathname === path;

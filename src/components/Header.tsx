@@ -1,6 +1,7 @@
 import { Bell, Globe } from "lucide-react";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface HeaderProps {
   title: string;
@@ -13,6 +14,12 @@ export const Header = ({
   showLanguageToggle = true, 
   showNotifications = true 
 }: HeaderProps) => {
+  const { language, setLanguage, t } = useLanguage();
+
+  const toggleLanguage = () => {
+    setLanguage(language === 'hindi' ? 'english' : 'hindi');
+  };
+
   return (
     <header className="bg-card/80 backdrop-blur-sm border-b border-border sticky top-0 z-40">
       <div className="flex items-center justify-between p-4">
@@ -25,9 +32,16 @@ export const Header = ({
         
         <div className="flex items-center gap-2">
           {showLanguageToggle && (
-            <Button variant="ghost" size="sm" className="gap-2">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="gap-2"
+              onClick={toggleLanguage}
+            >
               <Globe className="h-4 w-4" />
-              <span className="text-sm">हिं</span>
+              <span className="text-sm">
+                {language === 'hindi' ? t('header.language.english') : t('header.language.hindi')}
+              </span>
             </Button>
           )}
           

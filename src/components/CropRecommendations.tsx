@@ -2,54 +2,57 @@ import { Sprout, Calendar, TrendingUp, AlertTriangle } from "lucide-react";
 import { Card } from "./ui/card";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export const CropRecommendations = () => {
+  const { t } = useLanguage();
+
   const recommendations = [
     {
-      crop: "टमाटर",
-      season: "रबी",
-      profitability: "उच्च",
-      riskLevel: "मध्यम",
-      expectedYield: "25-30 टन/हेक्टेयर",
-      marketPrice: "₹15-20/किग्रा",
-      sowingTime: "अक्टूबर-नवंबर",
+      cropKey: "crops.tomato",
+      seasonKey: "crops.season.rabi",
+      profitabilityKey: "crops.profitability.high",
+      expectedYield: "25-30",
+      yieldUnitKey: "crops.yield.ton_per_hectare",
+      marketPrice: "₹15-20",
+      marketUnitKey: "crops.market_unit.kg",
+      sowingTimeKey: "crops.sowing.oct_nov",
       icon: "🍅"
     },
     {
-      crop: "गेहूं",
-      season: "रबी", 
-      profitability: "मध्यम",
-      riskLevel: "कम",
-      expectedYield: "40-45 क्विंटल/हेक्टेयर",
-      marketPrice: "₹2200-2500/क्विंटल",
-      sowingTime: "नवंबर-दिसंबर",
+      cropKey: "crops.wheat",
+      seasonKey: "crops.season.rabi",
+      profitabilityKey: "crops.profitability.medium",
+      expectedYield: "40-45",
+      yieldUnitKey: "crops.yield.qtl_per_hectare",
+      marketPrice: "₹2200-2500",
+      marketUnitKey: "crops.market_unit.qtl",
+      sowingTimeKey: "crops.sowing.nov_dec",
       icon: "🌾"
     }
   ];
 
   const alerts = [
-    "🐛 टमाटर में कीट प्रकोप की चेतावनी - तुरंत उपचार करें",
-    "💧 सिंचाई की जरूरत - मिट्टी की नमी कम है"
+    "alerts.tomato_pest",
+    "alerts.irrigation_needed"
   ];
 
   return (
     <div className="p-4">
-      <h2 className="text-lg font-semibold text-foreground mb-4">फसल सुझाव</h2>
-      
+      <h2 className="text-lg font-semibold text-foreground mb-4">{t('crops.recommendations')}</h2>
       {/* Alerts */}
       {alerts.length > 0 && (
         <div className="mb-4">
-          {alerts.map((alert, index) => (
+          {alerts.map((alertKey, index) => (
             <Card key={index} className="p-3 mb-2 bg-warning/10 border-warning/30">
               <div className="flex items-start gap-2">
                 <AlertTriangle className="h-4 w-4 text-warning mt-0.5 flex-shrink-0" />
-                <p className="text-sm text-warning-foreground">{alert}</p>
+                <p className="text-sm text-warning-foreground">{t(alertKey)}</p>
               </div>
             </Card>
           ))}
         </div>
       )}
-
       {/* Crop Recommendations */}
       <div className="space-y-3">
         {recommendations.map((rec, index) => (
@@ -58,37 +61,35 @@ export const CropRecommendations = () => {
               <div className="flex items-center gap-2">
                 <span className="text-2xl">{rec.icon}</span>
                 <div>
-                  <h3 className="font-semibold text-foreground">{rec.crop}</h3>
-                  <p className="text-sm text-muted-foreground">{rec.season} सीजन</p>
+                  <h3 className="font-semibold text-foreground">{t(rec.cropKey)}</h3>
+                  <p className="text-sm text-muted-foreground">{t(rec.seasonKey)} {t('crops.season')}</p>
                 </div>
               </div>
               <Badge 
-                variant={rec.profitability === "उच्च" ? "default" : "secondary"}
-                className={rec.profitability === "उच्च" ? "bg-success text-success-foreground" : ""}
+                variant={rec.profitabilityKey === "crops.profitability.high" ? "default" : "secondary"}
+                className={rec.profitabilityKey === "crops.profitability.high" ? "bg-success text-success-foreground" : ""}
               >
-                {rec.profitability} लाभ
+                {t(rec.profitabilityKey)} {t('crops.profitability')}
               </Badge>
             </div>
-            
             <div className="grid grid-cols-2 gap-3 text-sm mb-3">
               <div className="flex items-center gap-2">
                 <TrendingUp className="h-4 w-4 text-success" />
-                <span className="text-muted-foreground">उत्पादन:</span>
-                <span className="font-medium">{rec.expectedYield}</span>
+                <span className="text-muted-foreground">{t('crops.yield')}:</span>
+                <span className="font-medium">{rec.expectedYield} {t(rec.yieldUnitKey)}</span>
               </div>
               <div className="flex items-center gap-2">
                 <Calendar className="h-4 w-4 text-accent" />
-                <span className="text-muted-foreground">बुआई:</span>
-                <span className="font-medium">{rec.sowingTime}</span>
+                <span className="text-muted-foreground">{t('crops.sowing')}:</span>
+                <span className="font-medium">{t(rec.sowingTimeKey)}</span>
               </div>
             </div>
-            
             <div className="flex items-center justify-between">
               <span className="text-sm font-medium text-success">
-                बाजार दर: {rec.marketPrice}
+                {t('crops.marketRate')}: {rec.marketPrice}/{t(rec.marketUnitKey)}
               </span>
               <Button size="sm" variant="outline" className="text-xs">
-                विस्तार देखें
+                {t('crops.viewDetails')}
               </Button>
             </div>
           </Card>
