@@ -21,7 +21,7 @@ import {
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useUser } from "@/contexts/UserContext";
-import { api, CommunityPost, CreatePostRequest, compressImage } from "@/lib/api";
+import { apiService, CommunityPost, CreatePostRequest, compressImage } from "@/lib/api";
 import { toast } from "@/hooks/use-toast";
 
 const categoryOptions = [
@@ -54,7 +54,7 @@ const Community = () => {
   const loadPosts = async () => {
     try {
       setLoading(true);
-      const fetchedPosts = await api.community.getPosts();
+      const fetchedPosts = await apiService.getCommunityPosts();
       setPosts(fetchedPosts);
     } catch (error) {
       console.error('Failed to load posts:', error);
@@ -70,11 +70,11 @@ const Community = () => {
 
   const handleLike = async (postId: string) => {
     try {
-      const result = await api.community.likePost(postId);
+      const result = await apiService.likePost(postId);
       if (result.success) {
         setPosts(posts.map(post => 
           post.id === postId 
-            ? { ...post, likes_count: result.likes }
+            ? { ...post, likes: result.likes }
             : post
         ));
       }
@@ -123,13 +123,12 @@ const Community = () => {
       setPosting(true);
       
       const postData: CreatePostRequest = {
-        title: `Post by ${user?.name || 'User'}`,
         content: newPost.content,
         category: newPost.category,
-        image_url: newPost.image || undefined
+        image: newPost.image || undefined
       };
 
-      const response = await api.community.createPost(postData);
+      const response = await apiService.createPost(postData);
       
       if (response.success) {
         setPosts([response.post, ...posts]);
@@ -159,8 +158,8 @@ const Community = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-app">
-      <Header title={t('header.agrisathi')} />
+    <div className="min-h-screen bg-gradient-earth">
+      <Header title={t('community.title')} />
       
       <div className="p-4 space-y-4">
         {/* Search and Filter */}
@@ -280,26 +279,26 @@ const Community = () => {
               <div className="flex items-start gap-3">
                 <Avatar>
                   <AvatarFallback className="bg-primary text-primary-foreground">
-                    {post.profiles?.name?.charAt(0) || 'U'}
+                    {post.author.charAt(0)}
                   </AvatarFallback>
                 </Avatar>
                 
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-2">
-                    <span className="font-medium text-foreground">{post.profiles?.name || 'User'}</span>
+                    <span className="font-medium text-foreground">{post.author}</span>
                     <Badge variant="outline" className="text-xs">{t(post.category)}</Badge>
                   </div>
                   
                   <p className="text-sm text-muted-foreground mb-2">
-                    {new Date(post.created_at).toLocaleDateString('hi-IN')} • {new Date(post.created_at).toLocaleTimeString('hi-IN', { hour: '2-digit', minute: '2-digit' })}
+                    {post.timestamp.toLocaleDateString('hi-IN')} • {post.timestamp.toLocaleTimeString('hi-IN', { hour: '2-digit', minute: '2-digit' })}
                   </p>
                   
                   <p className="text-foreground mb-3">{post.content}</p>
                   
                   {/* Show image if present */}
-                  {post.image_url && (
+                  {post.image && (
                     <div className="mb-3">
-                      <img src={post.image_url} alt="Post" className="w-full max-h-48 object-contain rounded-lg" />
+                      <img src={post.image} alt="Post" className="w-full max-h-48 object-contain rounded-lg" />
                     </div>
                   )}
                   
@@ -311,12 +310,12 @@ const Community = () => {
                       className="text-muted-foreground hover:text-red-500"
                     >
                       <Heart className="h-4 w-4 mr-1" />
-                      {post.likes_count}
+                      {post.likes}
                     </Button>
                     
                     <Button variant="ghost" size="sm" className="text-muted-foreground">
                       <MessageCircle className="h-4 w-4 mr-1" />
-                      {post.comments_count}
+                      {post.comments}
                     </Button>
                     
                     <Button variant="ghost" size="sm" className="text-muted-foreground">

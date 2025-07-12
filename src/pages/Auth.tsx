@@ -9,7 +9,7 @@ import { toast } from '@/hooks/use-toast';
 import { ArrowLeft, Phone, Mail, User, Lock, Eye, EyeOff } from 'lucide-react';
 
 const Auth = ({ onAuth }: { onAuth: () => void }) => {
-  const { login, signUp, signInWithOtp, isLoading } = useUser();
+  const { login } = useUser();
   const { t, language } = useLanguage();
   const navigate = useNavigate();
   
@@ -89,32 +89,19 @@ const Auth = ({ onAuth }: { onAuth: () => void }) => {
     setError(null);
     
     try {
-      const userData = {
-        name: name,
-        phone: phone,
-        location: language === 'hindi' ? 'गाँव: रामपुर, जिला: मेरठ, उत्तर प्रदेश' : 'Village: Rampur, District: Meerut, UP',
-        landSize: language === 'hindi' ? '2.5 एकड़' : '2.5 acres',
-        experience: language === 'hindi' ? '15 साल' : '15 years',
-        language: language,
-        crops: language === 'hindi' ? ['गेहूं', 'धान', 'गन्ना', 'सरसों'] : ['Wheat', 'Rice', 'Sugarcane', 'Mustard']
-      };
-
-      const result = await signUp(email, password, userData);
+      // Simulate OTP sending
+      await new Promise(resolve => setTimeout(resolve, 2000));
       
-      if (result.success) {
-        setOtpSent(true);
-        setOtpTimer(30);
-        setCanResendOtp(false);
-        
-        toast({
-          title: language === 'hindi' ? 'OTP भेजा गया' : 'OTP Sent',
-          description: language === 'hindi' 
-            ? `OTP ${email} पर भेजा गया है` 
-            : `OTP sent to ${email}`,
-        });
-      } else {
-        setError(result.error || (language === 'hindi' ? 'OTP भेजने में समस्या' : 'Error sending OTP'));
-      }
+      setOtpSent(true);
+      setOtpTimer(30); // 30 seconds timer
+      setCanResendOtp(false);
+      
+      toast({
+        title: language === 'hindi' ? 'OTP भेजा गया' : 'OTP Sent',
+        description: language === 'hindi' 
+          ? `OTP ${phone} पर भेजा गया है` 
+          : `OTP sent to ${phone}`,
+      });
       
     } catch (error) {
       setError(language === 'hindi' ? 'OTP भेजने में समस्या' : 'Error sending OTP');
@@ -133,15 +120,36 @@ const Auth = ({ onAuth }: { onAuth: () => void }) => {
     setError(null);
     
     try {
-      // For Supabase, OTP verification is handled automatically
-      // The user will be signed in when they click the link in their email
-      toast({
-        title: language === 'hindi' ? 'ईमेल जांचें' : 'Check Email',
-        description: language === 'hindi' 
-          ? 'कृपया अपना ईमेल जांचें और लिंक पर क्लिक करें' 
-          : 'Please check your email and click the link',
-      });
+      // Simulate OTP verification
+      await new Promise(resolve => setTimeout(resolve, 1500));
       
+      // For demo, accept any 6-digit OTP
+      if (otp.length === 6) {
+        const userData = {
+          name: name,
+          phone: phone,
+          email: email,
+          location: language === 'hindi' ? 'गाँव: रामपुर, जिला: मेरठ, उत्तर प्रदेश' : 'Village: Rampur, District: Meerut, UP',
+          landSize: language === 'hindi' ? '2.5 एकड़' : '2.5 acres',
+          experience: language === 'hindi' ? '15 साल' : '15 years',
+          language: language,
+          crops: language === 'hindi' ? ['गेहूं', 'धान', 'गन्ना', 'सरसों'] : ['Wheat', 'Rice', 'Sugarcane', 'Mustard']
+        };
+        
+        login(userData);
+        onAuth();
+        
+        toast({
+          title: language === 'hindi' ? 'सफल पंजीकरण' : 'Registration Successful',
+          description: language === 'hindi' ? 'आपका प्रोफाइल लोड हो रहा है...' : 'Loading your profile...',
+        });
+        
+        setTimeout(() => {
+          navigate('/profile');
+        }, 1000);
+      } else {
+        setError(language === 'hindi' ? 'गलत OTP' : 'Invalid OTP');
+      }
     } catch (error) {
       setError(language === 'hindi' ? 'OTP सत्यापन में समस्या' : 'OTP verification error');
     } finally {
@@ -157,22 +165,29 @@ const Auth = ({ onAuth }: { onAuth: () => void }) => {
     setError(null);
     
     try {
-      const result = await login(email, password);
+      // Simple login for demo
+      const userData = {
+        name: language === 'hindi' ? 'राजेश कुमार' : 'Rajesh Kumar',
+        phone: '+91 98765 43210',
+        email: email,
+        location: language === 'hindi' ? 'गाँव: रामपुर, जिला: मेरठ, उत्तर प्रदेश' : 'Village: Rampur, District: Meerut, UP',
+        landSize: language === 'hindi' ? '2.5 एकड़' : '2.5 acres',
+        experience: language === 'hindi' ? '15 साल' : '15 years',
+        language: language,
+        crops: language === 'hindi' ? ['गेहूं', 'धान', 'गन्ना', 'सरसों'] : ['Wheat', 'Rice', 'Sugarcane', 'Mustard']
+      };
       
-      if (result.success) {
-        onAuth();
-        
-        toast({
-          title: language === 'hindi' ? 'सफल लॉगिन' : 'Login Successful',
-          description: language === 'hindi' ? 'आपका प्रोफाइल लोड हो रहा है...' : 'Loading your profile...',
-        });
-        
-        setTimeout(() => {
-          navigate('/');
-        }, 1000);
-      } else {
-        setError(result.error || (language === 'hindi' ? 'लॉगिन में समस्या' : 'Login error'));
-      }
+      login(userData);
+      onAuth();
+      
+      toast({
+        title: language === 'hindi' ? 'सफल लॉगिन' : 'Login Successful',
+        description: language === 'hindi' ? 'आपका प्रोफाइल लोड हो रहा है...' : 'Loading your profile...',
+      });
+      
+      setTimeout(() => {
+        navigate('/profile');
+      }, 1000);
       
     } catch (error) {
       setError(language === 'hindi' ? 'लॉगिन में समस्या' : 'Login error');
@@ -193,23 +208,8 @@ const Auth = ({ onAuth }: { onAuth: () => void }) => {
     setError(null);
   };
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-app">
-        <div className="text-center">
-          <div className="w-16 h-16 bg-gradient-primary rounded-full flex items-center justify-center mx-auto mb-4">
-            <span className="text-2xl">🌾</span>
-          </div>
-          <p className="text-muted-foreground">
-            {language === 'hindi' ? 'लोड हो रहा है...' : 'Loading...'}
-          </p>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-app p-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-earth p-4">
       <Card className="p-8 w-full max-w-md space-y-6">
         <div className="text-center">
           <div className="w-16 h-16 bg-gradient-primary rounded-full flex items-center justify-center mx-auto mb-4">
@@ -336,8 +336,8 @@ const Auth = ({ onAuth }: { onAuth: () => void }) => {
             <div className="text-center">
               <p className="text-sm text-muted-foreground mb-4">
                 {language === 'hindi' 
-                  ? `OTP ${email} पर भेजा गया है` 
-                  : `OTP sent to ${email}`
+                  ? `OTP ${phone} पर भेजा गया है` 
+                  : `OTP sent to ${phone}`
                 }
               </p>
             </div>
@@ -421,8 +421,8 @@ const Auth = ({ onAuth }: { onAuth: () => void }) => {
         {!isSignUp && (
           <div className="text-center text-sm text-muted-foreground">
             {language === 'hindi' 
-              ? 'सुपाबेस के साथ सुरक्षित प्रमाणीकरण'
-              : 'Secure authentication with Supabase'
+              ? 'डेमो के लिए कोई भी ईमेल और पासवर्ड का उपयोग करें'
+              : 'Use any email and password for demo'
             }
           </div>
         )}
