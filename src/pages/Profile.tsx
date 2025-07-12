@@ -31,7 +31,7 @@ const Profile = () => {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-gradient-earth flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-app flex items-center justify-center">
         <div className="text-center">
           <h2 className="text-xl font-bold mb-4">Please log in to view your profile</h2>
           <Button onClick={() => navigate('/auth')}>Go to Login</Button>
@@ -74,7 +74,7 @@ const Profile = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-earth">
+    <div className="min-h-screen bg-gradient-app">
       <Header title={t('profile.title')} />
       
       <div className="p-4 space-y-4">
@@ -226,8 +226,8 @@ const Profile = () => {
           </Button>
           <Button 
             className="w-full bg-destructive hover:bg-destructive/90 text-white" 
-            onClick={() => {
-              logout();
+            onClick={async () => {
+              await logout();
               navigate('/auth');
             }}
           >

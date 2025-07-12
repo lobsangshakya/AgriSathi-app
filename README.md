@@ -72,7 +72,19 @@ npx cap sync
 npx cap open android  # or ios
 ```
 
-## 🔧 Real API Integration
+## 🔧 Backend & Authentication
+
+The app uses **Supabase** for backend services, authentication, and database management.
+
+### Supabase Setup
+1. **Create a Supabase project** at [supabase.com](https://supabase.com)
+2. **Set up environment variables** with your Supabase credentials
+3. **Run the database schema** from `supabase-schema.sql`
+4. **Configure authentication** settings in Supabase dashboard
+
+See `SUPABASE_SETUP.md` for detailed setup instructions.
+
+### Real API Integration
 
 The app supports both mock APIs (for development) and real APIs (for production) to provide accurate agricultural information.
 
@@ -155,7 +167,7 @@ See `REAL_API_SETUP.md` for detailed setup instructions.
 - **Push notifications** support
 
 ### APIs & Services
-- **Supabase** for backend services
+- **Supabase** for backend services and authentication
 - **Real-time APIs** for agricultural data
 - **AI services** for disease detection
 - **Weather APIs** for climate data

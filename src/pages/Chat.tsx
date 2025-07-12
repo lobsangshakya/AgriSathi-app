@@ -20,7 +20,7 @@ import {
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useUser } from "@/contexts/UserContext";
 import { CameraScanner } from "@/components/CameraScanner";
-import { apiService, aiService, ChatMessage, ChatContext } from "@/lib/api";
+import { aiService, sendChatMessage, ChatMessage, ChatContext } from "@/lib/api";
 import { toast } from "@/hooks/use-toast";
 
 const Chat = () => {
@@ -51,7 +51,7 @@ const Chat = () => {
   const checkApiStatus = async () => {
     try {
       // Try to get weather data to test if real APIs are working
-      const testResponse = await apiService.sendChatMessage("test", { language });
+      const testResponse = await sendChatMessage("test", { language });
       setApiStatus('real');
     } catch (error) {
       console.log('Using mock APIs for development');
@@ -96,7 +96,7 @@ const Chat = () => {
         console.log('Sending message with context:', messageContext);
         
         // Send to chatbot API with proper language context
-        const botResponse = await apiService.sendChatMessage(newMessage, messageContext);
+        const botResponse = await sendChatMessage(newMessage, messageContext);
         
         console.log('Bot response received:', botResponse);
         
@@ -188,7 +188,7 @@ const Chat = () => {
     setIsTyping(true);
     
     try {
-      const analysisResult = await apiService.analyzeDisease(imageData);
+      const analysisResult = await aiService.analyzeDisease(imageData);
       
       const analysisMessage: ChatMessage = {
         id: Date.now().toString(),
@@ -274,7 +274,7 @@ const Chat = () => {
   const testLanguageSwitch = async () => {
     console.log('Testing language switch...');
     try {
-      const testResponse = await apiService.sendChatMessage("hello", { language });
+      const testResponse = await sendChatMessage("hello", { language });
       console.log('Test response:', testResponse);
       toast({
         title: 'Language Test',
@@ -287,7 +287,7 @@ const Chat = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-earth">
+    <div className="min-h-screen bg-gradient-app">
       <Header title={t('chat.title')} />
       
       <div className="flex flex-col h-[calc(100vh-140px)]">

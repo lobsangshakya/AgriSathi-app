@@ -1,8 +1,31 @@
-// API Configuration
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://api.agrisathi.com';
-const AI_SERVICE_URL = import.meta.env.VITE_AI_SERVICE_URL || 'https://ai.agrisathi.com';
+import { database } from './database';
+import { supabase } from './supabaseClient';
 
-// Types
+// Types for Community posts
+export interface CommunityPost {
+  id: string;
+  user_id: string;
+  title: string;
+  content: string;
+  category: string;
+  image_url?: string;
+  likes_count: number;
+  comments_count: number;
+  created_at: string;
+  profiles?: {
+    name: string;
+    avatar_url?: string;
+  };
+}
+
+export interface CreatePostRequest {
+  title: string;
+  content: string;
+  category: string;
+  image_url?: string;
+}
+
+// Types for Disease Detection
 export interface DiseaseAnalysisResult {
   disease: string;
   confidence: number;
@@ -14,6 +37,7 @@ export interface DiseaseAnalysisResult {
   symptoms: string[];
 }
 
+// Types for Chat
 export interface ChatMessage {
   id: string;
   sender: 'user' | 'bot';
@@ -26,50 +50,6 @@ export interface ChatContext {
   language: string;
   lastMessage?: string;
   nlpResult?: any;
-}
-
-export interface WeatherData {
-  temperature: number;
-  humidity: number;
-  windSpeed: number;
-  description: string;
-  icon: string;
-  forecast: Array<{
-    date: string;
-    temp: number;
-    description: string;
-  }>;
-}
-
-export interface CropRecommendation {
-  crop: string;
-  confidence: number;
-  reasons: string[];
-  plantingTime: string;
-  careInstructions: string[];
-}
-
-export interface CommunityPost {
-  id: string;
-  author: string;
-  content: string;
-  image?: string;
-  likes: number;
-  comments: number;
-  timestamp: Date;
-  category: string;
-}
-
-export interface CreatePostRequest {
-  content: string;
-  image?: string;
-  category: string;
-}
-
-export interface PostResponse {
-  success: boolean;
-  post?: CommunityPost;
-  error?: string;
 }
 
 // Image compression utility
@@ -108,229 +88,231 @@ export const compressImage = (file: File): Promise<string> => {
   });
 };
 
-// Base API Service
-class ApiService {
-  private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
-    const url = `${API_BASE_URL}${endpoint}`;
-    const config: RequestInit = {
-      headers: {
-        'Content-Type': 'application/json',
-        ...options.headers,
-      },
-      ...options,
-    };
-
-    try {
-      const response = await fetch(url, config);
-      
-      if (!response.ok) {
-        throw new Error(`API Error: ${response.status} ${response.statusText}`);
-      }
-      
-      return await response.json();
-    } catch (error) {
-      console.error('API Request failed:', error);
-      throw error;
-    }
-  }
-
-  // Disease Detection API
-  async analyzeDisease(imageData: string, cropType?: string): Promise<DiseaseAnalysisResult> {
-    return this.request<DiseaseAnalysisResult>('/disease-detection', {
-      method: 'POST',
-      body: JSON.stringify({
-        image: imageData,
-        cropType,
-        timestamp: new Date().toISOString(),
-      }),
-    });
-  }
-
-  // Chatbot API
-  async sendChatMessage(message: string, context?: ChatContext): Promise<ChatMessage> {
-    return this.request<ChatMessage>('/chat', {
-      method: 'POST',
-      body: JSON.stringify({
-        message,
-        context,
-        timestamp: new Date().toISOString(),
-      }),
-    });
-  }
-
-  // Weather API
-  async getWeatherData(latitude: number, longitude: number): Promise<WeatherData> {
-    return this.request<WeatherData>(`/weather?lat=${latitude}&lon=${longitude}`);
-  }
-
-  // Crop Recommendations API
-  async getCropRecommendations(
-    soilType: string,
-    season: string,
-    location: string
-  ): Promise<CropRecommendation[]> {
-    return this.request<CropRecommendation[]>('/crop-recommendations', {
-      method: 'POST',
-      body: JSON.stringify({
-        soilType,
-        season,
-        location,
-      }),
-    });
-  }
-
-  // Expert Consultation API
-  async getAvailableExperts(): Promise<any[]> {
-    return this.request<any[]>('/experts');
-  }
-
-  async bookExpertConsultation(
-    expertId: string,
-    userId: string,
-    dateTime: string
-  ): Promise<any> {
-    return this.request<any>('/experts/book', {
-      method: 'POST',
-      body: JSON.stringify({
-        expertId,
-        userId,
-        dateTime,
-      }),
-    });
-  }
-
-  // Market Prices API
-  async getMarketPrices(crop?: string): Promise<any[]> {
-    const endpoint = crop ? `/market-prices?crop=${crop}` : '/market-prices';
-    return this.request<any[]>(endpoint);
-  }
-
-  // Soil Analysis API
-  async analyzeSoil(imageData: string): Promise<any> {
-    return this.request<any>('/soil-analysis', {
-      method: 'POST',
-      body: JSON.stringify({
-        image: imageData,
-        timestamp: new Date().toISOString(),
-      }),
-    });
-  }
-
-  // Community Posts API
-  async getCommunityPosts(): Promise<CommunityPost[]> {
-    return this.request<CommunityPost[]>('/community/posts');
-  }
-
-  async createPost(postData: CreatePostRequest): Promise<PostResponse> {
-    return this.request<PostResponse>('/community/posts', {
-      method: 'POST',
-      body: JSON.stringify(postData),
-    });
-  }
-
-  async likePost(postId: string): Promise<any> {
-    return this.request<any>(`/community/posts/${postId}/like`, {
-      method: 'POST',
-    });
-  }
-}
-
-// AI Service for advanced features
-class AIService {
-  private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
-    const url = `${AI_SERVICE_URL}${endpoint}`;
-    const config: RequestInit = {
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${import.meta.env.VITE_AI_API_KEY}`,
-        ...options.headers,
-      },
-      ...options,
-    };
-
-    try {
-      const response = await fetch(url, config);
-      
-      if (!response.ok) {
-        throw new Error(`AI Service Error: ${response.status} ${response.statusText}`);
-      }
-      
-      return await response.json();
-    } catch (error) {
-      console.error('AI Service Request failed:', error);
-      throw error;
-    }
-  }
-
-  // Advanced disease detection with multiple models
-  async advancedDiseaseDetection(imageData: string): Promise<DiseaseAnalysisResult> {
-    return this.request<DiseaseAnalysisResult>('/disease-detection/advanced', {
-      method: 'POST',
-      body: JSON.stringify({
-        image: imageData,
-        models: ['resnet50', 'efficientnet', 'vit'],
-        confidence_threshold: 0.8,
-      }),
-    });
-  }
-
-  // Natural language processing for chatbot
-  async processNaturalLanguage(text: string, language: string = 'hindi'): Promise<any> {
-    return this.request<any>('/nlp/process', {
-      method: 'POST',
-      body: JSON.stringify({
-        text,
-        language,
-        context: 'agriculture',
-      }),
-    });
-  }
-
-  // Image preprocessing for better analysis
-  async preprocessImage(imageData: string): Promise<string> {
-    return this.request<{ processed_image: string }>('/image/preprocess', {
-      method: 'POST',
-      body: JSON.stringify({
-        image: imageData,
-        operations: ['enhance', 'normalize', 'resize'],
-      }),
-    }).then(result => result.processed_image);
-  }
-}
-
-// Import mock and real services
-import { MockApiService, MockAiService } from './mockApi';
-import { RealApiService, RealAiService } from './realApi';
-
-// Check if we're in development mode or if real APIs are not available
-const USE_MOCK_APIS = import.meta.env.DEV || !import.meta.env.VITE_API_BASE_URL;
-const USE_REAL_APIS = !USE_MOCK_APIS && (
-  import.meta.env.VITE_OPENWEATHER_API_KEY || 
-  import.meta.env.VITE_PLANT_ID_API_KEY || 
-  import.meta.env.VITE_AGRICULTURE_API_KEY
-);
-
-// Export instances
-export const apiService = USE_REAL_APIS ? new RealApiService() : new MockApiService();
-export const aiService = USE_REAL_APIS ? new RealAiService() : new MockAiService();
-
-export const getLocation = (): Promise<{ latitude: number; longitude: number }> => {
-  return new Promise((resolve, reject) => {
-    if (!navigator.geolocation) {
-      reject(new Error('Geolocation is not supported'));
-      return;
-    }
+// Mock AI service for disease detection
+export const aiService = {
+  analyzeDisease: async (imageData: string, cropType?: string): Promise<DiseaseAnalysisResult> => {
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 2000));
     
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        resolve({
-          latitude: position.coords.latitude,
-          longitude: position.coords.longitude,
-        });
+    // Mock disease detection result
+    const diseases = [
+      {
+        disease: 'Leaf Blight',
+        confidence: 0.85,
+        severity: 'medium' as const,
+        recommendations: ['Remove infected leaves', 'Apply fungicide', 'Improve air circulation'],
+        preventiveMeasures: ['Avoid overhead watering', 'Maintain proper spacing', 'Use resistant varieties'],
+        treatment: ['Copper-based fungicide', 'Neem oil application', 'Prune affected areas'],
+        scientificName: 'Alternaria solani',
+        symptoms: ['Brown spots on leaves', 'Yellow halos around lesions', 'Leaf wilting']
       },
-      (error) => {
-        reject(error);
+      {
+        disease: 'Powdery Mildew',
+        confidence: 0.92,
+        severity: 'low' as const,
+        recommendations: ['Increase air circulation', 'Reduce humidity', 'Apply sulfur-based treatment'],
+        preventiveMeasures: ['Proper plant spacing', 'Avoid overhead irrigation', 'Use resistant cultivars'],
+        treatment: ['Sulfur fungicide', 'Baking soda solution', 'Milk spray'],
+        scientificName: 'Erysiphe cichoracearum',
+        symptoms: ['White powdery spots', 'Leaf distortion', 'Stunted growth']
+      },
+      {
+        disease: 'Root Rot',
+        confidence: 0.78,
+        severity: 'high' as const,
+        recommendations: ['Improve drainage', 'Reduce watering frequency', 'Remove affected plants'],
+        preventiveMeasures: ['Well-draining soil', 'Proper watering schedule', 'Avoid overwatering'],
+        treatment: ['Remove infected roots', 'Apply fungicide', 'Repot with fresh soil'],
+        scientificName: 'Phytophthora spp.',
+        symptoms: ['Wilting despite adequate water', 'Brown/black roots', 'Stunted growth']
       }
-    );
-  });
-}; 
+    ];
+    
+    const randomDisease = diseases[Math.floor(Math.random() * diseases.length)];
+    return randomDisease;
+  },
+  processNaturalLanguage: async (text: string, language: string = 'hindi'): Promise<any> => {
+    // Simulate NLP processing
+    await new Promise(resolve => setTimeout(resolve, 500));
+    return { intent: 'general', entities: [] };
+  }
+};
+
+// Mock sendChatMessage for Chat page
+export const sendChatMessage = async (message: string, context: ChatContext): Promise<ChatMessage> => {
+  await new Promise(resolve => setTimeout(resolve, 1200));
+  return {
+    id: Date.now().toString(),
+    sender: 'bot',
+    content: context.language === 'hindi'
+      ? 'यह एक डेमो उत्तर है। कृपया असली एपीआई के लिए सेटअप पूरा करें।'
+      : 'This is a demo response. Please complete the real API setup.',
+    timestamp: new Date(),
+    type: 'text'
+  };
+};
+
+// API service using Supabase
+export const api = {
+  // User profile operations
+  profiles: {
+    getCurrentUser: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return { data: null, error: 'Not authenticated' };
+      
+      return database.profiles.getById(user.id);
+    },
+
+    updateProfile: async (updates: Record<string, unknown>) => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return { data: null, error: 'Not authenticated' };
+      
+      return database.profiles.update(user.id, updates);
+    }
+  },
+
+  // Crop recommendations
+  cropRecommendations: {
+    getByLocation: async (location: string, season?: string) => {
+      return database.cropRecommendations.getByLocation(location, season);
+    },
+
+    getAll: async () => {
+      return database.cropRecommendations.getAll();
+    }
+  },
+
+  // Disease detection
+  diseaseDetection: {
+    saveResult: async (result: {
+      image_url: string;
+      disease_name: string;
+      confidence: number;
+      recommendations: string[];
+    }) => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return { data: null, error: 'Not authenticated' };
+      
+      return database.diseaseDetection.saveResult({
+        user_id: user.id,
+        ...result
+      });
+    },
+
+    getHistory: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return { data: null, error: 'Not authenticated' };
+      
+      return database.diseaseDetection.getHistory(user.id);
+    }
+  },
+
+  // Community posts
+  community: {
+    getPosts: async (): Promise<CommunityPost[]> => {
+      const { data, error } = await database.community.getPosts();
+      if (error) throw error;
+      return data || [];
+    },
+
+    createPost: async (post: CreatePostRequest) => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return { data: null, error: 'Not authenticated' };
+      
+      const { data, error } = await database.community.createPost({
+        user_id: user.id,
+        ...post
+      });
+      
+      if (error) throw error;
+      return { success: true, post: data, message: 'Post created successfully! +10 AgriCreds earned!' };
+    },
+
+    getPostById: async (postId: string) => {
+      return database.community.getPostById(postId);
+    },
+
+    likePost: async (postId: string) => {
+      // For now, return a mock success response
+      // In a real implementation, you'd update the likes count in the database
+      return { success: true, likes: Math.floor(Math.random() * 10) + 1 };
+    }
+  },
+
+  // Expert consultations
+  consultations: {
+    getUserConsultations: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return { data: null, error: 'Not authenticated' };
+      
+      return database.consultations.getUserConsultations(user.id);
+    },
+
+    createConsultation: async (consultation: {
+      expert_id: string;
+      subject: string;
+      description: string;
+      urgency: 'low' | 'medium' | 'high';
+    }) => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return { data: null, error: 'Not authenticated' };
+      
+      return database.consultations.createConsultation({
+        user_id: user.id,
+        ...consultation
+      });
+    }
+  },
+
+  // Weather data
+  weather: {
+    getByLocation: async (location: string) => {
+      return database.weather.getByLocation(location);
+    }
+  },
+
+  // File uploads
+  storage: {
+    uploadImage: async (file: File, path: string) => {
+      return database.storage.uploadImage(file, path);
+    },
+
+    getPublicUrl: (path: string) => {
+      return database.storage.getPublicUrl(path);
+    }
+  },
+
+  // Notifications
+  notifications: {
+    getUnread: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return { data: null, error: 'Not authenticated' };
+      
+      const { data, error } = await supabase
+        .from('notifications')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('read', false)
+        .order('created_at', { ascending: false });
+      
+      return { data, error };
+    },
+
+    markAsRead: async (notificationId: string) => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return { data: null, error: 'Not authenticated' };
+      
+      const { data, error } = await supabase
+        .from('notifications')
+        .update({ read: true })
+        .eq('id', notificationId)
+        .eq('user_id', user.id)
+        .select()
+        .single();
+      
+      return { data, error };
+    }
+  }
+};
+
+export default api; 
