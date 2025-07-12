@@ -120,6 +120,16 @@ const translations = {
     'chat.fertilizerAmount': 'खाद की मात्रा',
     'chat.seedTreatment': 'बीज उपचार',
     'chat.irrigationTime': 'सिंचाई का समय',
+    'chat.placeholder': 'अपना संदेश लिखें...',
+    'chat.typing': 'टाइप कर रहा है...',
+    'chat.clear': 'साफ़ करें',
+    'chat.cleared': 'चैट साफ़ की गई',
+    'chat.startNewConversation': 'नई बातचीत शुरू करें',
+    'chat.responseReceived': 'जवाब मिला',
+    'chat.usingRealData': 'वास्तविक कृषि डेटा का उपयोग',
+    'chat.usingMockData': 'मॉक डेटा का उपयोग',
+    'chat.apiError': 'API त्रुटि',
+    'chat.error': 'जवाब प्राप्त करने में विफल',
     
     // Community
     'community.title': 'समुदाय मंच',
@@ -284,6 +294,16 @@ const translations = {
     'chat.fertilizerAmount': 'Fertilizer Amount',
     'chat.seedTreatment': 'Seed Treatment',
     'chat.irrigationTime': 'Irrigation Time',
+    'chat.placeholder': 'Type your message...',
+    'chat.typing': 'Typing...',
+    'chat.clear': 'Clear',
+    'chat.cleared': 'Chat Cleared',
+    'chat.startNewConversation': 'Start a new conversation',
+    'chat.responseReceived': 'Response Received',
+    'chat.usingRealData': 'Using real agricultural data',
+    'chat.usingMockData': 'Using mock data',
+    'chat.apiError': 'API Error',
+    'chat.error': 'Failed to get response',
     
     // Community
     'community.title': 'Community Forum',
