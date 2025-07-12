@@ -20,7 +20,12 @@ export interface ChatMessage {
   content: string;
   timestamp: Date;
   type: 'text' | 'image' | 'voice';
-  metadata?: any;
+}
+
+export interface ChatContext {
+  language: string;
+  lastMessage?: string;
+  nlpResult?: any;
 }
 
 export interface WeatherData {
@@ -47,33 +52,63 @@ export interface CropRecommendation {
 export interface CommunityPost {
   id: string;
   author: string;
-  location: string;
-  time: string;
   content: string;
-  image?: string | null;
+  image?: string;
   likes: number;
   comments: number;
-  agriCreds: number;
-  category: string;
   timestamp: Date;
-  userId?: string;
+  category: string;
 }
 
 export interface CreatePostRequest {
   content: string;
+  image?: string;
   category: string;
-  image?: string | null;
-  location?: string;
-  userId?: string;
 }
 
 export interface PostResponse {
   success: boolean;
-  post: CommunityPost;
-  message?: string;
+  post?: CommunityPost;
+  error?: string;
 }
 
-// API Service Class
+// Image compression utility
+export const compressImage = (file: File): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    const img = new Image();
+
+    img.onload = () => {
+      const maxSize = 800;
+      let { width, height } = img;
+
+      if (width > height) {
+        if (width > maxSize) {
+          height = (height * maxSize) / width;
+          width = maxSize;
+        }
+      } else {
+        if (height > maxSize) {
+          width = (width * maxSize) / height;
+          height = maxSize;
+        }
+      }
+
+      canvas.width = width;
+      canvas.height = height;
+
+      ctx?.drawImage(img, 0, 0, width, height);
+      const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.8);
+      resolve(compressedDataUrl);
+    };
+
+    img.onerror = reject;
+    img.src = URL.createObjectURL(file);
+  });
+};
+
+// Base API Service
 class ApiService {
   private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
     const url = `${API_BASE_URL}${endpoint}`;
@@ -112,7 +147,7 @@ class ApiService {
   }
 
   // Chatbot API
-  async sendChatMessage(message: string, context?: any): Promise<ChatMessage> {
+  async sendChatMessage(message: string, context?: ChatContext): Promise<ChatMessage> {
     return this.request<ChatMessage>('/chat', {
       method: 'POST',
       body: JSON.stringify({
@@ -146,23 +181,28 @@ class ApiService {
 
   // Expert Consultation API
   async getAvailableExperts(): Promise<any[]> {
-    return this.request<any[]>('/experts/available');
+    return this.request<any[]>('/experts');
   }
 
-  async bookExpertConsultation(expertId: string, userId: string): Promise<any> {
+  async bookExpertConsultation(
+    expertId: string,
+    userId: string,
+    dateTime: string
+  ): Promise<any> {
     return this.request<any>('/experts/book', {
       method: 'POST',
       body: JSON.stringify({
         expertId,
         userId,
-        timestamp: new Date().toISOString(),
+        dateTime,
       }),
     });
   }
 
   // Market Prices API
-  async getMarketPrices(crop: string, location: string): Promise<any> {
-    return this.request<any>(`/market-prices?crop=${crop}&location=${location}`);
+  async getMarketPrices(crop?: string): Promise<any[]> {
+    const endpoint = crop ? `/market-prices?crop=${crop}` : '/market-prices';
+    return this.request<any[]>(endpoint);
   }
 
   // Soil Analysis API
@@ -176,54 +216,21 @@ class ApiService {
     });
   }
 
-  // Community API
-  async getCommunityPosts(category?: string, limit: number = 20): Promise<CommunityPost[]> {
-    const params = new URLSearchParams();
-    if (category) params.append('category', category);
-    if (limit) params.append('limit', limit.toString());
-    
-    return this.request<CommunityPost[]>(`/community/posts?${params.toString()}`);
+  // Community Posts API
+  async getCommunityPosts(): Promise<CommunityPost[]> {
+    return this.request<CommunityPost[]>('/community/posts');
   }
 
-  async createCommunityPost(postData: CreatePostRequest): Promise<PostResponse> {
+  async createPost(postData: CreatePostRequest): Promise<PostResponse> {
     return this.request<PostResponse>('/community/posts', {
       method: 'POST',
-      body: JSON.stringify({
-        ...postData,
-        timestamp: new Date().toISOString(),
-      }),
+      body: JSON.stringify(postData),
     });
   }
 
-  async likeCommunityPost(postId: string, userId: string): Promise<{ success: boolean; likes: number }> {
-    return this.request<{ success: boolean; likes: number }>(`/community/posts/${postId}/like`, {
+  async likePost(postId: string): Promise<any> {
+    return this.request<any>(`/community/posts/${postId}/like`, {
       method: 'POST',
-      body: JSON.stringify({
-        userId,
-        timestamp: new Date().toISOString(),
-      }),
-    });
-  }
-
-  async addCommentToPost(postId: string, comment: string, userId: string): Promise<any> {
-    return this.request<any>(`/community/posts/${postId}/comments`, {
-      method: 'POST',
-      body: JSON.stringify({
-        comment,
-        userId,
-        timestamp: new Date().toISOString(),
-      }),
-    });
-  }
-
-  async uploadCommunityImage(imageData: string, fileName: string): Promise<{ imageUrl: string }> {
-    return this.request<{ imageUrl: string }>('/community/upload-image', {
-      method: 'POST',
-      body: JSON.stringify({
-        image: imageData,
-        fileName,
-        timestamp: new Date().toISOString(),
-      }),
     });
   }
 }
@@ -291,35 +298,21 @@ class AIService {
   }
 }
 
-// Import mock services
+// Import mock and real services
 import { MockApiService, MockAiService } from './mockApi';
+import { RealApiService, RealAiService } from './realApi';
 
 // Check if we're in development mode or if real APIs are not available
 const USE_MOCK_APIS = import.meta.env.DEV || !import.meta.env.VITE_API_BASE_URL;
+const USE_REAL_APIS = !USE_MOCK_APIS && (
+  import.meta.env.VITE_OPENWEATHER_API_KEY || 
+  import.meta.env.VITE_PLANT_ID_API_KEY || 
+  import.meta.env.VITE_AGRICULTURE_API_KEY
+);
 
 // Export instances
-export const apiService = USE_MOCK_APIS ? new MockApiService() : new ApiService();
-export const aiService = USE_MOCK_APIS ? new MockAiService() : new AIService();
-
-// Utility functions
-export const compressImage = async (file: File, maxSize: number = 800): Promise<string> => {
-  return new Promise((resolve) => {
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d')!;
-    const img = new Image();
-    
-    img.onload = () => {
-      const ratio = Math.min(maxSize / img.width, maxSize / img.height);
-      canvas.width = img.width * ratio;
-      canvas.height = img.height * ratio;
-      
-      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-      resolve(canvas.toDataURL('image/jpeg', 0.8));
-    };
-    
-    img.src = URL.createObjectURL(file);
-  });
-};
+export const apiService = USE_REAL_APIS ? new RealApiService() : new MockApiService();
+export const aiService = USE_REAL_APIS ? new RealAiService() : new MockAiService();
 
 export const getLocation = (): Promise<{ latitude: number; longitude: number }> => {
   return new Promise((resolve, reject) => {
