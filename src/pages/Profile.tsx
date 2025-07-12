@@ -12,34 +12,55 @@ import {
   Award,
   Settings,
   Phone,
+  Mail,
   Globe,
-  TrendingUp
+  TrendingUp,
+  LogOut,
+  Users
 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useUser } from "@/contexts/UserContext";
+import { useNavigate } from "react-router-dom";
+import { toast } from "@/hooks/use-toast";
 
 const Profile = () => {
   const { t } = useLanguage();
-  const userProfile = {
-    name: "राजेश कुमार",
-    phone: "+91 98765 43210",
-    location: "गाँव: रामपुर, जिला: मेरठ, उत्तर प्रदेश",
-    landSize: "2.5 एकड़",
-    experience: "15 साल",
-    agriCreds: 1250,
-    joinDate: "जनवरी 2024",
-    language: "हिंदी",
-    crops: ["गेहूं", "धान", "गन्ना", "सरसों"],
-    achievements: [
-      { title: "सामुदायिक योगदानकर्ता", points: 500, icon: "🏆" },
-      { title: "जैविक खेती विशेषज्ञ", points: 300, icon: "🌱" },
-      { title: "मौसम पूर्वानुमान गुरु", points: 200, icon: "🌦️" }
-    ],
-    stats: {
-      postsShared: 15,
-      helpfulAnswers: 8,
-      questionsAsked: 12,
-      creditsEarned: 1250
+  const { user, logout, addAgriCreds } = useUser();
+  const navigate = useNavigate();
+
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-gradient-earth flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-xl font-bold mb-4">Please log in to view your profile</h2>
+          <Button onClick={() => navigate('/auth')}>Go to Login</Button>
+        </div>
+      </div>
+    );
+  }
+
+  const handleRedeemCredits = () => {
+    if (user.agriCreds < 50) {
+      toast({
+        title: t('profile.insufficientCredits') || 'Insufficient Credits',
+        description: t('profile.need50Credits') || 'You need at least 50 AgriCreds to chat with experts',
+        variant: 'destructive',
+      });
+      return;
     }
+
+    // Deduct 50 credits for expert consultation
+    addAgriCreds(-50, 'Expert consultation');
+    
+    toast({
+      title: t('profile.expertChatStarted') || 'Expert Chat Started',
+      description: t('profile.redirectingToExpert') || 'Redirecting to expert consultation...',
+    });
+
+    // Navigate to expert consultation page
+    setTimeout(() => {
+      navigate('/expert-consultation');
+    }, 1000);
   };
 
   return (
@@ -51,24 +72,28 @@ const Profile = () => {
         <Card className="p-6 text-center">
           <Avatar className="w-20 h-20 mx-auto mb-4">
             <AvatarFallback className="text-2xl bg-primary text-primary-foreground">
-              {userProfile.name.charAt(0)}
+              {user.name.charAt(0)}
             </AvatarFallback>
           </Avatar>
-          <h2 className="text-xl font-bold text-foreground mb-2">{userProfile.name}</h2>
+          <h2 className="text-xl font-bold text-foreground mb-2">{user.name}</h2>
+          <div className="flex items-center justify-center gap-2 text-muted-foreground mb-2">
+            <Mail className="h-4 w-4" />
+            <span className="text-sm">{user.email}</span>
+          </div>
           <div className="flex items-center justify-center gap-2 text-muted-foreground mb-2">
             <Phone className="h-4 w-4" />
-            <span className="text-sm">{userProfile.phone}</span>
+            <span className="text-sm">{user.phone}</span>
           </div>
           <div className="flex items-center justify-center gap-2 text-muted-foreground mb-4">
             <MapPin className="h-4 w-4" />
-            <span className="text-sm">{userProfile.location}</span>
+            <span className="text-sm">{user.location}</span>
           </div>
           
           {/* AgriCreds Display */}
           <Card className="p-4 bg-gradient-primary text-primary-foreground">
             <div className="flex items-center justify-center gap-2 mb-2">
               <Coins className="h-6 w-6" />
-              <span className="text-2xl font-bold">₹{userProfile.agriCreds}</span>
+              <span className="text-2xl font-bold">₹{user.agriCreds}</span>
             </div>
             <p className="text-sm opacity-90">कुल AgriCreds</p>
           </Card>
@@ -83,21 +108,21 @@ const Profile = () => {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <p className="text-sm text-muted-foreground">{t('profile.landSize')}</p>
-              <p className="font-medium">{userProfile.landSize}</p>
+              <p className="font-medium">{user.landSize}</p>
             </div>
             <div>
               <p className="text-sm text-muted-foreground">{t('profile.experience')}</p>
-              <p className="font-medium">{userProfile.experience}</p>
+              <p className="font-medium">{user.experience}</p>
             </div>
             <div>
               <p className="text-sm text-muted-foreground">{t('profile.memberSince')}</p>
-              <p className="font-medium">{userProfile.joinDate}</p>
+              <p className="font-medium">{user.joinDate}</p>
             </div>
             <div>
               <p className="text-sm text-muted-foreground">{t('profile.language')}</p>
               <div className="flex items-center gap-2">
                 <Globe className="h-4 w-4" />
-                <p className="font-medium">{userProfile.language}</p>
+                <p className="font-medium">{user.language}</p>
               </div>
             </div>
           </div>
@@ -105,7 +130,7 @@ const Profile = () => {
           <div className="mt-4">
             <p className="text-sm text-muted-foreground mb-2">{t('profile.mainCrops')}</p>
             <div className="flex flex-wrap gap-2">
-              {userProfile.crops.map(crop => (
+              {user.crops.map(crop => (
                 <Badge key={crop} variant="secondary">{crop}</Badge>
               ))}
             </div>
@@ -120,19 +145,19 @@ const Profile = () => {
           </h3>
           <div className="grid grid-cols-2 gap-4">
             <div className="text-center">
-              <p className="text-2xl font-bold text-primary">{userProfile.stats.postsShared}</p>
+              <p className="text-2xl font-bold text-primary">{user.stats.postsShared}</p>
               <p className="text-sm text-muted-foreground">{t('profile.postsShared')}</p>
             </div>
             <div className="text-center">
-              <p className="text-2xl font-bold text-success">{userProfile.stats.helpfulAnswers}</p>
+              <p className="text-2xl font-bold text-success">{user.stats.helpfulAnswers}</p>
               <p className="text-sm text-muted-foreground">{t('profile.helpfulAnswers')}</p>
             </div>
             <div className="text-center">
-              <p className="text-2xl font-bold text-accent">{userProfile.stats.questionsAsked}</p>
+              <p className="text-2xl font-bold text-accent">{user.stats.questionsAsked}</p>
               <p className="text-sm text-muted-foreground">{t('profile.questionsAsked')}</p>
             </div>
             <div className="text-center">
-              <p className="text-2xl font-bold text-warning">{userProfile.stats.creditsEarned}</p>
+              <p className="text-2xl font-bold text-warning">{user.stats.creditsEarned}</p>
               <p className="text-sm text-muted-foreground">{t('profile.creditsEarned')}</p>
             </div>
           </div>
@@ -145,7 +170,7 @@ const Profile = () => {
             {t('profile.achievements')}
           </h3>
           <div className="space-y-3">
-            {userProfile.achievements.map((achievement, index) => (
+            {user.achievements.map((achievement, index) => (
               <div key={index} className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
                 <span className="text-2xl">{achievement.icon}</span>
                 <div className="flex-1">
@@ -154,6 +179,12 @@ const Profile = () => {
                 </div>
               </div>
             ))}
+            {user.achievements.length === 0 && (
+              <div className="text-center py-4 text-muted-foreground">
+                <p>{t('profile.noAchievements') || 'No achievements yet'}</p>
+                <p className="text-sm">{t('profile.keepParticipating') || 'Keep participating to earn achievements!'}</p>
+              </div>
+            )}
           </div>
         </Card>
 
@@ -167,9 +198,23 @@ const Profile = () => {
             <Globe className="h-4 w-4 mr-2" />
             {t('profile.changeLanguage')}
           </Button>
-          <Button className="w-full bg-primary hover:bg-primary/90">
-            <Award className="h-4 w-4 mr-2" />
-            {t('profile.redeemCredits')}
+          <Button 
+            className="w-full bg-primary hover:bg-primary/90"
+            onClick={handleRedeemCredits}
+            disabled={user.agriCreds < 50}
+          >
+            <Users className="h-4 w-4 mr-2" />
+            {t('profile.redeemCredits')} (50 {t('profile.credits') || 'Credits'})
+          </Button>
+          <Button 
+            className="w-full bg-destructive hover:bg-destructive/90 text-white" 
+            onClick={() => {
+              logout();
+              navigate('/auth');
+            }}
+          >
+            <LogOut className="h-4 w-4 mr-2" />
+            {t('profile.logout') || 'Logout'}
           </Button>
         </div>
       </div>
