@@ -2,49 +2,74 @@ import { useState } from "react";
 import { Header } from "@/components/Header";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Camera, Upload, Scan, AlertTriangle, CheckCircle } from "lucide-react";
+import { Camera, Upload, Scan, AlertTriangle, CheckCircle, RefreshCw, Info } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { CameraScanner } from "@/components/CameraScanner";
+import { apiService, aiService, compressImage, DiseaseAnalysisResult } from "@/lib/api";
+import { toast } from "@/hooks/use-toast";
 
 const DiseaseDetection = () => {
   const { t } = useLanguage();
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [analysisResult, setAnalysisResult] = useState<any>(null);
+  const [analysisResult, setAnalysisResult] = useState<DiseaseAnalysisResult | null>(null);
+  const [isCameraOpen, setIsCameraOpen] = useState(false);
+  const [selectedCropType, setSelectedCropType] = useState<string>('');
+  const [analysisHistory, setAnalysisHistory] = useState<DiseaseAnalysisResult[]>([]);
 
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setSelectedImage(e.target?.result as string);
+      try {
+        const compressedImage = await compressImage(file);
+        setSelectedImage(compressedImage);
         setAnalysisResult(null);
-      };
-      reader.readAsDataURL(file);
+      } catch (error) {
+        toast({
+          title: t('common.error') || 'Error',
+          description: t('disease.uploadError') || 'Failed to process image',
+          variant: 'destructive',
+        });
+      }
     }
   };
 
-  const analyzeImage = () => {
+  const handleCameraCapture = (imageData: string) => {
+    setSelectedImage(imageData);
+    setAnalysisResult(null);
+    setIsCameraOpen(false);
+  };
+
+  const analyzeImage = async () => {
+    if (!selectedImage) return;
+
     setIsAnalyzing(true);
-    // Simulate AI analysis
-    setTimeout(() => {
-      setAnalysisResult({
-        disease: "पत्ती का धब्बा रोग (Leaf Spot)",
-        confidence: 92,
-        severity: "मध्यम",
-        recommendations: [
-          "संक्रमित पत्तियों को तुरंत हटा दें",
-          "कॉपर ऑक्सीक्लोराइड का छिड़काव करें",
-          "नीम तेल का प्राकृतिक उपचार करें",
-          "खेत में जल निकासी सुनिश्चित करें"
-        ],
-        preventiveMeasures: [
-          "बीज उपचार करें",
-          "उचित दूरी पर बुआई करें",
-          "खेत की सफाई रखें"
-        ]
+    try {
+      let result: DiseaseAnalysisResult;
+      
+      try {
+        result = await aiService.advancedDiseaseDetection(selectedImage);
+      } catch (error) {
+        result = await apiService.analyzeDisease(selectedImage, selectedCropType);
+      }
+
+      setAnalysisResult(result);
+      setAnalysisHistory(prev => [result, ...prev.slice(0, 4)]);
+      
+      toast({
+        title: t('disease.analysisComplete') || 'Analysis Complete',
+        description: `${result.disease} detected with ${result.confidence}% confidence`,
       });
+    } catch (error) {
+      console.error('Analysis failed:', error);
+      toast({
+        title: t('common.error') || 'Error',
+        description: t('disease.analysisError') || 'Failed to analyze image. Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
       setIsAnalyzing(false);
-    }, 3000);
+    }
   };
 
   return (
@@ -64,6 +89,27 @@ const DiseaseDetection = () => {
             </p>
           </div>
           
+          {/* Crop Type Selection */}
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-foreground mb-2">
+              {t('disease.selectCrop') || 'Select Crop Type (Optional)'}
+            </label>
+            <select
+              value={selectedCropType}
+              onChange={(e) => setSelectedCropType(e.target.value)}
+              className="w-full p-2 border border-border rounded-md bg-background text-foreground"
+            >
+              <option value="">{t('disease.autoDetect') || 'Auto Detect'}</option>
+              <option value="tomato">टमाटर (Tomato)</option>
+              <option value="potato">आलू (Potato)</option>
+              <option value="wheat">गेहूं (Wheat)</option>
+              <option value="rice">चावल (Rice)</option>
+              <option value="corn">मक्का (Corn)</option>
+              <option value="cotton">कपास (Cotton)</option>
+              <option value="sugarcane">गन्ना (Sugarcane)</option>
+            </select>
+          </div>
+          
           <div className="space-y-3">
             <label htmlFor="image-upload">
               <Button className="w-full" variant="gradient">
@@ -79,7 +125,11 @@ const DiseaseDetection = () => {
               />
             </label>
             
-            <Button className="w-full" variant="outline">
+            <Button 
+              className="w-full" 
+              variant="outline"
+              onClick={() => setIsCameraOpen(true)}
+            >
               <Camera className="h-4 w-4 mr-2" />
               {t('disease.camera')}
             </Button>
@@ -167,6 +217,35 @@ const DiseaseDetection = () => {
           </div>
         )}
 
+        {/* Analysis History */}
+        {analysisHistory.length > 0 && (
+          <Card className="p-4">
+            <h4 className="font-semibold text-foreground mb-3 flex items-center gap-2">
+              <RefreshCw className="h-5 w-5" />
+              {t('disease.recentAnalyses') || 'Recent Analyses'}
+            </h4>
+            <div className="space-y-2">
+              {analysisHistory.map((result, index) => (
+                <div key={index} className="flex items-center justify-between p-2 bg-accent/10 rounded">
+                  <div>
+                    <p className="text-sm font-medium">{result.disease}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {result.confidence}% confidence • {result.severity} severity
+                    </p>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setAnalysisResult(result)}
+                  >
+                    View
+                  </Button>
+                </div>
+              ))}
+            </div>
+          </Card>
+        )}
+
         {/* Tips Section */}
         <Card className="p-4 bg-accent/10">
           <h4 className="font-semibold text-foreground mb-2">{t('disease.tips')}</h4>
@@ -178,6 +257,13 @@ const DiseaseDetection = () => {
           </ul>
         </Card>
       </div>
+
+      {/* Camera Scanner */}
+      <CameraScanner
+        isOpen={isCameraOpen}
+        onClose={() => setIsCameraOpen(false)}
+        onImageCapture={handleCameraCapture}
+      />
     </div>
   );
 };
