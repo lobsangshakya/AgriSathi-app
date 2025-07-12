@@ -18,12 +18,14 @@ import {
   Info
 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useUser } from "@/contexts/UserContext";
 import { CameraScanner } from "@/components/CameraScanner";
 import { apiService, aiService, ChatMessage, ChatContext } from "@/lib/api";
 import { toast } from "@/hooks/use-toast";
 
 const Chat = () => {
   const { t, language } = useLanguage();
+  const { user, updateStats } = useUser();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [isTyping, setIsTyping] = useState(false);
@@ -67,32 +69,37 @@ const Chat = () => {
         type: "text"
       };
       
-      setMessages(prev => [...prev, userMessage]);
-      setNewMessage("");
-      setIsTyping(true);
-      
-      try {
-        // Process with NLP first
-        const nlpResult = await aiService.processNaturalLanguage(newMessage, language);
+              setMessages(prev => [...prev, userMessage]);
+        setNewMessage("");
+        setIsTyping(true);
         
-        // Send to chatbot API with proper language context
-        const botResponse = await apiService.sendChatMessage(newMessage, {
-          ...chatContext,
-          language,
-          nlpResult
-        });
-        
-        setMessages(prev => [...prev, botResponse]);
-        setChatContext(prev => ({ ...prev, lastMessage: newMessage, language }));
-        
-        // Show success toast for real API usage
-        if (apiStatus === 'real') {
-          toast({
-            title: t('chat.responseReceived') || 'Response Received',
-            description: t('chat.usingRealData') || 'Using real agricultural data',
-            variant: 'default',
-          });
+        // Add AgriCreds for asking a question
+        if (user) {
+          updateStats('question');
         }
+        
+        try {
+          // Process with NLP first
+          const nlpResult = await aiService.processNaturalLanguage(newMessage, language);
+          
+          // Send to chatbot API with proper language context
+          const botResponse = await apiService.sendChatMessage(newMessage, {
+            ...chatContext,
+            language,
+            nlpResult
+          });
+          
+          setMessages(prev => [...prev, botResponse]);
+          setChatContext(prev => ({ ...prev, lastMessage: newMessage, language }));
+          
+          // Show success toast for real API usage
+          if (apiStatus === 'real') {
+            toast({
+              title: t('chat.responseReceived') || 'Response Received',
+              description: t('chat.usingRealData') || 'Using real agricultural data',
+              variant: 'default',
+            });
+          }
         
       } catch (error) {
         console.error('Chat error:', error);
@@ -228,8 +235,8 @@ const Chat = () => {
     });
 
     return language === 'hindi'
-      ? `🌾 नमस्ते! मैं AgriSathi AI हूं।\n📅 आज: ${today}\n\n💡 आप इन विषयों पर पूछ सकते हैं:\n• फसल (टमाटर, गेहूं, धान, मक्का)\n• मौसम और जलवायु\n• खाद और पोषण\n• कीट और रोग नियंत्रण\n• सिंचाई तरीके\n• जैविक खेती\n• बाजार भाव\n• सरकारी योजनाएं\n\n📸 तस्वीर भेजकर रोग की पहचान भी कर सकते हैं!\n\n🌐 भाषा बदलने के लिए ऊपर दाईं तरफ का बटन दबाएं।`
-      : `🌾 Hello! I'm AgriSathi AI.\n📅 Today: ${today}\n\n💡 You can ask about:\n• Crops (tomato, wheat, rice, maize)\n• Weather and climate\n• Fertilizers and nutrition\n• Pest and disease control\n• Irrigation methods\n• Organic farming\n• Market rates\n• Government schemes\n\n📸 You can also send photos to identify diseases!\n\n🌐 Click the button on the top right to change language.`;
+      ? `नमस्ते! मैं AgriSathi AI हूं।\nआज: ${today}\n\nआप इन विषयों पर पूछ सकते हैं:\n• फसल (टमाटर, गेहूं, धान, मक्का)\n• मौसम और जलवायु\n• खाद और पोषण\n• कीट और रोग नियंत्रण\n• सिंचाई तरीके\n• जैविक खेती\n• बाजार भाव\n• सरकारी योजनाएं\n\nतस्वीर भेजकर रोग की पहचान भी कर सकते हैं!\n\nभाषा बदलने के लिए ऊपर दाईं तरफ का बटन दबाएं।`
+      : `Hello! I'm AgriSathi AI.\nToday: ${today}\n\nYou can ask about:\n• Crops (tomato, wheat, rice, maize)\n• Weather and climate\n• Fertilizers and nutrition\n• Pest and disease control\n• Irrigation methods\n• Organic farming\n• Market rates\n• Government schemes\n\nYou can also send photos to identify diseases!\n\nClick the button on the top right to change language.`;
   };
 
   // Initialize with welcome message if no messages
