@@ -253,8 +253,15 @@ export class MockApiService {
   async sendChatMessage(message: string, context?: any): Promise<ChatMessage> {
     await delay(1000 + Math.random() * 2000); // 1-3 seconds
     
+    // Debug: Log the received context
+    console.log('Mock API received context:', context);
+    console.log('Mock API received message:', message);
+    
     const language = context?.language || 'hindi';
+    console.log('Mock API using language:', language);
+    
     const responses = mockChatResponses[language as keyof typeof mockChatResponses];
+    console.log('Mock API selected responses:', responses ? 'Found' : 'Not found');
     
     // Enhanced keyword matching with multiple patterns
     let response = responses.default;
@@ -322,6 +329,8 @@ export class MockApiService {
         ? "ज़रूर! मैं आपकी मदद कर सकता हूं। आप इन विषयों पर पूछ सकते हैं:\n\nफसल (टमाटर, गेहूं, धान, मक्का)\nमौसम और जलवायु\nखाद और पोषण\nकीट और रोग नियंत्रण\nसिंचाई तरीके\nजैविक खेती\nबाजार भाव\nसरकारी योजनाएं\n\nतस्वीर भेजकर रोग की पहचान भी कर सकते हैं!"
         : "Of course! I can help you. You can ask about:\n\nCrops (tomato, wheat, rice, maize)\nWeather and climate\nFertilizers and nutrition\nPest and disease control\nIrrigation methods\nOrganic farming\nMarket rates\nGovernment schemes\n\nYou can also send photos to identify diseases!";
     }
+    
+    console.log('Mock API final response:', response);
     
     return {
       id: Date.now().toString(),
