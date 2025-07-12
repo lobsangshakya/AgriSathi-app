@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Header } from "@/components/Header";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -17,8 +17,18 @@ import {
   Camera
 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { useLanguage } from "@/contexts/LanguageContext";
+
+const categoryOptions = [
+  { key: "community.category.problem" },
+  { key: "community.category.tips" },
+  { key: "community.category.experience" },
+  { key: "community.category.market" },
+];
 
 const Community = () => {
+  const { t } = useLanguage();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [posts, setPosts] = useState([
     {
       id: 1,
@@ -30,7 +40,7 @@ const Community = () => {
       likes: 12,
       comments: 5,
       agriCreds: 25,
-      category: "समस्या"
+      category: "community.category.problem"
     },
     {
       id: 2,
@@ -42,7 +52,7 @@ const Community = () => {
       likes: 28,
       comments: 8,
       agriCreds: 50,
-      category: "टिप्स"
+      category: "community.category.tips"
     },
     {
       id: 3,
@@ -54,16 +64,15 @@ const Community = () => {
       likes: 35,
       comments: 12,
       agriCreds: 75,
-      category: "अनुभव"
+      category: "community.category.experience"
     }
   ]);
 
   const [newPost, setNewPost] = useState({
     content: "",
-    category: "समस्या"
+    category: "community.category.problem",
+    image: null as string | null,
   });
-
-  const categories = ["समस्या", "टिप्स", "अनुभव", "बाजार"];
 
   const handleLike = (postId: number) => {
     setPosts(posts.map(post => 
@@ -71,6 +80,21 @@ const Community = () => {
         ? { ...post, likes: post.likes + 1 }
         : post
     ));
+  };
+
+  const handleAddPhotoClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        setNewPost((prev) => ({ ...prev, image: ev.target?.result as string }));
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const addPost = () => {
@@ -81,65 +105,78 @@ const Community = () => {
         location: "आपका स्थान",
         time: "अभी",
         content: newPost.content,
-        image: "📝",
+        image: newPost.image,
         likes: 0,
         comments: 0,
         agriCreds: 10,
         category: newPost.category
       };
       setPosts([post, ...posts]);
-      setNewPost({ content: "", category: "समस्या" });
+      setNewPost({ content: "", category: "community.category.problem", image: null });
     }
   };
 
   return (
     <div className="min-h-screen bg-gradient-earth">
-      <Header title="समुदाय मंच" />
+      <Header title={t('community.title')} />
       
       <div className="p-4 space-y-4">
         {/* Search and Filter */}
         <div className="flex gap-2">
           <div className="flex-1 relative">
             <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-            <Input placeholder="पोस्ट खोजें..." className="pl-9" />
+            <Input placeholder={t('community.searchPosts')} className="pl-9" />
           </div>
           <Dialog>
             <DialogTrigger asChild>
               <Button className="bg-primary hover:bg-primary/90">
                 <Plus className="h-4 w-4 mr-2" />
-                पोस्ट
+                {t('community.post')}
               </Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>नई पोस्ट लिखें</DialogTitle>
+                <DialogTitle>{t('community.newPost')}</DialogTitle>
               </DialogHeader>
               <div className="space-y-4">
                 <div>
-                  <label className="text-sm font-medium mb-2 block">श्रेणी</label>
+                  <label className="text-sm font-medium mb-2 block">{t('community.category')}</label>
                   <select 
                     value={newPost.category}
                     onChange={(e) => setNewPost({...newPost, category: e.target.value})}
                     className="w-full p-2 border border-border rounded-md"
                   >
-                    {categories.map(cat => (
-                      <option key={cat} value={cat}>{cat}</option>
+                    {categoryOptions.map(opt => (
+                      <option key={opt.key} value={opt.key}>{t(opt.key)}</option>
                     ))}
                   </select>
                 </div>
                 <Textarea
-                  placeholder="अपना सवाल या सुझाव लिखें..."
+                  placeholder={t('community.writeQuestion')}
                   value={newPost.content}
                   onChange={(e) => setNewPost({...newPost, content: e.target.value})}
                   rows={4}
                 />
+                {/* Image preview if selected */}
+                {newPost.image && (
+                  <div className="mb-2 flex justify-center">
+                    <img src={newPost.image} alt="Preview" className="max-h-32 rounded-lg" />
+                  </div>
+                )}
                 <div className="flex gap-2">
-                  <Button variant="outline" className="flex-1">
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleImageChange}
+                  />
+                  <Button variant="outline" className="flex-1" type="button" onClick={handleAddPhotoClick}>
                     <Camera className="h-4 w-4 mr-2" />
-                    फोटो जोड़ें
+                    {t('community.addPhoto')}
                   </Button>
                   <Button onClick={addPost} className="flex-1">
-                    पोस्ट करें
+                    {t('community.postNow')}
                   </Button>
                 </div>
               </div>
@@ -149,9 +186,9 @@ const Community = () => {
 
         {/* Category Filter */}
         <div className="flex gap-2 overflow-x-auto pb-2">
-          {categories.map(category => (
-            <Badge key={category} variant="outline" className="whitespace-nowrap cursor-pointer hover:bg-primary hover:text-primary-foreground">
-              {category}
+          {categoryOptions.map(opt => (
+            <Badge key={opt.key} variant="outline" className="whitespace-nowrap cursor-pointer hover:bg-primary hover:text-primary-foreground">
+              {t(opt.key)}
             </Badge>
           ))}
         </div>
@@ -170,7 +207,7 @@ const Community = () => {
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-2">
                     <span className="font-medium text-foreground">{post.author}</span>
-                    <Badge variant="outline" className="text-xs">{post.category}</Badge>
+                    <Badge variant="outline" className="text-xs">{t(post.category)}</Badge>
                     <div className="flex items-center gap-1 text-success">
                       <Coins className="h-3 w-3" />
                       <span className="text-xs font-medium">+{post.agriCreds}</span>
@@ -183,11 +220,10 @@ const Community = () => {
                   
                   <p className="text-foreground mb-3">{post.content}</p>
                   
+                  {/* Show image if present */}
                   {post.image && (
                     <div className="mb-3">
-                      <div className="w-full h-32 bg-muted rounded-lg flex items-center justify-center text-4xl">
-                        {post.image}
-                      </div>
+                      <img src={post.image} alt="Post" className="w-full max-h-48 object-contain rounded-lg" />
                     </div>
                   )}
                   
@@ -209,7 +245,7 @@ const Community = () => {
                     
                     <Button variant="ghost" size="sm" className="text-muted-foreground">
                       <Share2 className="h-4 w-4 mr-1" />
-                      साझा करें
+                      {t('community.share')}
                     </Button>
                   </div>
                 </div>

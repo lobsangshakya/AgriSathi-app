@@ -1,34 +1,37 @@
 import { Camera, Mic, MessageSquare, MapPin, CloudRain, Coins } from "lucide-react";
 import { Button } from "./ui/button";
 import { Card } from "./ui/card";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export const QuickActions = () => {
+  const { t } = useLanguage();
+
   const actions = [
     {
       icon: Camera,
-      label: "फसल स्कैन करें",
-      description: "बीमारी की पहचान",
+      label: t('quickActions.scanCrop'),
+      description: t('quickActions.scanDescription'),
       color: "bg-accent hover:bg-accent/90",
       route: "/disease-detection"
     },
     {
       icon: Mic,
-      label: "आवाज में पूछें",
-      description: "स्वरबद्ध सहायक",
+      label: t('quickActions.voiceAsk'),
+      description: t('quickActions.voiceDescription'),
       color: "bg-primary hover:bg-primary/90",
       route: "/voice-assistant"
     },
     {
       icon: MessageSquare,
-      label: "विशेषज्ञ चैट",
-      description: "तुरंत सलाह पाएं",
+      label: t('quickActions.expertChat'),
+      description: t('quickActions.expertDescription'),
       color: "bg-success hover:bg-success/90",
       route: "/expert-chat"
     },
     {
       icon: CloudRain,
-      label: "मौसम जानकारी",
-      description: "आज का पूर्वानुमान",
+      label: t('quickActions.weather'),
+      description: t('quickActions.weatherDescription'),
       color: "bg-gradient-sky hover:opacity-90",
       route: "/weather"
     }
@@ -36,7 +39,7 @@ export const QuickActions = () => {
 
   return (
     <div className="p-4">
-      <h2 className="text-lg font-semibold text-foreground mb-4">त्वरित कार्य</h2>
+      <h2 className="text-lg font-semibold text-foreground mb-4">{t('dashboard.quickActions')}</h2>
       <div className="grid grid-cols-2 gap-3">
         {actions.map((action, index) => (
           <Card key={index} className="p-0 overflow-hidden border-border/50">
@@ -59,11 +62,11 @@ export const QuickActions = () => {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Coins className="h-5 w-5" />
-            <span className="font-medium">AgriCreds</span>
+            <span className="font-medium">{t('quickActions.agriCreds')}</span>
           </div>
           <div className="text-lg font-bold">₹ 1,250</div>
         </div>
-        <p className="text-sm opacity-90 mt-1">समुदाय में योगदान करके और अधिक कमाएं!</p>
+        <p className="text-sm opacity-90 mt-1">{t('quickActions.earnMore')}</p>
       </Card>
     </div>
   );
