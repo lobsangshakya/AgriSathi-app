@@ -16,7 +16,8 @@ import {
   Globe,
   TrendingUp,
   LogOut,
-  Users
+  Users,
+  Edit
 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useUser } from "@/contexts/UserContext";
@@ -25,7 +26,7 @@ import { toast } from "@/hooks/use-toast";
 
 const Profile = () => {
   const { t } = useLanguage();
-  const { user, logout, addAgriCreds } = useUser();
+  const { user, logout, addAgriCreds, updateUser } = useUser();
   const navigate = useNavigate();
 
   if (!user) {
@@ -63,6 +64,15 @@ const Profile = () => {
     }, 1000);
   };
 
+  const handleChangeLocation = () => {
+    updateUser({ location: 'Bangalore, India' });
+    toast({
+      title: t('profile.locationUpdated') || 'Location Updated',
+      description: t('profile.locationChangedToBangalore') || 'Your location has been changed to Bangalore, India',
+      variant: 'default',
+    });
+  };
+
   return (
     <div className="min-h-screen bg-gradient-earth">
       <Header title={t('profile.title')} />
@@ -87,6 +97,14 @@ const Profile = () => {
           <div className="flex items-center justify-center gap-2 text-muted-foreground mb-4">
             <MapPin className="h-4 w-4" />
             <span className="text-sm">{user.location}</span>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={handleChangeLocation}
+              className="h-6 w-6 p-0"
+            >
+              <Edit className="h-3 w-3" />
+            </Button>
           </div>
           
           {/* AgriCreds Display */}

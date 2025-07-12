@@ -69,38 +69,49 @@ const Chat = () => {
         type: "text"
       };
       
-              setMessages(prev => [...prev, userMessage]);
-        setNewMessage("");
-        setIsTyping(true);
+      setMessages(prev => [...prev, userMessage]);
+      setNewMessage("");
+      setIsTyping(true);
+      
+      // Add AgriCreds for asking a question
+      if (user) {
+        updateStats('question');
+      }
+      
+      try {
+        // Debug: Log the current language
+        console.log('Current language:', language);
+        console.log('Chat context:', chatContext);
         
-        // Add AgriCreds for asking a question
-        if (user) {
-          updateStats('question');
-        }
+        // Process with NLP first
+        const nlpResult = await aiService.processNaturalLanguage(newMessage, language);
         
-        try {
-          // Process with NLP first
-          const nlpResult = await aiService.processNaturalLanguage(newMessage, language);
-          
-          // Send to chatbot API with proper language context
-          const botResponse = await apiService.sendChatMessage(newMessage, {
-            ...chatContext,
-            language,
-            nlpResult
+        // Create the context with explicit language
+        const messageContext = {
+          ...chatContext,
+          language: language, // Explicitly set language
+          nlpResult
+        };
+        
+        console.log('Sending message with context:', messageContext);
+        
+        // Send to chatbot API with proper language context
+        const botResponse = await apiService.sendChatMessage(newMessage, messageContext);
+        
+        console.log('Bot response received:', botResponse);
+        
+        setMessages(prev => [...prev, botResponse]);
+        setChatContext(prev => ({ ...prev, lastMessage: newMessage, language }));
+        
+        // Show success toast for real API usage
+        if (apiStatus === 'real') {
+          toast({
+            title: t('chat.responseReceived') || 'Response Received',
+            description: t('chat.usingRealData') || 'Using real agricultural data',
+            variant: 'default',
           });
-          
-          setMessages(prev => [...prev, botResponse]);
-          setChatContext(prev => ({ ...prev, lastMessage: newMessage, language }));
-          
-          // Show success toast for real API usage
-          if (apiStatus === 'real') {
-            toast({
-              title: t('chat.responseReceived') || 'Response Received',
-              description: t('chat.usingRealData') || 'Using real agricultural data',
-              variant: 'default',
-            });
-          }
-        
+        }
+      
       } catch (error) {
         console.error('Chat error:', error);
         
@@ -108,8 +119,8 @@ const Chat = () => {
           id: Date.now().toString(),
           sender: "bot",
           content: language === 'hindi' 
-            ? "माफ़ करें, मैं आपके सवाल का जवाब नहीं दे पा रहा हूं। कृपया फिर से कोशिश करें।\n\n💡 आप इन विषयों पर पूछ सकते हैं:\n• फसल (टमाटर, गेहूं, धान, मक्का)\n• मौसम और जलवायु\n• खाद और पोषण\n• कीट और रोग नियंत्रण\n• सिंचाई तरीके\n• जैविक खेती\n• बाजार भाव\n• सरकारी योजनाएं"
-            : "Sorry, I couldn't process your question. Please try again.\n\n💡 You can ask about:\n• Crops (tomato, wheat, rice, maize)\n• Weather and climate\n• Fertilizers and nutrition\n• Pest and disease control\n• Irrigation methods\n• Organic farming\n• Market rates\n• Government schemes",
+            ? "माफ़ करें, मैं आपके सवाल का जवाब नहीं दे पा रहा हूं। कृपया फिर से कोशिश करें।\n\nआप इन विषयों पर पूछ सकते हैं:\n• फसल (टमाटर, गेहूं, धान, मक्का)\n• मौसम और जलवायु\n• खाद और पोषण\n• कीट और रोग नियंत्रण\n• सिंचाई तरीके\n• जैविक खेती\n• बाजार भाव\n• सरकारी योजनाएं"
+            : "Sorry, I couldn't process your question. Please try again.\n\nYou can ask about:\n• Crops (tomato, wheat, rice, maize)\n• Weather and climate\n• Fertilizers and nutrition\n• Pest and disease control\n• Irrigation methods\n• Organic farming\n• Market rates\n• Government schemes",
           timestamp: new Date(),
           type: "text"
         };
@@ -183,8 +194,8 @@ const Chat = () => {
         id: Date.now().toString(),
         sender: "bot",
         content: language === 'hindi'
-          ? `🔍 छवि विश्लेषण परिणाम:\n\n🌿 पौधा: ${analysisResult.disease}\n📊 विश्वास: ${analysisResult.confidence}%\n⚠️ गंभीरता: ${analysisResult.severity}\n\n💡 सिफारिशें:\n${analysisResult.recommendations.map(rec => `• ${rec}`).join('\n')}\n\n🛡️ रोकथाम:\n${analysisResult.preventiveMeasures.map(prev => `• ${prev}`).join('\n')}`
-          : `🔍 Image Analysis Result:\n\n🌿 Plant: ${analysisResult.disease}\n📊 Confidence: ${analysisResult.confidence}%\n⚠️ Severity: ${analysisResult.severity}\n\n💡 Recommendations:\n${analysisResult.recommendations.map(rec => `• ${rec}`).join('\n')}\n\n🛡️ Prevention:\n${analysisResult.preventiveMeasures.map(prev => `• ${prev}`).join('\n')}`,
+          ? `छवि विश्लेषण परिणाम:\n\nपौधा: ${analysisResult.disease}\nविश्वास: ${analysisResult.confidence}%\nगंभीरता: ${analysisResult.severity}\n\nसिफारिशें:\n${analysisResult.recommendations.map(rec => `• ${rec}`).join('\n')}\n\nरोकथाम:\n${analysisResult.preventiveMeasures.map(prev => `• ${prev}`).join('\n')}`
+          : `Image Analysis Result:\n\nPlant: ${analysisResult.disease}\nConfidence: ${analysisResult.confidence}%\nSeverity: ${analysisResult.severity}\n\nRecommendations:\n${analysisResult.recommendations.map(rec => `• ${rec}`).join('\n')}\n\nPrevention:\n${analysisResult.preventiveMeasures.map(prev => `• ${prev}`).join('\n')}`,
         timestamp: new Date(),
         type: "text"
       };
@@ -253,6 +264,28 @@ const Chat = () => {
     }
   }, [language, messages.length]);
 
+  // Debug: Log language changes
+  useEffect(() => {
+    console.log('Language changed to:', language);
+    console.log('Chat context updated:', chatContext);
+  }, [language, chatContext]);
+
+  // Test function to verify language switching
+  const testLanguageSwitch = async () => {
+    console.log('Testing language switch...');
+    try {
+      const testResponse = await apiService.sendChatMessage("hello", { language });
+      console.log('Test response:', testResponse);
+      toast({
+        title: 'Language Test',
+        description: `Response in ${language}: ${testResponse.content.substring(0, 50)}...`,
+        variant: 'default',
+      });
+    } catch (error) {
+      console.error('Test failed:', error);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-earth">
       <Header title={t('chat.title')} />
@@ -278,15 +311,29 @@ const Chat = () => {
                 }
               </span>
             </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={clearChat}
-              className="gap-1 text-xs"
-            >
-              <Trash2 className="h-3 w-3" />
-              {t('chat.clear') || 'Clear'}
-            </Button>
+            <div className="flex items-center gap-2">
+              {/* Debug: Language indicator */}
+              <span className="text-xs bg-primary/20 px-2 py-1 rounded">
+                {language === 'hindi' ? 'हिंदी' : 'English'}
+              </span>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={testLanguageSwitch}
+                className="gap-1 text-xs"
+              >
+                Test
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={clearChat}
+                className="gap-1 text-xs"
+              >
+                <Trash2 className="h-3 w-3" />
+                {t('chat.clear') || 'Clear'}
+              </Button>
+            </div>
           </div>
         </div>
 
@@ -397,13 +444,29 @@ const Chat = () => {
         </div>
       </div>
 
-      {/* Camera Scanner */}
+      {/* Camera Scanner Modal */}
       {isCameraOpen && (
-        <CameraScanner
-          onImageCapture={handleCameraCapture}
-          onClose={() => setIsCameraOpen(false)}
-          isOpen={isCameraOpen}
-        />
+        <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center">
+          <div className="bg-background rounded-lg p-4 max-w-md w-full mx-4">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold">
+                {t('diseaseDetection.scanPlant') || 'Scan Plant'}
+              </h3>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setIsCameraOpen(false)}
+              >
+                ×
+              </Button>
+            </div>
+            <CameraScanner
+              onImageCapture={handleCameraCapture}
+              onClose={() => setIsCameraOpen(false)}
+              isOpen={isCameraOpen}
+            />
+          </div>
+        </div>
       )}
     </div>
   );
