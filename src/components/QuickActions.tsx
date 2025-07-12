@@ -1,9 +1,8 @@
-import { Camera, Mic, MessageSquare, MapPin, CloudRain, Coins } from "lucide-react";
+import { Camera, CloudRain, Coins } from "lucide-react";
 import { Button } from "./ui/button";
 import { Card } from "./ui/card";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useUser } from "@/contexts/UserContext";
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "@/hooks/use-toast";
 
@@ -11,21 +10,13 @@ export const QuickActions = () => {
   const { t, language } = useLanguage();
   const { user } = useUser();
   const navigate = useNavigate();
-  const [isListening, setIsListening] = useState(false);
 
   const handleAction = (action: string) => {
     switch (action) {
       case 'scan':
         navigate('/disease-detection');
         break;
-      case 'voice':
-        startVoiceInput();
-        break;
-      case 'chat':
-        navigate('/chat');
-        break;
       case 'weather':
-        // Show weather info in a toast
         toast({
           title: t('weather.title') || 'Weather Information',
           description: language === 'hindi' 
@@ -36,48 +27,6 @@ export const QuickActions = () => {
     }
   };
 
-  const startVoiceInput = () => {
-    setIsListening(true);
-    toast({
-      title: t('voice.listening') || 'Listening...',
-      description: t('voice.speakNow') || 'Speak your question now',
-    });
-    
-    // Simulate voice input
-    setTimeout(() => {
-      setIsListening(false);
-      const voiceQuestions = {
-        hindi: [
-          "गेहूं की बुआई के लिए सबसे अच्छा समय कौन सा है?",
-          "टमाटर में कीट नियंत्रण कैसे करें?",
-          "जैविक खेती के फायदे क्या हैं?",
-          "मौसम कैसा रहेगा?",
-          "बाजार में गेहूं का भाव क्या है?"
-        ],
-        english: [
-          "What is the best time for wheat sowing?",
-          "How to control pests in tomato?",
-          "What are the benefits of organic farming?",
-          "How is the weather today?",
-          "What is the market price of wheat?"
-        ]
-      };
-      
-      const questions = voiceQuestions[language as keyof typeof voiceQuestions];
-      const randomQuestion = questions[Math.floor(Math.random() * questions.length)];
-      
-      toast({
-        title: t('voice.question') || 'Question Detected',
-        description: randomQuestion,
-      });
-      
-      // Navigate to chat with the question
-      setTimeout(() => {
-        navigate('/chat');
-      }, 2000);
-    }, 3000);
-  };
-
   const actions = [
     {
       icon: Camera,
@@ -85,20 +34,6 @@ export const QuickActions = () => {
       description: t('quickActions.scanDescription'),
       color: "bg-accent hover:bg-accent/90",
       action: 'scan'
-    },
-    {
-      icon: Mic,
-      label: t('quickActions.voiceAsk'),
-      description: t('quickActions.voiceDescription'),
-      color: "bg-primary hover:bg-primary/90",
-      action: 'voice'
-    },
-    {
-      icon: MessageSquare,
-      label: t('quickActions.expertChat'),
-      description: t('quickActions.expertDescription'),
-      color: "bg-success hover:bg-success/90",
-      action: 'chat'
     },
     {
       icon: CloudRain,
@@ -118,10 +53,9 @@ export const QuickActions = () => {
             <Button
               variant="ghost"
               onClick={() => handleAction(action.action)}
-              disabled={action.action === 'voice' && isListening}
               className={`w-full h-auto p-4 ${action.color} text-white flex flex-col items-center gap-2 rounded-lg hover:scale-105 transition-transform duration-200`}
             >
-              <action.icon className={`h-8 w-8 ${action.action === 'voice' && isListening ? 'animate-pulse' : ''}`} />
+              <action.icon className="h-8 w-8" />
               <div className="text-center">
                 <div className="font-medium text-sm">{action.label}</div>
                 <div className="text-xs opacity-90">{action.description}</div>

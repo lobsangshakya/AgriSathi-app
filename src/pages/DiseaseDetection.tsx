@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Camera, Upload, Scan, AlertTriangle, CheckCircle, RefreshCw, Info, FileImage } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { CameraScanner } from "@/components/CameraScanner";
-import { apiService, aiService, compressImage, DiseaseAnalysisResult } from "@/lib/api";
+import { aiService, compressImage, DiseaseAnalysisResult } from "@/lib/api";
 import { toast } from "@/hooks/use-toast";
 
 const DiseaseDetection = () => {
@@ -137,7 +137,7 @@ const DiseaseDetection = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-earth">
+    <div className="min-h-screen bg-gradient-app">
       <Header title={t('disease.title')} />
       
       <div className="p-4 space-y-4">

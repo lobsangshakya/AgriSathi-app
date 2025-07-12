@@ -9,7 +9,7 @@ const Dashboard = () => {
   const { t } = useLanguage();
 
   return (
-    <div className="min-h-screen bg-gradient-earth">
+    <div className="min-h-screen bg-gradient-app">
       <Header title={t('header.agrisathi')} />
       
       {/* Hero Section */}
