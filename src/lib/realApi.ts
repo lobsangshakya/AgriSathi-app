@@ -353,6 +353,61 @@ export class RealApiService {
     
     return recommendations;
   }
+
+  // Community Posts API - Mock implementation for now
+  async getCommunityPosts(): Promise<any[]> {
+    // Return mock community posts
+    return [
+      {
+        id: '1',
+        author: 'राजेश कुमार',
+        content: 'गेहूं की फसल में पीले पत्ते आ रहे हैं, क्या करूं?',
+        image: null,
+        likes: 5,
+        comments: 3,
+        timestamp: new Date(Date.now() - 3600000), // 1 hour ago
+        category: 'community.category.problem'
+      },
+      {
+        id: '2',
+        author: 'सुनीता देवी',
+        content: 'टमाटर की खेती के लिए बहुत अच्छे टिप्स मिले हैं। सभी किसान भाइयों के लिए उपयोगी।',
+        image: null,
+        likes: 12,
+        comments: 8,
+        timestamp: new Date(Date.now() - 7200000), // 2 hours ago
+        category: 'community.category.tips'
+      }
+    ];
+  }
+
+  async createPost(postData: any): Promise<any> {
+    // Mock implementation - in real app, this would save to database
+    const newPost = {
+      id: Date.now().toString(),
+      author: 'आप',
+      content: postData.content,
+      image: postData.image,
+      likes: 0,
+      comments: 0,
+      timestamp: new Date(),
+      category: postData.category
+    };
+    
+    return {
+      success: true,
+      post: newPost,
+      message: 'Post created successfully!'
+    };
+  }
+
+  async likePost(postId: string): Promise<any> {
+    // Mock implementation - in real app, this would update database
+    return {
+      success: true,
+      likes: Math.floor(Math.random() * 20) + 1
+    };
+  }
 }
 
 export class RealAiService {

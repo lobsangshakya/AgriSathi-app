@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useUser } from "@/contexts/UserContext";
 import { apiService, CommunityPost, CreatePostRequest, compressImage } from "@/lib/api";
 import { toast } from "@/hooks/use-toast";
 
@@ -32,6 +33,7 @@ const categoryOptions = [
 
 const Community = () => {
   const { t } = useLanguage();
+  const { user, updateStats } = useUser();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [posts, setPosts] = useState<CommunityPost[]>([]);
   const [loading, setLoading] = useState(true);
@@ -52,7 +54,7 @@ const Community = () => {
   const loadPosts = async () => {
     try {
       setLoading(true);
-      const fetchedPosts = await apiService.getCommunityPosts(selectedCategory || undefined);
+      const fetchedPosts = await apiService.getCommunityPosts();
       setPosts(fetchedPosts);
     } catch (error) {
       console.error('Failed to load posts:', error);
@@ -68,7 +70,7 @@ const Community = () => {
 
   const handleLike = async (postId: string) => {
     try {
-      const result = await apiService.likeCommunityPost(postId, "current_user");
+      const result = await apiService.likePost(postId);
       if (result.success) {
         setPosts(posts.map(post => 
           post.id === postId 
@@ -123,21 +125,24 @@ const Community = () => {
       const postData: CreatePostRequest = {
         content: newPost.content,
         category: newPost.category,
-        image: newPost.image,
-        location: "आपका स्थान",
-        userId: "current_user"
+        image: newPost.image || undefined
       };
 
-      const response = await apiService.createCommunityPost(postData);
+      const response = await apiService.createPost(postData);
       
       if (response.success) {
         setPosts([response.post, ...posts]);
         setNewPost({ content: "", category: "community.category.problem", image: null });
         setIsDialogOpen(false);
         
+        // Add AgriCreds for posting
+        if (user) {
+          updateStats('post');
+        }
+        
         toast({
           title: 'Success',
-          description: response.message || 'Post created successfully!',
+          description: response.message || 'Post created successfully! +10 AgriCreds earned!',
         });
       }
     } catch (error) {
@@ -282,14 +287,10 @@ const Community = () => {
                   <div className="flex items-center gap-2 mb-2">
                     <span className="font-medium text-foreground">{post.author}</span>
                     <Badge variant="outline" className="text-xs">{t(post.category)}</Badge>
-                    <div className="flex items-center gap-1 text-success">
-                      <Coins className="h-3 w-3" />
-                      <span className="text-xs font-medium">+{post.agriCreds}</span>
-                    </div>
                   </div>
                   
                   <p className="text-sm text-muted-foreground mb-2">
-                    {post.location} • {post.time}
+                    {post.timestamp.toLocaleDateString('hi-IN')} • {post.timestamp.toLocaleTimeString('hi-IN', { hour: '2-digit', minute: '2-digit' })}
                   </p>
                   
                   <p className="text-foreground mb-3">{post.content}</p>

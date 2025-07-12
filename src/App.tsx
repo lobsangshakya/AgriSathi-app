@@ -1,4 +1,3 @@
-import { useEffect, useState } from 'react';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -9,58 +8,53 @@ import Community from "./pages/Community";
 import Profile from "./pages/Profile";
 import DiseaseDetection from "./pages/DiseaseDetection";
 import Chat from "./pages/Chat";
+import ExpertConsultation from "./pages/ExpertConsultation";
 import NotFound from "./pages/NotFound";
 import { Layout } from "./components/Layout";
 import { LanguageProvider } from "./contexts/LanguageContext";
+import { UserProvider, useUser } from "./contexts/UserContext";
 import Auth from "./pages/Auth";
-import { supabase } from "./lib/supabaseClient";
 
 const queryClient = new QueryClient();
 
-const App = () => {
-  const [authenticated, setAuthenticated] = useState(false);
-  const [loading, setLoading] = useState(true);
+const AppContent = () => {
+  const { isLoggedIn } = useUser();
 
-  useEffect(() => {
-    const session = supabase.auth.getSession().then(({ data }) => {
-      setAuthenticated(!!data.session);
-      setLoading(false);
-    });
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-      setAuthenticated(!!session);
-    });
-    return () => {
-      listener?.subscription.unsubscribe();
-    };
-  }, []);
-
-  if (loading) return null;
-
-  if (!authenticated) {
-    return <Auth onAuth={() => setAuthenticated(true)} />;
+  if (!isLoggedIn) {
+    return <Auth onAuth={() => {}} />;
   }
 
   return (
+    <Layout>
+      <Routes>
+        <Route path="/" element={<Dashboard />} />
+        <Route path="/community" element={<Community />} />
+        <Route path="/profile" element={<Profile />} />
+        <Route path="/disease-detection" element={<DiseaseDetection />} />
+        <Route path="/chat" element={<Chat />} />
+        <Route path="/expert-consultation" element={<ExpertConsultation />} />
+        {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </Layout>
+  );
+};
+
+const App = () => {
+
+  return (
     <LanguageProvider>
-      <QueryClientProvider client={queryClient}>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <Layout>
-              <Routes>
-                <Route path="/" element={<Dashboard />} />
-                <Route path="/community" element={<Community />} />
-                <Route path="/profile" element={<Profile />} />
-                <Route path="/disease-detection" element={<DiseaseDetection />} />
-                <Route path="/chat" element={<Chat />} />
-                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </Layout>
-          </BrowserRouter>
-        </TooltipProvider>
-      </QueryClientProvider>
+      <UserProvider>
+        <QueryClientProvider client={queryClient}>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <AppContent />
+            </BrowserRouter>
+          </TooltipProvider>
+        </QueryClientProvider>
+      </UserProvider>
     </LanguageProvider>
   );
 };
