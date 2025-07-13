@@ -287,7 +287,7 @@ const mockChatResponses = {
     // Government Schemes
     "योजना": "किसानों के लिए सरकारी योजनाएं:\n\nPM-KISAN: ₹6,000/वर्ष\nPMFBY: फसल बीमा योजना\nPMKSY: सिंचाई योजना\nPMFME: खाद्य प्रसंस्करण\n\nजानकारी: कृषि विभाग से संपर्क करें",
     
-    "default": "नमस्ते! मैं AgriSathi AI हूं। आपकी खेती संबंधी किसी भी समस्या में मदद कर सकता हूं।\n\nआप इन विषयों पर पूछ सकते हैं:\n• फसल (टमाटर, गेहूं, धान, मक्का)\n• मौसम और जलवायु\n• खाद और पोषण\n• कीट और रोग नियंत्रण\n• सिंचाई तरीके\n• जैविक खेती\n• बाजार भाव\n• सरकारी योजनाएं\n\nतस्वीर भेजकर रोग की पहचान भी कर सकते हैं!"
+        "default": "नमस्ते! मैं AgriSaathi AI हूं। आपकी खेती संबंधी किसी भी समस्या में मदद कर सकता हूं।\n\nआप इन विषयों पर पूछ सकते हैं:\n• फसल (टमाटर, गेहूं, धान, मक्का)\n• मौसम और जलवायु\n• खाद और पोषण\n• कीट और रोग नियंत्रण\n• सिंचाई तरीके\n• जैविक खेती\n• बाजार भाव\n• सरकारी योजनाएं\n\nतस्वीर भेजकर रोग की पहचान भी कर सकते हैं!"
   },
   english: {
     // Crops
@@ -326,7 +326,7 @@ const mockChatResponses = {
     // Government Schemes
     "scheme": "Government schemes for farmers:\n\nPM-KISAN: ₹6,000/year\nPMFBY: Crop insurance scheme\nPMKSY: Irrigation scheme\nPMFME: Food processing\n\nInformation: Contact agriculture department",
     
-    "default": "Hello! I'm AgriSathi AI. I can help you with any farming-related problems.\n\nYou can ask about:\n• Crops (tomato, wheat, rice, maize)\n• Weather and climate\n• Fertilizers and nutrition\n• Pest and disease control\n• Irrigation methods\n• Organic farming\n• Market rates\n• Government schemes\n\nYou can also send photos to identify diseases!"
+            "default": "Hello! I'm AgriSaathi AI. I can help you with any farming-related problems.\n\nYou can ask about:\n• Crops (tomato, wheat, rice, maize)\n• Weather and climate\n• Fertilizers and nutrition\n• Pest and disease control\n• Irrigation methods\n• Organic farming\n• Market rates\n• Government schemes\n\nYou can also send photos to identify diseases!"
   }
 };
 
@@ -409,8 +409,8 @@ export class MockApiService {
     // Greetings and general questions
     else if (lowerMessage.includes('नमस्ते') || lowerMessage.includes('hello') || lowerMessage.includes('hi') || lowerMessage.includes('कैसे हो')) {
       response = language === 'hindi' 
-        ? "नमस्ते! मैं AgriSathi AI हूं। आपकी खेती संबंधी किसी भी समस्या में मदद कर सकता हूं। क्या आप कोई विशेष फसल या समस्या के बारे में जानना चाहते हैं?"
-        : "Hello! I'm AgriSathi AI. I can help you with any farming-related problems. Is there a specific crop or issue you'd like to know about?";
+        ? "नमस्ते! मैं AgriSaathi AI हूं। आपकी खेती संबंधी किसी भी समस्या में मदद कर सकता हूं। क्या आप कोई विशेष फसल या समस्या के बारे में जानना चाहते हैं?"
+        : "Hello! I'm AgriSaathi AI. I can help you with any farming-related problems. Is there a specific crop or issue you'd like to know about?";
     }
     // Help requests
     else if (lowerMessage.includes('मदद') || lowerMessage.includes('help') || lowerMessage.includes('सहायता')) {

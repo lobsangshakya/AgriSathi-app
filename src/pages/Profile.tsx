@@ -24,7 +24,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "@/hooks/use-toast";
 
 const Profile = () => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const { user, logout, addAgriCreds } = useUser();
   const navigate = useNavigate();
 
@@ -42,6 +42,32 @@ const Profile = () => {
   const handleRedeemCredits = () => {
     // Navigate to AgriCreds redemption page
     navigate('/agri-credits');
+  };
+
+  const handleViewCredits = () => {
+    // Navigate to AgriCredits page
+    navigate('/agri-credits');
+  };
+
+  const handleSettings = () => {
+    toast({
+      title: language === 'hindi' ? 'सेटिंग्स' : 'Settings',
+      description: language === 'hindi' 
+        ? 'सेटिंग्स पेज जल्द ही उपलब्ध होगा'
+        : 'Settings page coming soon',
+    });
+    // In a real app, navigate to settings page
+    // navigate('/settings');
+  };
+
+  const handleChangeLanguage = () => {
+    // This will be handled by the language toggle in header
+    toast({
+      title: language === 'hindi' ? 'भाषा बदलें' : 'Change Language',
+      description: language === 'hindi' 
+        ? 'हेडर में भाषा बटन का उपयोग करें'
+        : 'Use the language button in the header',
+    });
   };
 
   return (
@@ -71,12 +97,14 @@ const Profile = () => {
           </div>
           
           {/* AgriCreds Display */}
-          <Card className="p-4 bg-gradient-primary text-primary-foreground">
+          <Card className="p-4 bg-gradient-to-r from-green-500 to-blue-500 text-white cursor-pointer hover:shadow-lg transition-all" onClick={handleViewCredits}>
             <div className="flex items-center justify-center gap-2 mb-2">
               <Coins className="h-6 w-6" />
-              <span className="text-2xl font-bold">₹{user.agriCreds}</span>
+              <span className="text-2xl font-bold">{user.agriCreds}</span>
             </div>
-            <p className="text-sm opacity-90">कुल AgriCreds</p>
+            <p className="text-sm opacity-90">
+              {language === 'hindi' ? 'कुल AgriCreds - देखने के लिए क्लिक करें' : 'Total AgriCreds - Click to view'}
+            </p>
           </Card>
         </Card>
 
@@ -171,11 +199,11 @@ const Profile = () => {
 
         {/* Quick Actions */}
         <div className="space-y-3">
-          <Button className="w-full" variant="outline">
+          <Button className="w-full" variant="outline" onClick={handleSettings}>
             <Settings className="h-4 w-4 mr-2" />
             {t('profile.settings')}
           </Button>
-          <Button className="w-full" variant="outline">
+          <Button className="w-full" variant="outline" onClick={handleChangeLanguage}>
             <Globe className="h-4 w-4 mr-2" />
             {t('profile.changeLanguage')}
           </Button>

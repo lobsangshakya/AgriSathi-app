@@ -10,11 +10,13 @@ import DiseaseDetection from "./pages/DiseaseDetection";
 import Chat from "./pages/Chat";
 import ExpertConsultation from "./pages/ExpertConsultation";
 import AgriCredits from "./pages/AgriCredits";
+import Wallet from "./pages/Wallet";
 import ServiceConfirmation from "./pages/ServiceConfirmation";
 import NotFound from "./pages/NotFound";
 import { Layout } from "./components/Layout";
 import { LanguageProvider } from "./contexts/LanguageContext";
 import { UserProvider, useUser } from "./contexts/UserContext";
+import { WalletProvider } from "./contexts/WalletContext";
 import Auth from "./pages/Auth";
 
 const queryClient = new QueryClient();
@@ -36,6 +38,7 @@ const AppContent = () => {
         <Route path="/chat" element={<Chat />} />
         <Route path="/expert-consultation" element={<ExpertConsultation />} />
         <Route path="/agri-credits" element={<AgriCredits />} />
+        <Route path="/wallet" element={<Wallet />} />
         <Route path="/service-confirmation" element={<ServiceConfirmation />} />
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />
@@ -49,15 +52,17 @@ const App = () => {
   return (
     <LanguageProvider>
       <UserProvider>
-        <QueryClientProvider client={queryClient}>
-          <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter>
-              <AppContent />
-            </BrowserRouter>
-          </TooltipProvider>
-        </QueryClientProvider>
+        <WalletProvider>
+          <QueryClientProvider client={queryClient}>
+            <TooltipProvider>
+              <Toaster />
+              <Sonner />
+              <BrowserRouter>
+                <AppContent />
+              </BrowserRouter>
+            </TooltipProvider>
+          </QueryClientProvider>
+        </WalletProvider>
       </UserProvider>
     </LanguageProvider>
   );

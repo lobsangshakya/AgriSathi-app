@@ -1,6 +1,6 @@
 // API Configuration
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://api.agrisathi.com';
-const AI_SERVICE_URL = import.meta.env.VITE_AI_SERVICE_URL || 'https://ai.agrisathi.com';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://api.agrisaathi.com';
+const AI_SERVICE_URL = import.meta.env.VITE_AI_SERVICE_URL || 'https://ai.agrisaathi.com';
 
 // Types
 export interface DiseaseAnalysisResult {

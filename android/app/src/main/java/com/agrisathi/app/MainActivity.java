@@ -1,4 +1,4 @@
-package com.agrisathi.app;
+package com.agrisaathi.app;
 
 import com.getcapacitor.BridgeActivity;
 

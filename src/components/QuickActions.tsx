@@ -24,7 +24,12 @@ export const QuickActions = () => {
         startVoiceInput();
         break;
       case 'chat':
-        navigate('/chat');
+        // Navigate to AgriCredits page for expert consultation
+        navigate('/agri-credits', { 
+          state: { 
+            fromExpertChat: true 
+          } 
+        });
         break;
       case 'weather':
         // Show weather info in a toast

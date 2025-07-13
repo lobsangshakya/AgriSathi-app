@@ -1,308 +1,259 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Header } from '@/components/Header';
-import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import { useLanguage } from "@/contexts/LanguageContext";
+import { useUser } from "@/contexts/UserContext";
+import { Header } from "@/components/Header";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { 
-  Coins, 
   Phone, 
   MessageCircle, 
-  Video, 
-  FileText, 
-  MapPin, 
-  Clock, 
-  Users,
-  ArrowLeft,
-  CheckCircle,
-  AlertCircle
-} from 'lucide-react';
-import { useLanguage } from '@/contexts/LanguageContext';
-import { useUser } from '@/contexts/UserContext';
-import { toast } from '@/hooks/use-toast';
+  Camera, 
+  Users, 
+  TrendingUp, 
+  Leaf,
+  Star,
+  Gift,
+  Coins,
+  Wallet
+} from "lucide-react";
+import { useNavigate, useLocation } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
+import React from "react";
 
-const AgriCredits = () => {
-  const { t } = useLanguage();
+export default function AgriCredits() {
+  const { language, t } = useLanguage();
   const { user, addAgriCreds } = useUser();
   const navigate = useNavigate();
-  const [selectedService, setSelectedService] = useState<string | null>(null);
-  const [isProcessing, setIsProcessing] = useState(false);
-
-  if (!user) {
-    return (
-      <div className="min-h-screen bg-gradient-earth flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-xl font-bold mb-4">Please log in to view AgriCreds</h2>
-          <Button onClick={() => navigate('/auth')}>Go to Login</Button>
-        </div>
-      </div>
-    );
-  }
+  const location = useLocation();
+  const { toast } = useToast();
+  
+  // Check if user came from expert chat
+  const fromExpertChat = location.state?.fromExpertChat;
 
   const services = [
     {
       id: 'expert-chat',
-      title: t('agriCredits.expertChat.title') || 'Expert Chat Consultation',
-      description: t('agriCredits.expertChat.description') || 'Chat with Dr. Rajesh Kumar (Crop Disease), Dr. Priya Sharma (Soil Science), Dr. Amit Singh (Pest Management), Dr. Meera Patel (Organic Farming), Dr. Suresh Verma (Fertilizer), Dr. Anjali Reddy (Irrigation)',
-      cost: 50,
+      name: language === 'hindi' ? 'विशेषज्ञ से बात' : 'Expert Chat',
+      description: language === 'hindi' ? 'कृषि विशेषज्ञ से सीधी बातचीत' : 'Direct chat with agriculture expert',
+      credits: 50,
       icon: MessageCircle,
-      duration: '30 min',
-      features: [
-        t('agriCredits.expertChat.feature1') || 'Real-time chat with 6 specialized experts',
-        t('agriCredits.expertChat.feature2') || 'Crop disease diagnosis & treatment',
-        t('agriCredits.expertChat.feature3') || 'Soil analysis & fertilizer recommendations',
-        t('agriCredits.expertChat.feature4') || 'Pest management & organic solutions'
-      ]
+      color: 'bg-blue-500'
     },
     {
-      id: 'video-call',
-      title: t('agriCredits.videoCall.title') || 'Video Call Consultation',
-      description: t('agriCredits.videoCall.description') || 'Face-to-face consultation with agricultural experts',
-      cost: 100,
-      icon: Video,
-      duration: '45 min',
-      features: [
-        t('agriCredits.videoCall.feature1') || 'Video call with experts',
-        t('agriCredits.videoCall.feature2') || 'Visual problem diagnosis',
-        t('agriCredits.videoCall.feature3') || 'Detailed farm analysis'
-      ]
-    },
-    {
-      id: 'soil-test',
-      title: t('agriCredits.soilTest.title') || 'Soil Testing Service',
-      description: t('agriCredits.soilTest.description') || 'Professional soil analysis and recommendations',
-      cost: 75,
-      icon: FileText,
-      duration: '3-5 days',
-      features: [
-        t('agriCredits.soilTest.feature1') || 'Comprehensive soil analysis',
-        t('agriCredits.soilTest.feature2') || 'Nutrient recommendations',
-        t('agriCredits.soilTest.feature3') || 'Detailed report'
-      ]
-    },
-    {
-      id: 'farm-visit',
-      title: t('agriCredits.farmVisit.title') || 'Farm Visit Consultation',
-      description: t('agriCredits.farmVisit.description') || 'Expert visit to your farm for on-site analysis',
-      cost: 200,
-      icon: MapPin,
-      duration: '2-3 hours',
-      features: [
-        t('agriCredits.farmVisit.feature1') || 'Expert farm visit',
-        t('agriCredits.farmVisit.feature2') || 'On-site problem diagnosis',
-        t('agriCredits.farmVisit.feature3') || 'Comprehensive farm plan'
-      ]
-    },
-    {
-      id: 'group-session',
-      title: t('agriCredits.groupSession.title') || 'Group Learning Session',
-      description: t('agriCredits.groupSession.description') || 'Join group sessions with other farmers and experts',
-      cost: 25,
-      icon: Users,
-      duration: '60 min',
-      features: [
-        t('agriCredits.groupSession.feature1') || 'Group learning sessions',
-        t('agriCredits.groupSession.feature2') || 'Peer farmer interaction',
-        t('agriCredits.groupSession.feature3') || 'Expert-led discussions'
-      ]
-    },
-    {
-      id: 'emergency-call',
-      title: t('agriCredits.emergencyCall.title') || 'Emergency Phone Call',
-      description: t('agriCredits.emergencyCall.description') || 'Immediate phone consultation for urgent issues',
-      cost: 150,
+      id: 'voice-call',
+      name: language === 'hindi' ? 'वॉइस कॉल' : 'Voice Call',
+      description: language === 'hindi' ? 'विशेषज्ञ से फोन पर बात' : 'Phone call with expert',
+      credits: 100,
       icon: Phone,
-      duration: '15 min',
-      features: [
-        t('agriCredits.emergencyCall.feature1') || 'Immediate expert call',
-        t('agriCredits.emergencyCall.feature2') || 'Urgent problem solving',
-        t('agriCredits.emergencyCall.feature3') || '24/7 availability'
-      ]
+      color: 'bg-green-500'
+    },
+    {
+      id: 'disease-detection',
+      name: language === 'hindi' ? 'रोग पहचान' : 'Disease Detection',
+      description: language === 'hindi' ? 'फसल रोग की पहचान' : 'Crop disease identification',
+      credits: 25,
+      icon: Camera,
+      color: 'bg-orange-500'
+    },
+    {
+      id: 'soil-analysis',
+      name: language === 'hindi' ? 'मिट्टी जांच' : 'Soil Analysis',
+      description: language === 'hindi' ? 'मिट्टी की गुणवत्ता जांच' : 'Soil quality analysis',
+      credits: 30,
+      icon: Leaf,
+      color: 'bg-purple-500'
     }
   ];
 
-  const handleRedeem = async (service: typeof services[0]) => {
-    if (user.agriCreds < service.cost) {
+  const handleServiceClick = (service: any) => {
+    if (user.agriCreds >= service.credits) {
+      addAgriCreds(-service.credits, `Used ${service.name}`);
       toast({
-        title: t('agriCredits.insufficientCredits') || 'Insufficient Credits',
-        description: t('agriCredits.needMoreCredits') || `You need ${service.cost} AgriCreds for this service`,
-        variant: 'destructive',
+        title: language === 'hindi' ? 'सेवा शुरू की गई' : 'Service Started',
+        description: language === 'hindi' 
+          ? `${service.name} सेवा शुरू की गई। ${service.credits} क्रेडिट खर्च हुए।`
+          : `${service.name} service started. ${service.credits} credits spent.`,
       });
-      return;
-    }
-
-    setIsProcessing(true);
-    
-    try {
-      // Deduct credits
-      addAgriCreds(-service.cost, service.title);
       
+      // Navigate to appropriate page based on service
+      switch (service.id) {
+        case 'expert-chat':
+          navigate('/chat');
+          break;
+        case 'voice-call':
+          // Navigate to voice call page or show call interface
+          break;
+        case 'disease-detection':
+          navigate('/disease-detection');
+          break;
+        case 'soil-analysis':
+          // Navigate to soil analysis page
+          break;
+      }
+    } else {
       toast({
-        title: t('agriCredits.redemptionSuccess') || 'Redemption Successful',
-        description: t('agriCredits.serviceBooked') || `${service.title} has been booked!`,
+        title: language === 'hindi' ? 'अपर्याप्त क्रेडिट' : 'Insufficient Credits',
+        description: language === 'hindi' 
+          ? `आपके पास पर्याप्त क्रेडिट नहीं हैं। ${service.credits} क्रेडिट की आवश्यकता है।`
+          : `You don't have enough credits. ${service.credits} credits required.`,
+        variant: "destructive",
       });
-
-      // Navigate based on service type
-      setTimeout(() => {
-        if (service.id === 'expert-chat') {
-          navigate('/expert-consultation');
-        } else if (service.id === 'video-call') {
-          navigate('/video-consultation');
-        } else {
-          // For other services, show confirmation
-          navigate('/service-confirmation', { 
-            state: { service: service.title, cost: service.cost }
-          });
-        }
-      }, 1000);
-      
-    } catch (error) {
-      toast({
-        title: t('agriCredits.redemptionError') || 'Redemption Failed',
-        description: t('agriCredits.tryAgain') || 'Please try again later',
-        variant: 'destructive',
-      });
-    } finally {
-      setIsProcessing(false);
     }
   };
 
-  return (
-    <div className="min-h-screen bg-gradient-earth">
-      <Header title={t('agriCredits.title') || 'AgriCreds Redemption'} />
-      
-      <div className="p-4 space-y-4">
-        {/* Back Button */}
-        <Button 
-          variant="ghost" 
-          onClick={() => navigate('/profile')}
-          className="gap-2"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          {t('agriCredits.backToProfile') || 'Back to Profile'}
-        </Button>
+  const earningMethods = [
+    {
+      id: 'daily-login',
+      name: language === 'hindi' ? 'दैनिक लॉगिन' : 'Daily Login',
+      credits: 10,
+      icon: Star,
+      description: language === 'hindi' ? 'रोज लॉगिन करें' : 'Login daily'
+    },
+    {
+      id: 'community-post',
+      name: language === 'hindi' ? 'समुदाय पोस्ट' : 'Community Post',
+      credits: 15,
+      icon: Users,
+      description: language === 'hindi' ? 'समुदाय में पोस्ट करें' : 'Post in community'
+    },
+    {
+      id: 'refer-friend',
+      name: language === 'hindi' ? 'दोस्त को भेजें' : 'Refer Friend',
+      credits: 50,
+      icon: Gift,
+      description: language === 'hindi' ? 'दोस्त को ऐप भेजें' : 'Refer app to friend'
+    }
+  ];
 
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50">
+      <Header title={language === 'hindi' ? 'AgriCredits' : 'AgriCredits'} />
+      
+      <div className="p-4 space-y-6">
         {/* Credits Display */}
-        <Card className="p-6 bg-gradient-primary text-primary-foreground text-center">
-          <div className="flex items-center justify-center gap-3 mb-2">
-            <Coins className="h-8 w-8" />
-            <span className="text-3xl font-bold">₹{user.agriCreds}</span>
-          </div>
-          <p className="text-lg opacity-90">
-            {t('agriCredits.availableCredits') || 'Available AgriCreds'}
-          </p>
-          <p className="text-sm opacity-75 mt-2">
-            {t('agriCredits.earnMore') || 'Earn more by participating in the community!'}
-          </p>
+        <Card className="bg-gradient-to-r from-green-500 to-blue-500 text-white">
+          <CardContent className="p-6 text-center">
+            <div className="flex items-center justify-center gap-3 mb-2">
+              <Coins className="h-8 w-8" />
+              <span className="text-3xl font-bold">{user.agriCreds}</span>
+            </div>
+            <p className="text-lg opacity-90">
+              {language === 'hindi' ? 'आपके AgriCredits' : 'Your AgriCredits'}
+            </p>
+          </CardContent>
         </Card>
 
-        {/* Services Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {services.map((service) => {
-            const IconComponent = service.icon;
-            const canAfford = user.agriCreds >= service.cost;
-            
-            return (
-              <Card 
-                key={service.id} 
-                className={`p-6 cursor-pointer transition-all hover:shadow-lg ${
-                  selectedService === service.id ? 'ring-2 ring-primary' : ''
-                } ${!canAfford ? 'opacity-60' : ''}`}
-                onClick={() => setSelectedService(service.id)}
-              >
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-primary/10 rounded-lg">
-                      <IconComponent className="h-6 w-6 text-primary" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-foreground">{service.title}</h3>
-                      <p className="text-sm text-muted-foreground">{service.description}</p>
-                    </div>
-                  </div>
-                  <Badge variant={canAfford ? "default" : "secondary"}>
-                    ₹{service.cost}
-                  </Badge>
+        {/* Expert Chat Banner */}
+        {fromExpertChat && (
+          <Card className="bg-gradient-to-r from-orange-500 to-red-500 text-white">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <MessageCircle className="h-6 w-6" />
+                <div>
+                  <h3 className="font-semibold">
+                    {language === 'hindi' ? 'विशेषज्ञ चैट' : 'Expert Chat'}
+                  </h3>
+                  <p className="text-sm opacity-90">
+                    {language === 'hindi' 
+                      ? '50 क्रेडिट की आवश्यकता है' 
+                      : 'Requires 50 credits'
+                    }
+                  </p>
                 </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
-                <div className="space-y-3">
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Clock className="h-4 w-4" />
-                    <span>{service.duration}</span>
-                  </div>
-
-                  <div className="space-y-2">
-                    {service.features.map((feature, index) => (
-                      <div key={index} className="flex items-center gap-2 text-sm">
-                        <CheckCircle className="h-4 w-4 text-success" />
-                        <span>{feature}</span>
+        {/* Services */}
+        <div>
+          <h2 className="text-xl font-semibold mb-4 text-gray-800">
+            {language === 'hindi' ? 'उपलब्ध सेवाएं' : 'Available Services'}
+          </h2>
+          <div className="grid grid-cols-1 gap-4">
+            {services.map((service) => {
+              const IconComponent = service.icon;
+              const canAfford = user.agriCreds >= service.credits;
+              
+              return (
+                <Card 
+                  key={service.id}
+                  className={`cursor-pointer transition-all hover:shadow-md ${
+                    canAfford ? 'hover:scale-105' : 'opacity-60'
+                  }`}
+                  onClick={() => handleServiceClick(service)}
+                >
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-4">
+                      <div className={`p-3 rounded-lg ${service.color} text-white`}>
+                        <IconComponent className="h-6 w-6" />
                       </div>
-                    ))}
-                  </div>
-
-                  <Button 
-                    className="w-full mt-4"
-                    disabled={!canAfford || isProcessing}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleRedeem(service);
-                    }}
-                  >
-                    {isProcessing ? (
-                      <div className="flex items-center gap-2">
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                        {t('agriCredits.processing') || 'Processing...'}
+                      <div className="flex-1">
+                        <h3 className="font-semibold text-gray-800">{service.name}</h3>
+                        <p className="text-sm text-gray-600">{service.description}</p>
                       </div>
-                    ) : canAfford ? (
-                      t('agriCredits.redeem') || 'Redeem Now'
-                    ) : (
-                      <div className="flex items-center gap-2">
-                        <AlertCircle className="h-4 w-4" />
-                        {t('agriCredits.insufficient') || 'Insufficient Credits'}
+                      <div className="text-right">
+                        <Badge variant={canAfford ? "default" : "secondary"}>
+                          {service.credits} {language === 'hindi' ? 'क्रेडिट' : 'Credits'}
+                        </Badge>
                       </div>
-                    )}
-                  </Button>
-                </div>
-              </Card>
-            );
-          })}
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
         </div>
 
-        {/* How to Earn More */}
-        <Card className="p-6">
-          <h3 className="font-semibold text-foreground mb-4">
-            {t('agriCredits.howToEarn') || 'How to Earn More AgriCreds'}
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-success/20 rounded-full flex items-center justify-center">
-                <span className="text-success font-bold">+10</span>
-              </div>
-              <span className="text-sm">{t('agriCredits.earnPost') || 'Share a post in community'}</span>
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-success/20 rounded-full flex items-center justify-center">
-                <span className="text-success font-bold">+15</span>
-              </div>
-              <span className="text-sm">{t('agriCredits.earnAnswer') || 'Provide helpful answers'}</span>
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-success/20 rounded-full flex items-center justify-center">
-                <span className="text-success font-bold">+5</span>
-              </div>
-              <span className="text-sm">{t('agriCredits.earnQuestion') || 'Ask questions in chat'}</span>
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-success/20 rounded-full flex items-center justify-center">
-                <span className="text-success font-bold">+20</span>
-              </div>
-              <span className="text-sm">{t('agriCredits.earnLike') || 'Get likes on your posts'}</span>
-            </div>
+        {/* How to Earn */}
+        <div>
+          <h2 className="text-xl font-semibold mb-4 text-gray-800">
+            {language === 'hindi' ? 'क्रेडिट कैसे कमाएं' : 'How to Earn Credits'}
+          </h2>
+          <div className="grid grid-cols-1 gap-3">
+            {earningMethods.map((method) => {
+              const IconComponent = method.icon;
+              return (
+                <Card key={method.id} className="bg-gray-50">
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-green-100 rounded-lg">
+                        <IconComponent className="h-5 w-5 text-green-600" />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="font-medium text-gray-800">{method.name}</h3>
+                        <p className="text-sm text-gray-600">{method.description}</p>
+                      </div>
+                      <Badge variant="outline" className="bg-green-50 text-green-700">
+                        +{method.credits}
+                      </Badge>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
-        </Card>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="grid grid-cols-2 gap-3">
+          <Button 
+            variant="outline" 
+            onClick={() => navigate('/wallet')}
+            className="h-12"
+          >
+            <Wallet className="h-4 w-4 mr-2" />
+            {language === 'hindi' ? 'वॉलेट' : 'Wallet'}
+          </Button>
+          <Button 
+            variant="outline" 
+            onClick={() => navigate(-1)}
+            className="h-12"
+          >
+            {language === 'hindi' ? 'वापस जाएं' : 'Go Back'}
+          </Button>
+        </div>
       </div>
     </div>
   );
-};
-
-export default AgriCredits; 
+} 

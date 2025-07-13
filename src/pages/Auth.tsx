@@ -216,12 +216,12 @@ const Auth = ({ onAuth }: { onAuth: () => void }) => {
       <Card className="p-8 w-full max-w-md space-y-6">
         <div className="text-center">
           <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 overflow-hidden">
-            <img src={logo} alt="AgriSathi" className="w-full h-full object-contain" />
+            <img src={logo} alt="AgriSaathi" className="w-full h-full object-contain" />
           </div>
           <h2 className="text-2xl font-bold mb-2">
             {isSignUp 
-              ? (language === 'hindi' ? 'AgriSathi में शामिल हों' : 'Join AgriSathi')
-              : (language === 'hindi' ? 'AgriSathi में आपका स्वागत है' : 'Welcome to AgriSathi')
+              ? (language === 'hindi' ? 'AgriSaathi में शामिल हों' : 'Join AgriSaathi')
+              : (language === 'hindi' ? 'AgriSaathi में आपका स्वागत है' : 'Welcome to AgriSaathi')
             }
           </h2>
           <p className="text-muted-foreground">

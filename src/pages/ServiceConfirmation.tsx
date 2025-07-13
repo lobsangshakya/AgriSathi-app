@@ -126,7 +126,7 @@ const ServiceConfirmation = () => {
               <Mail className="h-5 w-5 text-primary" />
               <div>
                 <p className="font-medium">{t('serviceConfirmation.email') || 'Email'}</p>
-                <p className="text-sm text-muted-foreground">support@agrisathi.com</p>
+                <p className="text-sm text-muted-foreground">support@agrisaathi.com</p>
               </div>
             </div>
           </div>

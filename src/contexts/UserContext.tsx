@@ -55,7 +55,7 @@ const defaultUser: User = {
   address: 'Bangalore, India',
   landSize: '2.5 एकड़',
   experience: '15 साल',
-  agriCreds: 0, // Start with 0 credits
+  agriCreds: 200, // Start with 200 credits for testing
   joinDate: new Date().toLocaleDateString('hi-IN', { 
     year: 'numeric', 
     month: 'long' 
@@ -77,7 +77,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Check for existing user data on mount
   useEffect(() => {
-    const savedUser = localStorage.getItem('agrisathi_user');
+    const savedUser = localStorage.getItem('agrisaathi_user');
     if (savedUser) {
       const userData = JSON.parse(savedUser);
       setUser(userData);
@@ -89,13 +89,13 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const newUser = { ...defaultUser, ...userData };
     setUser(newUser);
     setIsLoggedIn(true);
-    localStorage.setItem('agrisathi_user', JSON.stringify(newUser));
+          localStorage.setItem('agrisaathi_user', JSON.stringify(newUser));
   };
 
   const logout = () => {
     setUser(null);
     setIsLoggedIn(false);
-    localStorage.removeItem('agrisathi_user');
+    localStorage.removeItem('agrisaathi_user');
   };
 
   const addAgriCreds = (amount: number, reason: string) => {
@@ -111,7 +111,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
 
     setUser(updatedUser);
-    localStorage.setItem('agrisathi_user', JSON.stringify(updatedUser));
+    localStorage.setItem('agrisaathi_user', JSON.stringify(updatedUser));
 
     // Add achievement if criteria met
     const newAchievements = [...updatedUser.achievements];
@@ -143,7 +143,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (newAchievements.length > updatedUser.achievements.length) {
       const userWithAchievements = { ...updatedUser, achievements: newAchievements };
       setUser(userWithAchievements);
-      localStorage.setItem('agrisathi_user', JSON.stringify(userWithAchievements));
+      localStorage.setItem('agrisaathi_user', JSON.stringify(userWithAchievements));
     }
   };
 
@@ -161,7 +161,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
 
     setUser(updatedUser);
-    localStorage.setItem('agrisathi_user', JSON.stringify(updatedUser));
+    localStorage.setItem('agrisaathi_user', JSON.stringify(updatedUser));
 
     // Add credits for actions
     const creditRewards = {
@@ -178,7 +178,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const updatedUser = { ...user, ...updates };
     setUser(updatedUser);
-    localStorage.setItem('agrisathi_user', JSON.stringify(updatedUser));
+    localStorage.setItem('agrisaathi_user', JSON.stringify(updatedUser));
   };
 
   const value: UserContextType = {
