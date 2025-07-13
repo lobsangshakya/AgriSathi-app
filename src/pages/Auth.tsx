@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { toast } from '@/hooks/use-toast';
 import { ArrowLeft, Phone, Mail, User, Lock, Eye, EyeOff } from 'lucide-react';
+import logo from '@/assets/Logo.png';
 
 const Auth = ({ onAuth }: { onAuth: () => void }) => {
   const { login } = useUser();
@@ -214,8 +215,8 @@ const Auth = ({ onAuth }: { onAuth: () => void }) => {
     <div className="min-h-screen flex items-center justify-center bg-gradient-earth p-4">
       <Card className="p-8 w-full max-w-md space-y-6">
         <div className="text-center">
-          <div className="w-16 h-16 bg-gradient-primary rounded-full flex items-center justify-center mx-auto mb-4">
-            <span className="text-2xl">🌾</span>
+          <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 overflow-hidden">
+            <img src={logo} alt="AgriSathi" className="w-full h-full object-contain" />
           </div>
           <h2 className="text-2xl font-bold mb-2">
             {isSignUp 

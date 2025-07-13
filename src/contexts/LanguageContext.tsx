@@ -166,6 +166,25 @@ const translations = {
     'community.category.experience': 'अनुभव',
     'community.category.market': 'बाजार',
     
+    // Additional Community translations
+    'community.allCategories': 'सभी श्रेणियां',
+    'community.loadingPosts': 'पोस्ट लोड हो रही हैं...',
+    'community.noPosts': 'कोई पोस्ट नहीं मिली',
+    'community.categoryNoPosts': 'श्रेणी में कोई पोस्ट नहीं मिली',
+    'community.posting': 'पोस्ट हो रही है...',
+    'common.refresh': 'रिफ्रेश',
+    
+    // Voice recognition translations
+    'voice.listening': 'सुन रहा हूं...',
+    'voice.speakNow': 'अपना सवाल बोलें',
+    'voice.detected': 'आवाज पहचानी गई',
+    'voice.error': 'आवाज त्रुटि',
+    'voice.notSupported': 'आवाज समर्थित नहीं',
+    'voice.browserSupport': 'आपका ब्राउज़र आवाज पहचान का समर्थन नहीं करता',
+    'voice.startFailed': 'आवाज पहचान शुरू नहीं हो सकी',
+    'voice.noInput': 'कोई इनपुट नहीं',
+    'voice.inputReceived': 'आवाज इनपुट प्राप्त हुआ',
+    
     // Profile
     'profile.title': 'मेरी प्रोफाइल',
     'profile.farmingInfo': 'खेती की जानकारी',
@@ -289,9 +308,8 @@ const translations = {
     'crops.profitability.medium': 'Medium',
     'crops.profitability.low': 'Low',
     'crops.yield.ton_per_hectare': 'ton/hectare',
-    'crops.yield.qtl_per_hectare': 'quintal/hectare',
-    'crops.market_unit.kg': 'kg',
-    'crops.market_unit.qtl': 'quintal',
+    'crops.yield.kg_per_hectare': 'kilograms/hectare',
+    'crops.market_unit.kg': 'kilogram',
     'crops.sowing.oct_nov': 'October-November',
     'crops.sowing.nov_dec': 'November-December',
     // Alerts
@@ -381,6 +399,25 @@ const translations = {
     'community.category.tips': 'Tips',
     'community.category.experience': 'Experience',
     'community.category.market': 'Market',
+    
+    // Additional Community translations
+    'community.allCategories': 'All Categories',
+    'community.loadingPosts': 'Loading posts...',
+    'community.noPosts': 'No posts found',
+    'community.categoryNoPosts': 'category has no posts',
+    'community.posting': 'Posting...',
+    'common.refresh': 'Refresh',
+    
+    // Voice recognition translations
+    'voice.listening': 'Listening...',
+    'voice.speakNow': 'Speak your question',
+    'voice.detected': 'Voice Detected',
+    'voice.error': 'Voice Error',
+    'voice.notSupported': 'Voice Not Supported',
+    'voice.browserSupport': 'Your browser does not support speech recognition',
+    'voice.startFailed': 'Failed to start voice recognition',
+    'voice.noInput': 'No Input',
+    'voice.inputReceived': 'Voice Input Received',
     
     // Profile
     'profile.title': 'My Profile',

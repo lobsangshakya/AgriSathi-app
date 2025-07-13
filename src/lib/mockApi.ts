@@ -126,38 +126,127 @@ const mockDiseases = [
   }
 ];
 
-// Mock community posts
-const mockCommunityPosts: CommunityPost[] = [
+// Bilingual community posts interface
+interface BilingualCommunityPost extends Omit<CommunityPost, 'content' | 'author'> {
+  content: {
+    hindi: string;
+    english: string;
+  };
+  author: {
+    hindi: string;
+    english: string;
+  };
+}
+
+// Mock community posts with bilingual content
+const mockBilingualCommunityPosts: BilingualCommunityPost[] = [
   {
     id: "1",
-    author: "राम कुमार",
-    content: "टमाटर में पत्ती का धब्बा रोग आ गया है। कोई उपाय बताएं।",
+    author: {
+      hindi: "राम कुमार",
+      english: "Ram Kumar"
+    },
+    content: {
+      hindi: "टमाटर में पत्ती का धब्बा रोग आ गया है। कोई उपाय बताएं।",
+      english: "Leaf spot disease has appeared in my tomato crop. Please suggest a remedy."
+    },
     image: "https://images.unsplash.com/photo-1546094096-0df4bcaaa337?w=400",
     likes: 12,
     comments: 5,
     timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000),
-    category: "problem"
+    category: "community.category.problem"
   },
   {
     id: "2",
-    author: "सुनीता देवी",
-    content: "गेहूं की बुआई के लिए सबसे अच्छा समय कौन सा है?",
+    author: {
+      hindi: "सुनीता देवी",
+      english: "Sunita Devi"
+    },
+    content: {
+      hindi: "गेहूं की बुआई के लिए सबसे अच्छा समय कौन सा है?",
+      english: "What is the best time for wheat sowing?"
+    },
     likes: 8,
     comments: 3,
     timestamp: new Date(Date.now() - 4 * 60 * 60 * 1000),
-    category: "tips"
+    category: "community.category.tips"
   },
   {
     id: "3",
-    author: "अजय सिंह",
-    content: "जैविक खेती से मेरी आय दोगुनी हो गई है। सभी किसान भाइयों को सलाह दूंगा।",
+    author: {
+      hindi: "अजय सिंह",
+      english: "Ajay Singh"
+    },
+    content: {
+      hindi: "जैविक खेती से मेरी आय दोगुनी हो गई है। सभी किसान भाइयों को सलाह दूंगा।",
+      english: "My income has doubled through organic farming. I would advise all farmer brothers."
+    },
     image: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=400",
     likes: 25,
     comments: 8,
     timestamp: new Date(Date.now() - 6 * 60 * 60 * 1000),
-    category: "experience"
+    category: "community.category.experience"
+  },
+  {
+    id: "4",
+    author: {
+      hindi: "प्रमोद शर्मा",
+      english: "Pramod Sharma"
+    },
+    content: {
+      hindi: "आज गेहूं का भाव ₹22-24/किलो है। क्या बेचना चाहिए?",
+      english: "Today's wheat price is ₹22-24/kilogram. Should I sell?"
+    },
+    likes: 15,
+    comments: 7,
+    timestamp: new Date(Date.now() - 8 * 60 * 60 * 1000),
+    category: "community.category.market"
+  },
+  {
+    id: "5",
+    author: {
+      hindi: "मीना यादव",
+      english: "Meena Yadav"
+    },
+    content: {
+      hindi: "मेरे खेत में पानी की कमी है। कौन सी फसल बो सकते हैं?",
+      english: "There is water shortage in my field. Which crop can I sow?"
+    },
+    likes: 6,
+    comments: 4,
+    timestamp: new Date(Date.now() - 10 * 60 * 60 * 1000),
+    category: "community.category.problem"
+  },
+  {
+    id: "6",
+    author: {
+      hindi: "राजेश पटेल",
+      english: "Rajesh Patel"
+    },
+    content: {
+      hindi: "ड्रिप इरिगेशन से 50% पानी की बचत होती है। सभी को सलाह दूंगा।",
+      english: "Drip irrigation saves 50% water. I would advise everyone."
+    },
+    likes: 18,
+    comments: 6,
+    timestamp: new Date(Date.now() - 12 * 60 * 60 * 1000),
+    category: "community.category.tips"
   }
 ];
+
+// Convert bilingual posts to regular format based on language
+const getCommunityPostsByLanguage = (language: string): CommunityPost[] => {
+  return mockBilingualCommunityPosts.map(post => ({
+    id: post.id,
+    author: post.author[language as keyof typeof post.author],
+    content: post.content[language as keyof typeof post.content],
+    image: post.image,
+    likes: post.likes,
+    comments: post.comments,
+    timestamp: post.timestamp,
+    category: post.category
+  }));
+};
 
 // Enhanced bilingual chat responses
 const mockChatResponses = {
@@ -203,9 +292,9 @@ const mockChatResponses = {
   english: {
     // Crops
     "tomato": "Complete Guide for Tomato Farming:\n\nSowing Time: February-March or July-August\nSoil: Loamy soil is most suitable\nIrrigation: Light and regular (2-3 times per week)\nFertilizer: Use NPK 20:20:20\nPest Control: Spray neem oil\nYield: 25-30 tons/hectare\nCaution: Ensure proper drainage, maintain proper spacing",
-    "wheat": "Wheat Farming Guide:\n\nSowing Time: November-December\nSoil: Loamy to heavy loamy\nIrrigation: 3-4 times (sowing, tillering, flowering)\nFertilizer: Urea 120kg/hectare\nPest Control: Spray imidacloprid\nYield: 40-50 quintals/hectare\nPrecautions: Treat seeds, follow crop rotation",
-    "rice": "Rice Farming Information:\n\nSowing: June-July (Kharif)\nSoil: Clay loam\nIrrigation: Continuous water requirement\nFertilizer: NPK 120:60:60 kg/ha\nPest Control: Use carbofuran\nYield: 25-30 quintals/hectare\nPrecautions: Seed treatment in nursery, water management",
-    "maize": "Maize Farming Tips:\n\nSowing: June-July or February-March\nSoil: Loamy soil\nIrrigation: Light and regular\nFertilizer: NPK 150:75:75 kg/ha\nPest Control: Spray chlorpyrifos\nYield: 35-40 quintals/hectare\nPrecautions: Seed treatment, pest control",
+    "wheat": "Wheat Farming Guide:\n\nSowing Time: November-December\nSoil: Loamy to heavy loamy\nIrrigation: 3-4 times (sowing, tillering, flowering)\nFertilizer: Urea 120kg/hectare\nPest Control: Spray imidacloprid\nYield: 4000-5000 kilograms/hectare\nPrecautions: Treat seeds, follow crop rotation",
+    "rice": "Rice Farming Information:\n\nSowing: June-July (Kharif)\nSoil: Clay loam\nIrrigation: Continuous water requirement\nFertilizer: NPK 120:60:60 kg/ha\nPest Control: Use carbofuran\nYield: 2500-3000 kilograms/hectare\nPrecautions: Seed treatment in nursery, water management",
+    "maize": "Maize Farming Tips:\n\nSowing: June-July or February-March\nSoil: Loamy soil\nIrrigation: Light and regular\nFertilizer: NPK 150:75:75 kg/ha\nPest Control: Spray chlorpyrifos\nYield: 3500-4000 kilograms/hectare\nPrecautions: Seed treatment, pest control",
     
     // Weather and Climate
     "weather": "Today's weather is favorable for agriculture:\n\nTemperature: 25-30°C\nHumidity: 65-75%\nWind: 8-12 km/h\nRain: Light rain expected\nSuggestion: Reduce crop irrigation and be prepared for pest control",
@@ -226,7 +315,7 @@ const mockChatResponses = {
     "organic": "Benefits of organic farming:\n\nOrganic manure: Cow dung, vermicompost\nNeem cake: Natural pesticide\nJeevamrit: Increases soil fertility\nBeejamrit: For seed treatment\n\nBenefit: Low cost, high profit, healthy crop",
     
     // Market Prices
-    "market": "Today's market rates:\n\nWheat: ₹2,200-2,400/quintal\nRice: ₹1,800-2,000/quintal\nMaize: ₹1,500-1,700/quintal\nTomato: ₹40-60/kg\nSoybean: ₹3,500-3,800/quintal\n\nTip: Selling at MSP gives more profit",
+    "market": "Today's market rates:\n\nWheat: ₹22-24/kilogram\nRice: ₹18-20/kilogram\nMaize: ₹15-17/kilogram\nTomato: ₹40-60/kilogram\nSoybean: ₹35-38/kilogram\n\nTip: Selling at MSP gives more profit",
     
     // Seed Treatment
     "seed": "Seed treatment methods:\n\nBeejamrit: Organic seed treatment\nTrichoderma: Protection from fungal diseases\nBavistin: Chemical seed treatment\nHot water: 30 minutes at 50°C\n\nTip: Seed treatment increases yield by 20-30%",
@@ -407,9 +496,9 @@ export class MockApiService {
   }
 
   // Community API Methods
-  async getCommunityPosts(): Promise<CommunityPost[]> {
+  async getCommunityPosts(language: string = 'hindi'): Promise<CommunityPost[]> {
     await delay(800);
-    return [...mockCommunityPosts];
+    return getCommunityPostsByLanguage(language);
   }
 
   async createPost(postData: CreatePostRequest): Promise<PostResponse> {
@@ -417,7 +506,7 @@ export class MockApiService {
     
     const newPost: CommunityPost = {
       id: Date.now().toString(),
-      author: "आप (You)",
+      author: postData.language === 'hindi' ? "आप" : "You",
       content: postData.content,
       image: postData.image,
       likes: 0,
@@ -428,7 +517,8 @@ export class MockApiService {
     
     return {
       success: true,
-      post: newPost
+      post: newPost,
+      message: postData.language === 'hindi' ? 'पोस्ट सफलतापूर्वक बनाई गई!' : 'Post created successfully!'
     };
   }
 
