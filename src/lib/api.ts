@@ -64,12 +64,14 @@ export interface CreatePostRequest {
   content: string;
   image?: string;
   category: string;
+  language?: string;
 }
 
 export interface PostResponse {
   success: boolean;
   post?: CommunityPost;
   error?: string;
+  message?: string;
 }
 
 // Image compression utility
@@ -217,8 +219,8 @@ class ApiService {
   }
 
   // Community Posts API
-  async getCommunityPosts(): Promise<CommunityPost[]> {
-    return this.request<CommunityPost[]>('/community/posts');
+  async getCommunityPosts(language: string = 'hindi'): Promise<CommunityPost[]> {
+    return this.request<CommunityPost[]>(`/community/posts?language=${language}`);
   }
 
   async createPost(postData: CreatePostRequest): Promise<PostResponse> {

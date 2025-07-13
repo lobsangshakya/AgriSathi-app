@@ -3,7 +3,7 @@ import { Button } from "./ui/button";
 import { Card } from "./ui/card";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useUser } from "@/contexts/UserContext";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "@/hooks/use-toast";
 
@@ -12,6 +12,8 @@ export const QuickActions = () => {
   const { user } = useUser();
   const navigate = useNavigate();
   const [isListening, setIsListening] = useState(false);
+  const [transcript, setTranscript] = useState("");
+  const recognitionRef = useRef<any>(null);
 
   const handleAction = (action: string) => {
     switch (action) {
@@ -37,45 +39,170 @@ export const QuickActions = () => {
   };
 
   const startVoiceInput = () => {
-    setIsListening(true);
-    toast({
-      title: t('voice.listening') || 'Listening...',
-      description: t('voice.speakNow') || 'Speak your question now',
+    console.log('Starting voice input...');
+    console.log('Browser support check:', {
+      webkitSpeechRecognition: 'webkitSpeechRecognition' in window,
+      SpeechRecognition: 'SpeechRecognition' in window
     });
     
-    // Simulate voice input
-    setTimeout(() => {
-      setIsListening(false);
-      const voiceQuestions = {
-        hindi: [
-          "गेहूं की बुआई के लिए सबसे अच्छा समय कौन सा है?",
-          "टमाटर में कीट नियंत्रण कैसे करें?",
-          "जैविक खेती के फायदे क्या हैं?",
-          "मौसम कैसा रहेगा?",
-          "बाजार में गेहूं का भाव क्या है?"
-        ],
-        english: [
-          "What is the best time for wheat sowing?",
-          "How to control pests in tomato?",
-          "What are the benefits of organic farming?",
-          "How is the weather today?",
-          "What is the market price of wheat?"
-        ]
-      };
-      
-      const questions = voiceQuestions[language as keyof typeof voiceQuestions];
-      const randomQuestion = questions[Math.floor(Math.random() * questions.length)];
-      
+    // Check if we're in a secure context (HTTPS or localhost)
+    if (!window.isSecureContext) {
       toast({
-        title: t('voice.question') || 'Question Detected',
-        description: randomQuestion,
+        title: t('voice.notSupported') || 'Voice Not Supported',
+        description: 'Voice recognition requires a secure connection (HTTPS or localhost)',
+        variant: 'destructive',
       });
-      
-      // Navigate to chat with the question
+      return;
+    }
+    
+    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+      toast({
+        title: t('voice.notSupported') || 'Voice Not Supported',
+        description: t('voice.browserSupport') || 'Your browser does not support speech recognition',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setIsListening(true);
+    setTranscript("");
+
+    // Initialize speech recognition
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    recognitionRef.current = new SpeechRecognition();
+
+    // Configure recognition settings
+    recognitionRef.current.continuous = false;
+    recognitionRef.current.interimResults = false;
+    recognitionRef.current.lang = language === 'hindi' ? 'hi-IN' : 'en-US';
+    recognitionRef.current.maxAlternatives = 1;
+
+    // Handle results
+    recognitionRef.current.onresult = (event: any) => {
+      console.log('Voice recognition result:', event);
+      const result = event.results[0];
+      const detectedText = result[0].transcript;
+      console.log('Detected text:', detectedText);
+      setTranscript(detectedText);
+
+      toast({
+        title: t('voice.detected') || 'Voice Detected',
+        description: detectedText,
+        variant: 'default',
+      });
+
+      // Navigate to chat with the detected text
       setTimeout(() => {
-        navigate('/chat');
-      }, 2000);
-    }, 3000);
+        navigate('/chat', { 
+          state: { 
+            voiceInput: detectedText,
+            language: language 
+          } 
+        });
+      }, 1500);
+    };
+
+    // Handle errors
+    recognitionRef.current.onerror = (event: any) => {
+      console.error('Speech recognition error:', event.error);
+      setIsListening(false);
+      
+      let errorMessage = t('voice.error') || 'Voice recognition failed';
+      
+      switch (event.error) {
+        case 'no-speech':
+          errorMessage = language === 'hindi' 
+            ? 'कोई आवाज नहीं सुनाई दी। कृपया फिर से बोलें।'
+            : 'No speech detected. Please speak again.';
+          break;
+        case 'audio-capture':
+          errorMessage = language === 'hindi'
+            ? 'माइक्रोफोन तक पहुंच नहीं मिली। कृपया अनुमति दें।'
+            : 'Microphone access denied. Please allow permission.';
+          break;
+        case 'not-allowed':
+          errorMessage = language === 'hindi'
+            ? 'माइक्रोफोन की अनुमति नहीं मिली।'
+            : 'Microphone permission denied.';
+          break;
+        case 'network':
+          errorMessage = language === 'hindi'
+            ? 'नेटवर्क त्रुटि। कृपया इंटरनेट कनेक्शन जांचें।'
+            : 'Network error. Please check internet connection.';
+          break;
+      }
+
+      toast({
+        title: t('voice.error') || 'Voice Error',
+        description: errorMessage,
+        variant: 'destructive',
+      });
+    };
+
+    // Handle end of recognition
+    recognitionRef.current.onend = () => {
+      setIsListening(false);
+      if (!transcript) {
+        toast({
+          title: t('voice.noInput') || 'No Input',
+          description: language === 'hindi' 
+            ? 'कोई आवाज नहीं सुनाई दी। कृपया फिर से कोशिश करें।'
+            : 'No voice detected. Please try again.',
+          variant: 'destructive',
+        });
+      }
+    };
+
+    // Start recognition
+    try {
+      console.log('Starting speech recognition...');
+      recognitionRef.current.start();
+      console.log('Speech recognition started successfully');
+      toast({
+        title: t('voice.listening') || 'Listening...',
+        description: language === 'hindi' 
+          ? 'अपना सवाल बोलें...'
+          : 'Speak your question...',
+      });
+    } catch (error) {
+      console.error('Failed to start speech recognition:', error);
+      setIsListening(false);
+      toast({
+        title: t('voice.error') || 'Voice Error',
+        description: t('voice.startFailed') || 'Failed to start voice recognition',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const stopVoiceInput = () => {
+    if (recognitionRef.current) {
+      recognitionRef.current.stop();
+      setIsListening(false);
+    }
+  };
+
+  // Test function for debugging
+  const testVoiceInput = () => {
+    const testText = language === 'hindi' 
+      ? 'गेहूं की बुआई के लिए सबसे अच्छा समय कौन सा है?'
+      : 'What is the best time for wheat sowing?';
+    
+    setTranscript(testText);
+    toast({
+      title: 'Test Voice Input',
+      description: testText,
+      variant: 'default',
+    });
+    
+    setTimeout(() => {
+      navigate('/chat', { 
+        state: { 
+          voiceInput: testText,
+          language: language 
+        } 
+      });
+    }, 1500);
   };
 
   const actions = [
@@ -130,6 +257,51 @@ export const QuickActions = () => {
           </Card>
         ))}
       </div>
+      
+      {/* Voice Input Status */}
+      {isListening && (
+        <Card className="mt-4 p-4 bg-gradient-primary text-primary-foreground">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Mic className="h-5 w-5 animate-pulse" />
+              <span className="font-medium">
+                {language === 'hindi' ? 'सुन रहा हूं...' : 'Listening...'}
+              </span>
+            </div>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={stopVoiceInput}
+              className="text-primary-foreground border-primary-foreground hover:bg-primary-foreground hover:text-primary"
+            >
+              {language === 'hindi' ? 'रोकें' : 'Stop'}
+            </Button>
+          </div>
+          {transcript && (
+            <p className="text-sm mt-2 opacity-90">
+              {language === 'hindi' ? 'पहचाना गया: ' : 'Detected: '}{transcript}
+            </p>
+          )}
+        </Card>
+      )}
+      
+      {/* Debug Info */}
+      <Card className="mt-2 p-2 bg-muted/50">
+        <div className="text-xs text-muted-foreground">
+          <p>Secure Context: {window.isSecureContext ? 'Yes' : 'No'}</p>
+          <p>Webkit Speech: {'webkitSpeechRecognition' in window ? 'Yes' : 'No'}</p>
+          <p>Speech Recognition: {'SpeechRecognition' in window ? 'Yes' : 'No'}</p>
+          <p>Current Language: {language}</p>
+        </div>
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={testVoiceInput}
+          className="mt-2 w-full"
+        >
+          Test Voice Input
+        </Button>
+      </Card>
       
       {/* AgriCreds Display */}
       <Card className="mt-4 p-4 bg-gradient-primary text-primary-foreground">
