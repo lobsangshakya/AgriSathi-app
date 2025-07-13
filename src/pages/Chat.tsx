@@ -343,8 +343,8 @@ const Chat = () => {
     });
 
     return language === 'hindi'
-      ? `नमस्ते! मैं AgriSathi AI हूं।\nआज: ${today}\n\nआप इन विषयों पर पूछ सकते हैं:\n• फसल (टमाटर, गेहूं, धान, मक्का)\n• मौसम और जलवायु\n• खाद और पोषण\n• कीट और रोग नियंत्रण\n• सिंचाई तरीके\n• जैविक खेती\n• बाजार भाव\n• सरकारी योजनाएं\n\nतस्वीर भेजकर रोग की पहचान भी कर सकते हैं!\n\nभाषा बदलने के लिए ऊपर दाईं तरफ का बटन दबाएं।`
-      : `Hello! I'm AgriSathi AI.\nToday: ${today}\n\nYou can ask about:\n• Crops (tomato, wheat, rice, maize)\n• Weather and climate\n• Fertilizers and nutrition\n• Pest and disease control\n• Irrigation methods\n• Organic farming\n• Market rates\n• Government schemes\n\nYou can also send photos to identify diseases!\n\nClick the button on the top right to change language.`;
+        ? `नमस्ते! मैं AgriSaathi AI हूं।\nआज: ${today}\n\nआप इन विषयों पर पूछ सकते हैं:\n• फसल (टमाटर, गेहूं, धान, मक्का)\n• मौसम और जलवायु\n• खाद और पोषण\n• कीट और रोग नियंत्रण\n• सिंचाई तरीके\n• जैविक खेती\n• बाजार भाव\n• सरकारी योजनाएं\n\nतस्वीर भेजकर रोग की पहचान भी कर सकते हैं!\n\nभाषा बदलने के लिए ऊपर दाईं तरफ का बटन दबाएं।`
+              : `Hello! I'm AgriSaathi AI.\nToday: ${today}\n\nYou can ask about:\n• Crops (tomato, wheat, rice, maize)\n• Weather and climate\n• Fertilizers and nutrition\n• Pest and disease control\n• Irrigation methods\n• Organic farming\n• Market rates\n• Government schemes\n\nYou can also send photos to identify diseases!\n\nClick the button on the top right to change language.`;
   };
 
   // Initialize with welcome message if no messages

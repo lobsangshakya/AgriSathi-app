@@ -3,9 +3,12 @@ import { Card } from "./ui/card";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useNavigate } from "react-router-dom";
+import { toast } from "@/hooks/use-toast";
 
 export const CropRecommendations = () => {
   const { t } = useLanguage();
+  const navigate = useNavigate();
 
   const recommendations = [
     {
@@ -36,6 +39,19 @@ export const CropRecommendations = () => {
     "alerts.tomato_pest",
     "alerts.irrigation_needed"
   ];
+
+  const handleViewDetails = (cropKey: string) => {
+    // Navigate to a detailed crop information page
+    // For now, show a toast with crop details
+    const cropName = t(cropKey);
+    toast({
+      title: `${cropName} ${t('crops.details')}`,
+      description: t('crops.detailedInfo') || 'Detailed crop information and recommendations',
+    });
+    
+    // In a real app, you would navigate to a detailed page
+    // navigate(`/crop-details/${cropKey}`);
+  };
 
   return (
     <div className="p-4">
@@ -88,7 +104,12 @@ export const CropRecommendations = () => {
               <span className="text-sm font-medium text-success">
                 {t('crops.marketRate')}: {rec.marketPrice}/{t(rec.marketUnitKey)}
               </span>
-              <Button size="sm" variant="outline" className="text-xs">
+              <Button 
+                size="sm" 
+                variant="outline" 
+                className="text-xs"
+                onClick={() => handleViewDetails(rec.cropKey)}
+              >
                 {t('crops.viewDetails')}
               </Button>
             </div>

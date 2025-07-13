@@ -1,4 +1,4 @@
-import { Home, Users, MessageCircle, User, Camera } from "lucide-react";
+import { Home, Users, MessageCircle, User, Camera, Wallet } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Button } from "./ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -13,6 +13,7 @@ export const BottomNavigation = () => {
     { icon: Camera, label: t('nav.scan'), path: "/disease-detection", key: "scan" },
     { icon: Users, label: t('nav.community'), path: "/community", key: "community" },
     { icon: MessageCircle, label: t('nav.chat'), path: "/chat", key: "chat" },
+    { icon: Wallet, label: t('nav.wallet'), path: "/wallet", key: "wallet" },
     { icon: User, label: t('nav.profile'), path: "/profile", key: "profile" },
   ];
 

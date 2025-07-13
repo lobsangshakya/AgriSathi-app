@@ -4,6 +4,8 @@ import { Badge } from "./ui/badge";
 import { useLanguage } from "@/contexts/LanguageContext";
 import logo from "@/assets/Logo.png";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { toast } from "@/hooks/use-toast";
 import { 
   DropdownMenu, 
   DropdownMenuContent, 
@@ -24,6 +26,7 @@ export const Header = ({
   showNotifications = true 
 }: HeaderProps) => {
   const { language, setLanguage, t } = useLanguage();
+  const navigate = useNavigate();
   const [notifications, setNotifications] = useState([
     {
       id: 1,
@@ -84,12 +87,24 @@ export const Header = ({
     }
   };
 
+  const handleViewAllNotifications = () => {
+    // For now, show a toast with notification details
+    toast({
+      title: language === 'hindi' ? 'सभी सूचनाएं' : 'All Notifications',
+      description: language === 'hindi' 
+        ? `${notifications.length} सूचनाएं उपलब्ध हैं`
+        : `${notifications.length} notifications available`,
+    });
+    // In a real app, navigate to notifications page
+    // navigate('/notifications');
+  };
+
   return (
     <header className="bg-card/80 backdrop-blur-sm border-b border-border sticky top-0 z-40">
       <div className="flex items-center justify-between p-4">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-lg flex items-center justify-center overflow-hidden">
-            <img src={logo} alt="AgriSathi" className="w-full h-full object-contain" />
+            <img src={logo} alt="AgriSaathi" className="w-full h-full object-contain" />
           </div>
           <h1 className="text-lg font-semibold text-foreground">{title}</h1>
         </div>
@@ -175,7 +190,10 @@ export const Header = ({
                   ))
                 )}
                 <DropdownMenuSeparator />
-                <DropdownMenuItem className="text-center text-primary text-sm font-medium">
+                <DropdownMenuItem 
+                  className="text-center text-primary text-sm font-medium"
+                  onClick={handleViewAllNotifications}
+                >
                   {language === 'hindi' ? 'सभी सूचनाएं देखें' : 'View all notifications'}
                 </DropdownMenuItem>
               </DropdownMenuContent>
