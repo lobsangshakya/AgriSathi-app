@@ -13,6 +13,11 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator 
 } from "./ui/dropdown-menu";
+=======
+import { Bell, Globe } from "lucide-react";
+import { Button } from "./ui/button";
+import { Badge } from "./ui/badge";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface HeaderProps {
   title: string;
@@ -56,6 +61,7 @@ export const Header = ({
       priority: 'low'
     }
   ]);
+=======
 
   const toggleLanguage = () => {
     setLanguage(language === 'hindi' ? 'english' : 'hindi');
@@ -154,6 +160,19 @@ export const Header = ({
           </Button>
 
           {/* Language Toggle */}
+=======
+  return (
+    <header className="bg-card/80 backdrop-blur-sm border-b border-border sticky top-0 z-40">
+      <div className="flex items-center justify-between p-4">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 bg-gradient-primary rounded-lg flex items-center justify-center">
+            <span className="text-primary-foreground font-bold text-sm">🌾</span>
+          </div>
+          <h1 className="text-lg font-semibold text-foreground">{title}</h1>
+        </div>
+        
+        <div className="flex items-center gap-2">
+
           {showLanguageToggle && (
             <Button
               variant="ghost"
@@ -169,6 +188,7 @@ export const Header = ({
           )}
 
           {/* Notifications */}
+=======
           {showNotifications && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>

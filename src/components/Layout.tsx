@@ -24,6 +24,11 @@ export const Layout = ({ children }: LayoutProps) => {
         {children}
       </main>
       
+=======
+    <div className="min-h-screen bg-gradient-earth">
+      <main className="pb-20 max-w-md mx-auto">
+        {children}
+      </main>
       <BottomNavigation />
     </div>
   );
