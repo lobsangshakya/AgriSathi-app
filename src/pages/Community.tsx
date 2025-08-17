@@ -32,7 +32,7 @@ const categoryOptions = [
 ];
 
 const Community = () => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const { user, updateStats } = useUser();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [posts, setPosts] = useState<CommunityPost[]>([]);
@@ -49,11 +49,12 @@ const Community = () => {
   // Load posts from API
   useEffect(() => {
     loadPosts();
-  }, [selectedCategory]);
+  }, [language]); // Reload posts when language changes
 
   const loadPosts = async () => {
     try {
       setLoading(true);
+      const fetchedPosts = await apiService.getCommunityPosts(language);
       const fetchedPosts = await apiService.getCommunityPosts();
       setPosts(fetchedPosts);
     } catch (error) {
@@ -67,6 +68,11 @@ const Community = () => {
       setLoading(false);
     }
   };
+
+  // Filter posts based on selected category
+  const filteredPosts = selectedCategory 
+    ? posts.filter(post => post.category === selectedCategory)
+    : posts;
 
   const handleLike = async (postId: string) => {
     try {
@@ -125,6 +131,8 @@ const Community = () => {
       const postData: CreatePostRequest = {
         content: newPost.content,
         category: newPost.category,
+        image: newPost.image || undefined,
+        language: language
         image: newPost.image || undefined
       };
 
@@ -175,7 +183,7 @@ const Community = () => {
             className="gap-2"
           >
             <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-            रिफ्रेश
+            {t('common.refresh')}
           </Button>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
@@ -229,7 +237,7 @@ const Community = () => {
                     {posting ? (
                       <>
                         <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        पोस्ट हो रही है...
+                        {t('community.posting')}
                       </>
                     ) : (
                       t('community.postNow')
@@ -245,21 +253,24 @@ const Community = () => {
         <div className="flex gap-2 overflow-x-auto pb-2">
           <Badge 
             variant={selectedCategory === null ? "default" : "outline"} 
-            className="whitespace-nowrap cursor-pointer hover:bg-primary hover:text-primary-foreground"
+            className="whitespace-nowrap cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors"
             onClick={() => setSelectedCategory(null)}
           >
-            सभी (All)
+            {t('community.allCategories')} ({posts.length})
           </Badge>
-          {categoryOptions.map(opt => (
-            <Badge 
-              key={opt.key} 
-              variant={selectedCategory === opt.key ? "default" : "outline"} 
-              className="whitespace-nowrap cursor-pointer hover:bg-primary hover:text-primary-foreground"
-              onClick={() => setSelectedCategory(opt.key)}
-            >
-              {t(opt.key)}
-            </Badge>
-          ))}
+          {categoryOptions.map(opt => {
+            const categoryCount = posts.filter(post => post.category === opt.key).length;
+            return (
+              <Badge 
+                key={opt.key} 
+                variant={selectedCategory === opt.key ? "default" : "outline"} 
+                className="whitespace-nowrap cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors"
+                onClick={() => setSelectedCategory(opt.key)}
+              >
+                {t(opt.key)} ({categoryCount})
+              </Badge>
+            );
+          })}
         </div>
 
         {/* Posts */}
@@ -267,14 +278,19 @@ const Community = () => {
           {loading ? (
             <div className="flex items-center justify-center py-8">
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
-              <span className="ml-2 text-muted-foreground">पोस्ट लोड हो रही हैं...</span>
+              <span className="ml-2 text-muted-foreground">{t('community.loadingPosts')}</span>
             </div>
-          ) : posts.length === 0 ? (
+          ) : filteredPosts.length === 0 ? (
             <div className="text-center py-8">
-              <p className="text-muted-foreground">कोई पोस्ट नहीं मिली</p>
+              <p className="text-muted-foreground">
+                {selectedCategory 
+                  ? `${t(selectedCategory)} ${t('community.categoryNoPosts')}`
+                  : t('community.noPosts')
+                }
+              </p>
             </div>
           ) : (
-            posts.map(post => (
+            filteredPosts.map(post => (
             <Card key={post.id} className="p-4 border-border/50">
               <div className="flex items-start gap-3">
                 <Avatar>
@@ -323,7 +339,7 @@ const Community = () => {
                       {t('community.share')}
                     </Button>
                   </div>
-                                  </div>
+                 </div>
                 </div>
               </Card>
             ))

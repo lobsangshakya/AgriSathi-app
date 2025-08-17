@@ -54,7 +54,7 @@ const agriculturalKnowledge = {
         irrigation: "3-4 times (sowing, tillering, flowering)",
         fertilizer: "Urea 120kg/hectare",
         pestControl: "Spray imidacloprid",
-        yield: "40-50 quintals/hectare",
+        yield: "4000-5000 kilograms/hectare",
         diseases: ["Rust", "Karnal bunt", "Leaf spot"],
         precautions: "Treat seeds, follow crop rotation"
       }
@@ -78,7 +78,7 @@ const agriculturalKnowledge = {
         irrigation: "Continuous water requirement",
         fertilizer: "NPK 120:60:60 kg/ha",
         pestControl: "Use carbofuran",
-        yield: "25-30 quintals/hectare",
+        yield: "2500-3000 kilograms/hectare",
         diseases: ["Blast", "Bacterial blight", "Sheath blight"],
         precautions: "Seed treatment in nursery, water management"
       }
@@ -102,7 +102,7 @@ const agriculturalKnowledge = {
         irrigation: "Light and regular",
         fertilizer: "NPK 150:75:75 kg/ha",
         pestControl: "Spray chlorpyrifos",
-        yield: "35-40 quintals/hectare",
+        yield: "3500-4000 kilograms/hectare",
         diseases: ["Downy mildew", "Turcicum leaf blight", "Leaf spot"],
         precautions: "Seed treatment, pest control"
       }
@@ -315,8 +315,8 @@ export class RealApiService {
 
     // Default response with real agricultural information
     const defaultResponse = language === 'hindi'
-      ? `🌾 नमस्ते! मैं AgriSathi AI हूं। आपकी खेती संबंधी किसी भी समस्या में मदद कर सकता हूं।\n\n💡 आप इन विषयों पर पूछ सकते हैं:\n• फसल (टमाटर, गेहूं, धान, मक्का)\n• मौसम और जलवायु\n• खाद और पोषण\n• कीट और रोग नियंत्रण\n• सिंचाई तरीके\n• जैविक खेती\n• बाजार भाव\n• सरकारी योजनाएं\n\n📸 तस्वीर भेजकर रोग की पहचान भी कर सकते हैं!`
-      : `🌾 Hello! I'm AgriSathi AI. I can help you with any farming-related problems.\n\n💡 You can ask about:\n• Crops (tomato, wheat, rice, maize)\n• Weather and climate\n• Fertilizers and nutrition\n• Pest and disease control\n• Irrigation methods\n• Organic farming\n• Market rates\n• Government schemes\n\n📸 You can also send photos to identify diseases!`;
+        ? `🌾 नमस्ते! मैं AgriSaathi AI हूं। आपकी खेती संबंधी किसी भी समस्या में मदद कर सकता हूं।\n\n💡 आप इन विषयों पर पूछ सकते हैं:\n• फसल (टमाटर, गेहूं, धान, मक्का)\n• मौसम और जलवायु\n• खाद और पोषण\n• कीट और रोग नियंत्रण\n• सिंचाई तरीके\n• जैविक खेती\n• बाजार भाव\n• सरकारी योजनाएं\n\n📸 तस्वीर भेजकर रोग की पहचान भी कर सकते हैं!`
+              : `🌾 Hello! I'm AgriSaathi AI. I can help you with any farming-related problems.\n\n💡 You can ask about:\n• Crops (tomato, wheat, rice, maize)\n• Weather and climate\n• Fertilizers and nutrition\n• Pest and disease control\n• Irrigation methods\n• Organic farming\n• Market rates\n• Government schemes\n\n📸 You can also send photos to identify diseases!`;
 
     return {
       id: Date.now().toString(),
@@ -355,13 +355,19 @@ export class RealApiService {
   }
 
   // Community Posts API - Mock implementation for now
-  async getCommunityPosts(): Promise<any[]> {
-    // Return mock community posts
-    return [
+  async getCommunityPosts(language: string = 'hindi'): Promise<any[]> {
+    // Return bilingual mock community posts
+    const bilingualPosts = [
       {
         id: '1',
-        author: 'राजेश कुमार',
-        content: 'गेहूं की फसल में पीले पत्ते आ रहे हैं, क्या करूं?',
+        author: {
+          hindi: 'राजेश कुमार',
+          english: 'Rajesh Kumar'
+        },
+        content: {
+          hindi: 'गेहूं की फसल में पीले पत्ते आ रहे हैं, क्या करूं?',
+          english: 'Yellow leaves are appearing in my wheat crop, what should I do?'
+        },
         image: null,
         likes: 5,
         comments: 3,
@@ -370,8 +376,14 @@ export class RealApiService {
       },
       {
         id: '2',
-        author: 'सुनीता देवी',
-        content: 'टमाटर की खेती के लिए बहुत अच्छे टिप्स मिले हैं। सभी किसान भाइयों के लिए उपयोगी।',
+        author: {
+          hindi: 'सुनीता देवी',
+          english: 'Sunita Devi'
+        },
+        content: {
+          hindi: 'टमाटर की खेती के लिए बहुत अच्छे टिप्स मिले हैं। सभी किसान भाइयों के लिए उपयोगी।',
+          english: 'Got very good tips for tomato farming. Useful for all farmer brothers.'
+        },
         image: null,
         likes: 12,
         comments: 8,
@@ -379,13 +391,25 @@ export class RealApiService {
         category: 'community.category.tips'
       }
     ];
+
+    // Convert to language-specific format
+    return bilingualPosts.map(post => ({
+      id: post.id,
+      author: post.author[language as keyof typeof post.author],
+      content: post.content[language as keyof typeof post.content],
+      image: post.image,
+      likes: post.likes,
+      comments: post.comments,
+      timestamp: post.timestamp,
+      category: post.category
+    }));
   }
 
   async createPost(postData: any): Promise<any> {
     // Mock implementation - in real app, this would save to database
     const newPost = {
       id: Date.now().toString(),
-      author: 'आप',
+      author: postData.language === 'hindi' ? 'आप' : 'You',
       content: postData.content,
       image: postData.image,
       likes: 0,
@@ -397,7 +421,7 @@ export class RealApiService {
     return {
       success: true,
       post: newPost,
-      message: 'Post created successfully!'
+      message: postData.language === 'hindi' ? 'पोस्ट सफलतापूर्वक बनाई गई!' : 'Post created successfully!'
     };
   }
 

@@ -7,9 +7,11 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { CameraScanner } from "@/components/CameraScanner";
 import { apiService, aiService, compressImage, DiseaseAnalysisResult } from "@/lib/api";
 import { toast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 
 const DiseaseDetection = () => {
   const { t } = useLanguage();
+  const navigate = useNavigate();
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<DiseaseAnalysisResult | null>(null);
@@ -104,6 +106,27 @@ const DiseaseDetection = () => {
     setIsCameraOpen(false);
   };
 
+  const handleContactExpert = () => {
+    // Navigate to AgriCredits page for expert consultation
+    navigate('/agri-credits', { 
+      state: { 
+        fromExpertChat: true,
+        diseaseInfo: analysisResult 
+      } 
+    });
+  };
+
+  const handleBuyMedicine = () => {
+    if (analysisResult) {
+      toast({
+        title: t('disease.medicineAvailable') || 'Medicine Available',
+        description: t('disease.medicineDescription') || 'Connect with local pharmacies for treatment',
+      });
+      // In a real app, navigate to medicine marketplace
+      // navigate('/medicine-marketplace', { state: { disease: analysisResult.disease } });
+    }
+  };
+
   const analyzeImage = async () => {
     if (!selectedImage) return;
 
@@ -176,7 +199,7 @@ const DiseaseDetection = () => {
           
           {/* Drag and Drop Area */}
           <div
-            className={`border-2 border-dashed rounded-lg p-6 mb-4 transition-colors ${
+            className={`border-2 border-dashed rounded-lg p-6 mb-4 transition-colors cursor-pointer ${
               isDragOver 
                 ? 'border-primary bg-primary/5' 
                 : 'border-border hover:border-primary/50'
@@ -184,6 +207,7 @@ const DiseaseDetection = () => {
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
+            onClick={() => fileInputRef.current?.click()}
           >
             <FileImage className="h-12 w-12 mx-auto text-muted-foreground mb-3" />
             <p className="text-sm text-muted-foreground mb-2">
@@ -192,7 +216,7 @@ const DiseaseDetection = () => {
             <Button 
               variant="outline" 
               size="sm"
-              onClick={handleFileSelect}
+              onClick={() => fileInputRef.current?.click()}
             >
               <Upload className="h-4 w-4 mr-2" />
               {t('disease.browseFiles') || 'Browse Files'}
@@ -267,7 +291,7 @@ const DiseaseDetection = () => {
 
         {/* Analysis Results */}
         {analysisResult && (
-          <div className="space-y-4">
+          <div className="space-y-4" id="analysis-result">
             <Card className="p-4">
               <div className="flex items-center gap-3 mb-4">
                 <AlertTriangle className="h-6 w-6 text-warning" />
@@ -308,10 +332,10 @@ const DiseaseDetection = () => {
             </Card>
 
             <div className="flex gap-3">
-              <Button className="flex-1" variant="outline">
+              <Button className="flex-1" variant="outline" onClick={handleContactExpert}>
                 {t('disease.contactExpert')}
               </Button>
-              <Button className="flex-1" variant="gradient">
+              <Button className="flex-1" variant="gradient" onClick={handleBuyMedicine}>
                 {t('disease.buyMedicine')}
               </Button>
             </div>
@@ -337,9 +361,13 @@ const DiseaseDetection = () => {
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => setAnalysisResult(result)}
+                    onClick={() => {
+                      setAnalysisResult(result);
+                      // Scroll to analysis result section
+                      document.getElementById('analysis-result')?.scrollIntoView({ behavior: 'smooth' });
+                    }}
                   >
-                    View
+                    {t('disease.view') || 'View'}
                   </Button>
                 </div>
               ))}
