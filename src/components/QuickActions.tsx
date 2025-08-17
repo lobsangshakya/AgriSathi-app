@@ -1,4 +1,4 @@
-import { Camera, Mic, MessageSquare, MapPin, CloudRain, Coins } from "lucide-react";
+import { Camera, Mic, MessageSquare, MapPin, CloudRain, Coins, Sparkles, Zap, Target, Heart } from "lucide-react";
 import { Button } from "./ui/button";
 import { Card } from "./ui/card";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -100,11 +100,12 @@ export const QuickActions = () => {
       setTimeout(() => {
         navigate('/chat', { 
           state: { 
-            voiceInput: detectedText,
-            language: language 
+            initialMessage: detectedText 
           } 
         });
-      }, 1500);
+      }, 2000);
+
+      setIsListening(false);
     };
 
     // Handle errors
@@ -112,31 +113,15 @@ export const QuickActions = () => {
       console.error('Speech recognition error:', event.error);
       setIsListening(false);
       
-      let errorMessage = t('voice.error') || 'Voice recognition failed';
-      
-      switch (event.error) {
-        case 'no-speech':
-          errorMessage = language === 'hindi' 
-            ? 'कोई आवाज नहीं सुनाई दी। कृपया फिर से बोलें।'
-            : 'No speech detected. Please speak again.';
-          break;
-        case 'audio-capture':
-          errorMessage = language === 'hindi'
-            ? 'माइक्रोफोन तक पहुंच नहीं मिली। कृपया अनुमति दें।'
-            : 'Microphone access denied. Please allow permission.';
-          break;
-        case 'not-allowed':
-          errorMessage = language === 'hindi'
-            ? 'माइक्रोफोन की अनुमति नहीं मिली।'
-            : 'Microphone permission denied.';
-          break;
-        case 'network':
-          errorMessage = language === 'hindi'
-            ? 'नेटवर्क त्रुटि। कृपया इंटरनेट कनेक्शन जांचें।'
-            : 'Network error. Please check internet connection.';
-          break;
+      let errorMessage = 'Voice recognition failed';
+      if (event.error === 'no-speech') {
+        errorMessage = language === 'hindi' ? 'कोई आवाज नहीं सुनाई दी' : 'No speech detected';
+      } else if (event.error === 'audio-capture') {
+        errorMessage = language === 'hindi' ? 'माइक्रोफोन तक पहुंच नहीं' : 'Microphone access denied';
+      } else if (event.error === 'not-allowed') {
+        errorMessage = language === 'hindi' ? 'माइक्रोफोन की अनुमति नहीं' : 'Microphone permission denied';
       }
-
+      
       toast({
         title: t('voice.error') || 'Voice Error',
         description: errorMessage,
@@ -144,37 +129,24 @@ export const QuickActions = () => {
       });
     };
 
-    // Handle end of recognition
+    // Handle end
     recognitionRef.current.onend = () => {
       setIsListening(false);
-      if (!transcript) {
-        toast({
-          title: t('voice.noInput') || 'No Input',
-          description: language === 'hindi' 
-            ? 'कोई आवाज नहीं सुनाई दी। कृपया फिर से कोशिश करें।'
-            : 'No voice detected. Please try again.',
-          variant: 'destructive',
-        });
-      }
     };
 
     // Start recognition
     try {
-      console.log('Starting speech recognition...');
       recognitionRef.current.start();
-      console.log('Speech recognition started successfully');
       toast({
         title: t('voice.listening') || 'Listening...',
-        description: language === 'hindi' 
-          ? 'अपना सवाल बोलें...'
-          : 'Speak your question...',
+        description: language === 'hindi' ? 'अब बोलें...' : 'Speak now...',
       });
     } catch (error) {
-      console.error('Failed to start speech recognition:', error);
+      console.error('Error starting speech recognition:', error);
       setIsListening(false);
       toast({
         title: t('voice.error') || 'Voice Error',
-        description: t('voice.startFailed') || 'Failed to start voice recognition',
+        description: 'Failed to start voice recognition',
         variant: 'destructive',
       });
     }
@@ -187,138 +159,142 @@ export const QuickActions = () => {
     }
   };
 
-  // Test function for debugging
-  const testVoiceInput = () => {
-    const testText = language === 'hindi' 
-      ? 'गेहूं की बुआई के लिए सबसे अच्छा समय कौन सा है?'
-      : 'What is the best time for wheat sowing?';
-    
-    setTranscript(testText);
-    toast({
-      title: 'Test Voice Input',
-      description: testText,
-      variant: 'default',
-    });
-    
-    setTimeout(() => {
-      navigate('/chat', { 
-        state: { 
-          voiceInput: testText,
-          language: language 
-        } 
-      });
-    }, 1500);
-  };
-
   const actions = [
     {
+      key: 'scan',
       icon: Camera,
-      label: t('quickActions.scanCrop'),
-      description: t('quickActions.scanDescription'),
-      color: "bg-accent hover:bg-accent/90",
-      action: 'scan'
+      label: t('quickActions.scan') || 'Scan Crop',
+      description: t('quickActions.scanDesc') || 'Detect diseases',
+      color: 'from-green-500 to-emerald-600',
+      bgColor: 'bg-green-500/10',
+      iconColor: 'text-green-600',
+      action: () => handleAction('scan')
     },
     {
+      key: 'voice',
       icon: Mic,
-      label: t('quickActions.voiceAsk'),
-      description: t('quickActions.voiceDescription'),
-      color: "bg-primary hover:bg-primary/90",
-      action: 'voice'
+      label: t('quickActions.voice') || 'Voice Input',
+      description: t('quickActions.voiceDesc') || 'Speak to search',
+      color: 'from-blue-500 to-cyan-600',
+      bgColor: 'bg-blue-500/10',
+      iconColor: 'text-blue-600',
+      action: () => handleAction('voice'),
+      isActive: isListening
     },
     {
+      key: 'chat',
       icon: MessageSquare,
-      label: t('quickActions.expertChat'),
-      description: t('quickActions.expertDescription'),
-      color: "bg-success hover:bg-success/90",
-      action: 'chat'
+      label: t('quickActions.chat') || 'Expert Chat',
+      description: t('quickActions.chatDesc') || 'Get advice',
+      color: 'from-purple-500 to-pink-600',
+      bgColor: 'bg-purple-500/10',
+      iconColor: 'text-purple-600',
+      action: () => handleAction('chat')
     },
     {
+      key: 'weather',
       icon: CloudRain,
-      label: t('quickActions.weather'),
-      description: t('quickActions.weatherDescription'),
-      color: "bg-gradient-sky hover:opacity-90",
-      action: 'weather'
+      label: t('quickActions.weather') || 'Weather',
+      description: t('quickActions.weatherDesc') || 'Check forecast',
+      color: 'from-orange-500 to-red-600',
+      bgColor: 'bg-orange-500/10',
+      iconColor: 'text-orange-600',
+      action: () => handleAction('weather')
     }
   ];
 
   return (
-    <div className="p-4">
-      <h2 className="text-lg font-semibold text-foreground mb-4">{t('dashboard.quickActions')}</h2>
-      <div className="grid grid-cols-2 gap-3">
+    <div className="space-y-4">
+      {/* Header */}
+      <div className="flex items-center gap-3 mb-4">
+        <div className="bg-primary/10 rounded-full p-2">
+          <Zap className="h-5 w-5 text-primary" />
+        </div>
+        <div>
+          <h3 className="text-lg font-semibold text-gradient">
+            {t('quickActions.title') || 'Quick Actions'}
+          </h3>
+          <p className="text-sm text-muted-foreground">
+            {t('quickActions.subtitle') || 'Access essential tools instantly'}
+          </p>
+        </div>
+      </div>
+
+      {/* Actions Grid */}
+      <div className="grid grid-cols-2 gap-4">
         {actions.map((action, index) => (
-          <Card key={index} className="p-0 overflow-hidden border-border/50">
-            <Button
-              variant="ghost"
-              onClick={() => handleAction(action.action)}
-              disabled={action.action === 'voice' && isListening}
-              className={`w-full h-auto p-4 ${action.color} text-white flex flex-col items-center gap-2 rounded-lg hover:scale-105 transition-transform duration-200`}
-            >
-              <action.icon className={`h-8 w-8 ${action.action === 'voice' && isListening ? 'animate-pulse' : ''}`} />
-              <div className="text-center">
-                <div className="font-medium text-sm">{action.label}</div>
-                <div className="text-xs opacity-90">{action.description}</div>
+          <Card 
+            key={action.key}
+            className={`card-enhanced cursor-pointer group hover-scale transition-all duration-300 animate-slide-up`}
+            style={{ animationDelay: `${index * 0.1}s` }}
+            onClick={action.action}
+          >
+            <div className="p-4 text-center">
+              {/* Icon Container */}
+              <div className={`relative mb-3 ${action.bgColor} rounded-full w-16 h-16 mx-auto flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
+                {action.isActive ? (
+                  <div className="absolute inset-0 bg-gradient-to-r from-red-400 to-pink-500 rounded-full animate-pulse-slow" />
+                ) : null}
+                <action.icon className={`h-8 w-8 ${action.iconColor} relative z-10`} />
+                
+                {/* Active Indicator */}
+                {action.isActive && (
+                  <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full animate-bounce-gentle">
+                    <div className="w-full h-full bg-white rounded-full m-0.5" />
+                  </div>
+                )}
               </div>
-            </Button>
+              
+              {/* Label */}
+              <h4 className="font-semibold text-foreground mb-1 group-hover:text-primary transition-colors duration-300">
+                {action.label}
+              </h4>
+              
+              {/* Description */}
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                {action.description}
+              </p>
+              
+              {/* Hover Effect */}
+              <div className="absolute inset-0 bg-gradient-to-r opacity-0 group-hover:opacity-5 transition-opacity duration-300 rounded-xl" />
+            </div>
           </Card>
         ))}
       </div>
-      
+
       {/* Voice Input Status */}
       {isListening && (
-        <Card className="mt-4 p-4 bg-gradient-primary text-primary-foreground">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Mic className="h-5 w-5 animate-pulse" />
-              <span className="font-medium">
-                {language === 'hindi' ? 'सुन रहा हूं...' : 'Listening...'}
-              </span>
-            </div>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={stopVoiceInput}
-              className="text-primary-foreground border-primary-foreground hover:bg-primary-foreground hover:text-primary"
-            >
-              {language === 'hindi' ? 'रोकें' : 'Stop'}
-            </Button>
+        <div className="bg-gradient-to-r from-blue-500 to-cyan-600 rounded-xl p-4 text-white text-center animate-pulse-slow">
+          <div className="flex items-center justify-center gap-2 mb-2">
+            <div className="w-2 h-2 bg-white rounded-full animate-bounce-gentle" />
+            <div className="w-2 h-2 bg-white rounded-full animate-bounce-gentle" style={{ animationDelay: '0.2s' }} />
+            <div className="w-2 h-2 bg-white rounded-full animate-bounce-gentle" style={{ animationDelay: '0.4s' }} />
           </div>
-          {transcript && (
-            <p className="text-sm mt-2 opacity-90">
-              {language === 'hindi' ? 'पहचाना गया: ' : 'Detected: '}{transcript}
-            </p>
-          )}
-        </Card>
+          <p className="font-medium">{t('voice.listening') || 'Listening...'}</p>
+          <p className="text-sm opacity-80">{t('voice.speakNow') || 'Speak now...'}</p>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={stopVoiceInput}
+            className="mt-3 bg-white/20 border-white/30 text-white hover:bg-white/30"
+          >
+            {t('voice.stop') || 'Stop Listening'}
+          </Button>
+        </div>
       )}
-      
-      {/* Debug Info */}
-      <Card className="mt-2 p-2 bg-muted/50">
-        <div className="text-xs text-muted-foreground">
-          <p>Secure Context: {window.isSecureContext ? 'Yes' : 'No'}</p>
-          <p>Webkit Speech: {'webkitSpeechRecognition' in window ? 'Yes' : 'No'}</p>
-          <p>Speech Recognition: {'SpeechRecognition' in window ? 'Yes' : 'No'}</p>
-          <p>Current Language: {language}</p>
-        </div>
-        <Button 
-          variant="outline" 
-          size="sm" 
-          onClick={testVoiceInput}
-          className="mt-2 w-full"
-        >
-          Test Voice Input
-        </Button>
-      </Card>
-      
-      {/* AgriCreds Display */}
-      <Card className="mt-4 p-4 bg-gradient-primary text-primary-foreground">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Coins className="h-5 w-5" />
-            <span className="font-medium">{t('quickActions.agriCreds')}</span>
+
+      {/* Transcript Display */}
+      {transcript && (
+        <div className="bg-gradient-card rounded-xl p-4 shadow-card">
+          <div className="flex items-center gap-2 mb-2">
+            <Target className="h-4 w-4 text-primary" />
+            <span className="text-sm font-medium text-primary">
+              {t('voice.detected') || 'Voice Detected'}
+            </span>
           </div>
-          <div className="text-lg font-bold">₹ {user?.agriCreds || 0}</div>
+          <p className="text-sm text-muted-foreground">{transcript}</p>
         </div>
-        <p className="text-sm opacity-90 mt-1">{t('quickActions.earnMore')}</p>
-      </Card>
+      )}
     </div>
   );
 };
