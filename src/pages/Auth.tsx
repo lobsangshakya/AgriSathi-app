@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { toast } from '@/hooks/use-toast';
 import { ArrowLeft, Phone, Mail, User, Lock, Eye, EyeOff } from 'lucide-react';
+import logo from '@/assets/Logo.png';
 
 const Auth = ({ onAuth }: { onAuth: () => void }) => {
   const { login } = useUser();
@@ -129,6 +130,8 @@ const Auth = ({ onAuth }: { onAuth: () => void }) => {
           name: name,
           phone: phone,
           email: email,
+          address: 'Bangalore, India',
+          location: 'Bangalore, India',
           location: language === 'hindi' ? 'गाँव: रामपुर, जिला: मेरठ, उत्तर प्रदेश' : 'Village: Rampur, District: Meerut, UP',
           landSize: language === 'hindi' ? '2.5 एकड़' : '2.5 acres',
           experience: language === 'hindi' ? '15 साल' : '15 years',
@@ -170,6 +173,8 @@ const Auth = ({ onAuth }: { onAuth: () => void }) => {
         name: language === 'hindi' ? 'राजेश कुमार' : 'Rajesh Kumar',
         phone: '+91 98765 43210',
         email: email,
+        address: 'Bangalore, India',
+        location: 'Bangalore, India',
         location: language === 'hindi' ? 'गाँव: रामपुर, जिला: मेरठ, उत्तर प्रदेश' : 'Village: Rampur, District: Meerut, UP',
         landSize: language === 'hindi' ? '2.5 एकड़' : '2.5 acres',
         experience: language === 'hindi' ? '15 साल' : '15 years',
@@ -212,13 +217,13 @@ const Auth = ({ onAuth }: { onAuth: () => void }) => {
     <div className="min-h-screen flex items-center justify-center bg-gradient-earth p-4">
       <Card className="p-8 w-full max-w-md space-y-6">
         <div className="text-center">
-          <div className="w-16 h-16 bg-gradient-primary rounded-full flex items-center justify-center mx-auto mb-4">
-            <span className="text-2xl">🌾</span>
+          <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 overflow-hidden">
+            <img src={logo} alt="AgriSaathi" className="w-full h-full object-contain" />
           </div>
           <h2 className="text-2xl font-bold mb-2">
             {isSignUp 
-              ? (language === 'hindi' ? 'AgriSathi में शामिल हों' : 'Join AgriSathi')
-              : (language === 'hindi' ? 'AgriSathi में आपका स्वागत है' : 'Welcome to AgriSathi')
+              ? (language === 'hindi' ? 'AgriSaathi में शामिल हों' : 'Join AgriSaathi')
+              : (language === 'hindi' ? 'AgriSaathi में आपका स्वागत है' : 'Welcome to AgriSaathi')
             }
           </h2>
           <p className="text-muted-foreground">

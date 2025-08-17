@@ -22,10 +22,12 @@ import { useUser } from "@/contexts/UserContext";
 import { CameraScanner } from "@/components/CameraScanner";
 import { apiService, aiService, ChatMessage, ChatContext } from "@/lib/api";
 import { toast } from "@/hooks/use-toast";
+import { useLocation } from "react-router-dom";
 
 const Chat = () => {
   const { t, language } = useLanguage();
   const { user, updateStats } = useUser();
+  const location = useLocation();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [isTyping, setIsTyping] = useState(false);
@@ -37,6 +39,7 @@ const Chat = () => {
   });
   const [apiStatus, setApiStatus] = useState<'mock' | 'real' | 'error'>('mock');
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const recognitionRef = useRef<any>(null);
 
   // Check API status on component mount
   useEffect(() => {
@@ -47,6 +50,24 @@ const Chat = () => {
   useEffect(() => {
     setChatContext(prev => ({ ...prev, language }));
   }, [language]);
+
+  // Handle voice input from QuickActions
+  useEffect(() => {
+    if (location.state?.voiceInput) {
+      const voiceInput = location.state.voiceInput;
+      setNewMessage(voiceInput);
+      
+      // Show toast for voice input
+      toast({
+        title: t('voice.inputReceived') || 'Voice Input Received',
+        description: voiceInput,
+        variant: 'default',
+      });
+      
+      // Clear the state to prevent re-processing
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state, t]);
 
   const checkApiStatus = async () => {
     try {
@@ -142,32 +163,108 @@ const Chat = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  const startVoiceInput = () => {
-    setIsListening(true);
-    setTimeout(() => {
+  const stopVoiceInput = () => {
+    if (recognitionRef.current) {
+      recognitionRef.current.stop();
       setIsListening(false);
-      // Simulate different voice inputs based on language
-      const voiceInputs = {
-        hindi: [
-          "गेहूं की बुआई के लिए सबसे अच्छा समय कौन सा है?",
-          "टमाटर में कीट नियंत्रण कैसे करें?",
-          "जैविक खेती के फायदे क्या हैं?",
-          "मौसम कैसा रहेगा?",
-          "बाजार में गेहूं का भाव क्या है?"
-        ],
-        english: [
-          "What is the best time for wheat sowing?",
-          "How to control pests in tomato?",
-          "What are the benefits of organic farming?",
-          "How is the weather today?",
-          "What is the market price of wheat?"
-        ]
-      };
+    }
+  };
+
+  const startVoiceInput = () => {
+    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+      toast({
+        title: t('voice.notSupported') || 'Voice Not Supported',
+        description: t('voice.browserSupport') || 'Your browser does not support speech recognition',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setIsListening(true);
+
+    // Initialize speech recognition
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    recognitionRef.current = new SpeechRecognition();
+
+    // Configure recognition settings
+    recognitionRef.current.continuous = false;
+    recognitionRef.current.interimResults = false;
+    recognitionRef.current.lang = language === 'hindi' ? 'hi-IN' : 'en-US';
+    recognitionRef.current.maxAlternatives = 1;
+
+    // Handle results
+    recognitionRef.current.onresult = (event: any) => {
+      const result = event.results[0];
+      const detectedText = result[0].transcript;
+      setNewMessage(detectedText);
+
+      toast({
+        title: t('voice.detected') || 'Voice Detected',
+        description: detectedText,
+        variant: 'default',
+      });
+    };
+
+    // Handle errors
+    recognitionRef.current.onerror = (event: any) => {
+      console.error('Speech recognition error:', event.error);
+      setIsListening(false);
       
-      const inputs = voiceInputs[language as keyof typeof voiceInputs];
-      const randomInput = inputs[Math.floor(Math.random() * inputs.length)];
-      setNewMessage(randomInput);
-    }, 3000);
+      let errorMessage = t('voice.error') || 'Voice recognition failed';
+      
+      switch (event.error) {
+        case 'no-speech':
+          errorMessage = language === 'hindi' 
+            ? 'कोई आवाज नहीं सुनाई दी। कृपया फिर से बोलें।'
+            : 'No speech detected. Please speak again.';
+          break;
+        case 'audio-capture':
+          errorMessage = language === 'hindi'
+            ? 'माइक्रोफोन तक पहुंच नहीं मिली। कृपया अनुमति दें।'
+            : 'Microphone access denied. Please allow permission.';
+          break;
+        case 'not-allowed':
+          errorMessage = language === 'hindi'
+            ? 'माइक्रोफोन की अनुमति नहीं मिली।'
+            : 'Microphone permission denied.';
+          break;
+        case 'network':
+          errorMessage = language === 'hindi'
+            ? 'नेटवर्क त्रुटि। कृपया इंटरनेट कनेक्शन जांचें।'
+            : 'Network error. Please check internet connection.';
+          break;
+      }
+
+      toast({
+        title: t('voice.error') || 'Voice Error',
+        description: errorMessage,
+        variant: 'destructive',
+      });
+    };
+
+    // Handle end of recognition
+    recognitionRef.current.onend = () => {
+      setIsListening(false);
+    };
+
+    // Start recognition
+    try {
+      recognitionRef.current.start();
+      toast({
+        title: t('voice.listening') || 'Listening...',
+        description: language === 'hindi' 
+          ? 'अपना सवाल बोलें...'
+          : 'Speak your question...',
+      });
+    } catch (error) {
+      console.error('Failed to start speech recognition:', error);
+      setIsListening(false);
+      toast({
+        title: t('voice.error') || 'Voice Error',
+        description: t('voice.startFailed') || 'Failed to start voice recognition',
+        variant: 'destructive',
+      });
+    }
   };
 
   const handleCameraCapture = (imageData: string) => {
@@ -246,8 +343,8 @@ const Chat = () => {
     });
 
     return language === 'hindi'
-      ? `नमस्ते! मैं AgriSathi AI हूं।\nआज: ${today}\n\nआप इन विषयों पर पूछ सकते हैं:\n• फसल (टमाटर, गेहूं, धान, मक्का)\n• मौसम और जलवायु\n• खाद और पोषण\n• कीट और रोग नियंत्रण\n• सिंचाई तरीके\n• जैविक खेती\n• बाजार भाव\n• सरकारी योजनाएं\n\nतस्वीर भेजकर रोग की पहचान भी कर सकते हैं!\n\nभाषा बदलने के लिए ऊपर दाईं तरफ का बटन दबाएं।`
-      : `Hello! I'm AgriSathi AI.\nToday: ${today}\n\nYou can ask about:\n• Crops (tomato, wheat, rice, maize)\n• Weather and climate\n• Fertilizers and nutrition\n• Pest and disease control\n• Irrigation methods\n• Organic farming\n• Market rates\n• Government schemes\n\nYou can also send photos to identify diseases!\n\nClick the button on the top right to change language.`;
+        ? `नमस्ते! मैं AgriSaathi AI हूं।\nआज: ${today}\n\nआप इन विषयों पर पूछ सकते हैं:\n• फसल (टमाटर, गेहूं, धान, मक्का)\n• मौसम और जलवायु\n• खाद और पोषण\n• कीट और रोग नियंत्रण\n• सिंचाई तरीके\n• जैविक खेती\n• बाजार भाव\n• सरकारी योजनाएं\n\nतस्वीर भेजकर रोग की पहचान भी कर सकते हैं!\n\nभाषा बदलने के लिए ऊपर दाईं तरफ का बटन दबाएं।`
+              : `Hello! I'm AgriSaathi AI.\nToday: ${today}\n\nYou can ask about:\n• Crops (tomato, wheat, rice, maize)\n• Weather and climate\n• Fertilizers and nutrition\n• Pest and disease control\n• Irrigation methods\n• Organic farming\n• Market rates\n• Government schemes\n\nYou can also send photos to identify diseases!\n\nClick the button on the top right to change language.`;
   };
 
   // Initialize with welcome message if no messages
@@ -417,9 +514,8 @@ const Chat = () => {
             <Button
               variant="outline"
               size="sm"
-              onClick={startVoiceInput}
-              disabled={isListening}
-              className="flex-shrink-0"
+              onClick={isListening ? stopVoiceInput : startVoiceInput}
+              className={`flex-shrink-0 ${isListening ? 'bg-red-500 text-white hover:bg-red-600' : ''}`}
             >
               {isListening ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
             </Button>
