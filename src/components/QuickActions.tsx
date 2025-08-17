@@ -1,9 +1,17 @@
+
 import { Camera, Mic, MessageSquare, MapPin, CloudRain, Coins, Sparkles, Zap, Target, Heart } from "lucide-react";
+=======
+import { Camera, Mic, MessageSquare, MapPin, CloudRain, Coins } from "lucide-react";
+
 import { Button } from "./ui/button";
 import { Card } from "./ui/card";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useUser } from "@/contexts/UserContext";
+
 import { useState, useRef } from "react";
+=======
+import { useState } from "react";
+
 import { useNavigate } from "react-router-dom";
 import { toast } from "@/hooks/use-toast";
 
@@ -12,8 +20,11 @@ export const QuickActions = () => {
   const { user } = useUser();
   const navigate = useNavigate();
   const [isListening, setIsListening] = useState(false);
+
   const [transcript, setTranscript] = useState("");
   const recognitionRef = useRef<any>(null);
+=======
+
 
   const handleAction = (action: string) => {
     switch (action) {
@@ -24,12 +35,16 @@ export const QuickActions = () => {
         startVoiceInput();
         break;
       case 'chat':
+
         // Navigate to AgriCredits page for expert consultation
         navigate('/agri-credits', { 
           state: { 
             fromExpertChat: true 
           } 
         });
+=======
+        navigate('/chat');
+
         break;
       case 'weather':
         // Show weather info in a toast
@@ -44,6 +59,7 @@ export const QuickActions = () => {
   };
 
   const startVoiceInput = () => {
+
     console.log('Starting voice input...');
     console.log('Browser support check:', {
       webkitSpeechRecognition: 'webkitSpeechRecognition' in window,
@@ -157,6 +173,46 @@ export const QuickActions = () => {
       recognitionRef.current.stop();
       setIsListening(false);
     }
+=======
+    setIsListening(true);
+    toast({
+      title: t('voice.listening') || 'Listening...',
+      description: t('voice.speakNow') || 'Speak your question now',
+    });
+    
+    // Simulate voice input
+    setTimeout(() => {
+      setIsListening(false);
+      const voiceQuestions = {
+        hindi: [
+          "गेहूं की बुआई के लिए सबसे अच्छा समय कौन सा है?",
+          "टमाटर में कीट नियंत्रण कैसे करें?",
+          "जैविक खेती के फायदे क्या हैं?",
+          "मौसम कैसा रहेगा?",
+          "बाजार में गेहूं का भाव क्या है?"
+        ],
+        english: [
+          "What is the best time for wheat sowing?",
+          "How to control pests in tomato?",
+          "What are the benefits of organic farming?",
+          "How is the weather today?",
+          "What is the market price of wheat?"
+        ]
+      };
+      
+      const questions = voiceQuestions[language as keyof typeof voiceQuestions];
+      const randomQuestion = questions[Math.floor(Math.random() * questions.length)];
+      
+      toast({
+        title: t('voice.question') || 'Question Detected',
+        description: randomQuestion,
+      });
+      
+      // Navigate to chat with the question
+      setTimeout(() => {
+        navigate('/chat');
+      }, 2000);
+    }, 3000);
   };
 
   const actions = [
@@ -193,6 +249,21 @@ export const QuickActions = () => {
     },
     {
       key: 'weather',
+=======
+      icon: Mic,
+      label: t('quickActions.voiceAsk'),
+      description: t('quickActions.voiceDescription'),
+      color: "bg-primary hover:bg-primary/90",
+      action: 'voice'
+    },
+    {
+      icon: MessageSquare,
+      label: t('quickActions.expertChat'),
+      description: t('quickActions.expertDescription'),
+      color: "bg-success hover:bg-success/90",
+      action: 'chat'
+    },
+    {
       icon: CloudRain,
       label: t('quickActions.weather') || 'Weather',
       description: t('quickActions.weatherDesc') || 'Check forecast',
@@ -243,6 +314,18 @@ export const QuickActions = () => {
                     <div className="w-full h-full bg-white rounded-full m-0.5" />
                   </div>
                 )}
+=======
+          <Card key={index} className="p-0 overflow-hidden border-border/50">
+            <Button
+              variant="ghost"
+              onClick={() => handleAction(action.action)}
+              disabled={action.action === 'voice' && isListening}
+              className={`w-full h-auto p-4 ${action.color} text-white flex flex-col items-center gap-2 rounded-lg hover:scale-105 transition-transform duration-200`}
+            >
+              <action.icon className={`h-8 w-8 ${action.action === 'voice' && isListening ? 'animate-pulse' : ''}`} />
+              <div className="text-center">
+                <div className="font-medium text-sm">{action.label}</div>
+                <div className="text-xs opacity-90">{action.description}</div>
               </div>
               
               {/* Label */}
