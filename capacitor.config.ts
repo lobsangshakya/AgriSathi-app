@@ -2,7 +2,7 @@ import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'com.agrisaathi.app',
-appName: 'AgriSaathi',
+  appName: 'AgriSaathi',
   webDir: 'dist',
   server: {
     androidScheme: 'https'
@@ -11,7 +11,9 @@ appName: 'AgriSaathi',
     SplashScreen: {
       launchShowDuration: 2000,
       backgroundColor: "#22c55e",
-      showSpinner: false
+      showSpinner: false,
+      splashFullScreen: true,
+      splashImmersive: true
     },
     StatusBar: {
       style: 'dark',
