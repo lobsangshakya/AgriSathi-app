@@ -16,6 +16,7 @@ const DiseaseDetection = () => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<DiseaseAnalysisResult | null>(null);
   const [isCameraOpen, setIsCameraOpen] = useState(false);
+  const [showCamera, setShowCamera] = useState(false);
   const [selectedCropType, setSelectedCropType] = useState<string>('');
   const [analysisHistory, setAnalysisHistory] = useState<DiseaseAnalysisResult[]>([]);
   const [isDragOver, setIsDragOver] = useState(false);
@@ -249,7 +250,7 @@ const DiseaseDetection = () => {
               <Button 
                 className="w-full" 
                 variant="outline"
-                onClick={() => setIsCameraOpen(true)}
+                onClick={() => setShowCamera(true)}
               >
                 <Camera className="h-4 w-4 mr-2" />
                 {t('disease.camera')}
@@ -387,12 +388,31 @@ const DiseaseDetection = () => {
         </Card>
       </div>
 
-      {/* Camera Scanner */}
-      <CameraScanner
-        isOpen={isCameraOpen}
-        onClose={() => setIsCameraOpen(false)}
-        onImageCapture={handleCameraCapture}
-      />
+        {/* Inline Camera Scanner */}
+        {showCamera && (
+          <Card className="p-4">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold">{t('disease.scanPlant') || 'Scan Plant'}</h3>
+              <Button
+                variant="ghost"
+                onClick={() => setShowCamera(false)}
+                className="p-2"
+              >
+                ✕
+              </Button>
+            </div>
+            <div className="max-h-96 overflow-hidden rounded-lg">
+              <CameraScanner
+                isOpen={true}
+                onClose={() => setShowCamera(false)}
+                onImageCapture={(imageData) => {
+                  handleCameraCapture(imageData);
+                  setShowCamera(false);
+                }}
+              />
+            </div>
+          </Card>
+        )}
     </div>
   );
 };
