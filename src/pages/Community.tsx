@@ -55,7 +55,6 @@ const Community = () => {
     try {
       setLoading(true);
       const fetchedPosts = await apiService.getCommunityPosts(language);
-      const fetchedPosts = await apiService.getCommunityPosts();
       setPosts(fetchedPosts);
     } catch (error) {
       console.error('Failed to load posts:', error);
@@ -133,7 +132,6 @@ const Community = () => {
         category: newPost.category,
         image: newPost.image || undefined,
         language: language
-        image: newPost.image || undefined
       };
 
       const response = await apiService.createPost(postData);
