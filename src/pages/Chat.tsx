@@ -32,7 +32,7 @@ const Chat = () => {
   const [newMessage, setNewMessage] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const [isListening, setIsListening] = useState(false);
-  const [isCameraOpen, setIsCameraOpen] = useState(false);
+  const [showCamera, setShowCamera] = useState(false);
   const [chatContext, setChatContext] = useState<ChatContext>({ 
     language,
     lastMessage: ''
@@ -277,7 +277,7 @@ const Chat = () => {
     };
     
     setMessages(prev => [...prev, imageMessage]);
-    setIsCameraOpen(false);
+    setShowCamera(false);
     analyzeImageForChat(imageData);
   };
 
@@ -291,8 +291,28 @@ const Chat = () => {
         id: Date.now().toString(),
         sender: "bot",
         content: language === 'hindi'
-          ? `छवि विश्लेषण परिणाम:\n\nपौधा: ${analysisResult.disease}\nविश्वास: ${analysisResult.confidence}%\nगंभीरता: ${analysisResult.severity}\n\nसिफारिशें:\n${analysisResult.recommendations.map(rec => `• ${rec}`).join('\n')}\n\nरोकथाम:\n${analysisResult.preventiveMeasures.map(prev => `• ${prev}`).join('\n')}`
-          : `Image Analysis Result:\n\nPlant: ${analysisResult.disease}\nConfidence: ${analysisResult.confidence}%\nSeverity: ${analysisResult.severity}\n\nRecommendations:\n${analysisResult.recommendations.map(rec => `• ${rec}`).join('\n')}\n\nPrevention:\n${analysisResult.preventiveMeasures.map(prev => `• ${prev}`).join('\n')}`,
+          ? `छवि विश्लेषण परिणाम:
+
+पौधा: ${analysisResult.disease}
+विश्वास: ${analysisResult.confidence}%
+गंभीरता: ${analysisResult.severity}
+
+सिफारिशें:
+${analysisResult.recommendations.map(rec => `• ${rec}`).join('\n')}
+
+रोकथाम:
+${analysisResult.preventiveMeasures.map(prev => `• ${prev}`).join('\n')}`
+          : `Image Analysis Result:
+
+Plant: ${analysisResult.disease}
+Confidence: ${analysisResult.confidence}%
+Severity: ${analysisResult.severity}
+
+Recommendations:
+${analysisResult.recommendations.map(rec => `• ${rec}`).join('\n')}
+
+Prevention:
+${analysisResult.preventiveMeasures.map(prev => `• ${prev}`).join('\n')}`,
         timestamp: new Date(),
         type: "text"
       };
@@ -343,7 +363,22 @@ const Chat = () => {
     });
 
     return language === 'hindi'
-        ? `नमस्ते! मैं AgriSaathi AI हूं।\nआज: ${today}\n\nआप इन विषयों पर पूछ सकते हैं:\n• फसल (टमाटर, गेहूं, धान, मक्का)\n• मौसम और जलवायु\n• खाद और पोषण\n• कीट और रोग नियंत्रण\n• सिंचाई तरीके\n• जैविक खेती\n• बाजार भाव\n• सरकारी योजनाएं\n\nतस्वीर भेजकर रोग की पहचान भी कर सकते हैं!\n\nभाषा बदलने के लिए ऊपर दाईं तरफ का बटन दबाएं।`
+        ? `नमस्ते! मैं AgriSaathi AI हूं।
+आज: ${today}
+
+आप इन विषयों पर पूछ सकते हैं:
+• फसल (टमाटर, गेहूं, धान, मक्का)
+• मौसम और जलवायु
+• खाद और पोषण
+• कीट और रोग नियंत्रण
+• सिंचाई तरीके
+• जैविक खेती
+• बाजार भाव
+• सरकारी योजनाएं
+
+तस्वीर भेजकर रोग की पहचान भी कर सकते हैं!
+
+भाषा बदलने के लिए ऊपर दाईं तरफ का बटन दबाएं।`
               : `Hello! I'm AgriSaathi AI.\nToday: ${today}\n\nYou can ask about:\n• Crops (tomato, wheat, rice, maize)\n• Weather and climate\n• Fertilizers and nutrition\n• Pest and disease control\n• Irrigation methods\n• Organic farming\n• Market rates\n• Government schemes\n\nYou can also send photos to identify diseases!\n\nClick the button on the top right to change language.`;
   };
 
@@ -505,7 +540,7 @@ const Chat = () => {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setIsCameraOpen(true)}
+              onClick={() => setShowCamera(!showCamera)}
               className="flex-shrink-0"
             >
               <Camera className="h-4 w-4" />
@@ -540,30 +575,34 @@ const Chat = () => {
         </div>
       </div>
 
-      {/* Camera Scanner Modal */}
-      {isCameraOpen && (
-        <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center">
-          <div className="bg-background rounded-lg p-4 max-w-md w-full mx-4">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold">
+        {/* Inline Camera Scanner */}
+        {showCamera && (
+          <div className="p-4 bg-card/50 backdrop-blur-sm border-t border-border">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-sm font-semibold">
                 {t('diseaseDetection.scanPlant') || 'Scan Plant'}
               </h3>
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => setIsCameraOpen(false)}
+                onClick={() => setShowCamera(false)}
+                className="p-1"
               >
-                ×
+                ✕
               </Button>
             </div>
-            <CameraScanner
-              onImageCapture={handleCameraCapture}
-              onClose={() => setIsCameraOpen(false)}
-              isOpen={isCameraOpen}
-            />
+            <div className="max-h-80 overflow-hidden rounded-lg">
+              <CameraScanner
+                onImageCapture={(imageData) => {
+                  handleCameraCapture(imageData);
+                  setShowCamera(false);
+                }}
+                onClose={() => setShowCamera(false)}
+                isOpen={true}
+              />
+            </div>
           </div>
-        </div>
-      )}
+        )}
     </div>
   );
 };
