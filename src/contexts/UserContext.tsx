@@ -1,12 +1,18 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
+export interface Achievement {
+  title: string;
+  points: number;
+  icon: string;
+}
+
 export interface User {
   id: string;
   name: string;
+  location: string;
+  avatar: string;
   email: string;
   phone: string;
-  location: string;
-  address: string;
   landSize: string;
   experience: string;
   agriCreds: number;
@@ -19,11 +25,7 @@ export interface User {
     questionsAsked: number;
     creditsEarned: number;
   };
-  achievements: Array<{
-    title: string;
-    points: number;
-    icon: string;
-  }>;
+  achievements: Achievement[];
 }
 
 interface UserContextType {
@@ -38,26 +40,16 @@ interface UserContextType {
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
-export const useUser = () => {
-  const context = useContext(UserContext);
-  if (context === undefined) {
-    throw new Error('useUser must be used within a UserProvider');
-  }
-  return context;
-};
-
 const defaultUser: User = {
   id: '1',
-  name: 'राजेश कुमार',
-  email: 'rajesh@example.com',
+  name: 'राम प्रकाश',
+  location: 'उत्तर प्रदेश, भारत',
+  avatar: 'https://images.unsplash.com/photo-1607990281513-2c110a25bd8c?w=150&h=150&fit=crop&crop=face',
+  email: 'ram.prakash@example.com',
   phone: '+91 98765 43210',
-  location: 'Bangalore, India',
-  address: 'Bangalore, India',
   landSize: '2.5 एकड़',
   experience: '15 साल',
-  agriCreds: 200, // Start with 200 credits for testing
-=======
-  agriCreds: 0, // Start with 0 credits
+  agriCreds: 200,
   joinDate: new Date().toLocaleDateString('hi-IN', { 
     year: 'numeric', 
     month: 'long' 
@@ -79,8 +71,6 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Check for existing user data on mount
   useEffect(() => {
-    const savedUser = localStorage.getItem('agrisaathi_user');
-=======
     const savedUser = localStorage.getItem('agrisathi_user');
     if (savedUser) {
       const userData = JSON.parse(savedUser);
@@ -93,16 +83,12 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const newUser = { ...defaultUser, ...userData };
     setUser(newUser);
     setIsLoggedIn(true);
-          localStorage.setItem('agrisaathi_user', JSON.stringify(newUser));
-=======
     localStorage.setItem('agrisathi_user', JSON.stringify(newUser));
   };
 
   const logout = () => {
     setUser(null);
     setIsLoggedIn(false);
-    localStorage.removeItem('agrisaathi_user');
-=======
     localStorage.removeItem('agrisathi_user');
   };
 
@@ -119,8 +105,6 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
 
     setUser(updatedUser);
-    localStorage.setItem('agrisaathi_user', JSON.stringify(updatedUser));
-=======
     localStorage.setItem('agrisathi_user', JSON.stringify(updatedUser));
 
     // Add achievement if criteria met
@@ -153,8 +137,6 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (newAchievements.length > updatedUser.achievements.length) {
       const userWithAchievements = { ...updatedUser, achievements: newAchievements };
       setUser(userWithAchievements);
-      localStorage.setItem('agrisaathi_user', JSON.stringify(userWithAchievements));
-=======
       localStorage.setItem('agrisathi_user', JSON.stringify(userWithAchievements));
     }
   };
@@ -173,8 +155,6 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
 
     setUser(updatedUser);
-    localStorage.setItem('agrisaathi_user', JSON.stringify(updatedUser));
-=======
     localStorage.setItem('agrisathi_user', JSON.stringify(updatedUser));
 
     // Add credits for actions
@@ -192,8 +172,6 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const updatedUser = { ...user, ...updates };
     setUser(updatedUser);
-    localStorage.setItem('agrisaathi_user', JSON.stringify(updatedUser));
-=======
     localStorage.setItem('agrisathi_user', JSON.stringify(updatedUser));
   };
 
@@ -212,4 +190,12 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
       {children}
     </UserContext.Provider>
   );
-}; 
+};
+
+export const useUser = () => {
+  const context = useContext(UserContext);
+  if (context === undefined) {
+    throw new Error('useUser must be used within a UserProvider');
+  }
+  return context;
+};
