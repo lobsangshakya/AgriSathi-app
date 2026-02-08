@@ -1,4 +1,12 @@
+/**
+ * User Context - Real Authentication with Supabase
+ * Manages user authentication state and profile data
+ */
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { authService, UserProfile } from '@/services/authService';
+import { handleToastError } from '@/utils/errorHandler';
+import { toast } from '@/hooks/use-toast';
 
 export interface Achievement {
   title: string;
@@ -31,11 +39,14 @@ export interface User {
 interface UserContextType {
   user: User | null;
   isLoggedIn: boolean;
-  login: (userData: Partial<User>) => void;
-  logout: () => void;
+  isLoading: boolean;
+  login: (email: string, password: string) => Promise<boolean>;
+  signUp: (email: string, password: string, userData: Partial<User>) => Promise<boolean>;
+  logout: () => Promise<void>;
   addAgriCreds: (amount: number, reason: string) => void;
   updateStats: (type: 'post' | 'answer' | 'question') => void;
-  updateUser: (updates: Partial<User>) => void;
+  updateUser: (updates: Partial<User>) => Promise<boolean>;
+  refreshUser: () => Promise<void>;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -65,33 +76,241 @@ const defaultUser: User = {
   achievements: []
 };
 
+/**
+ * User Context Provider - Real Supabase Authentication
+ */
+
 export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  // Check for existing user data on mount
+  // Transform UserProfile to User interface
+  const transformProfile = (profile: UserProfile): User => ({
+    id: profile.id,
+    name: profile.name,
+    location: profile.location,
+    avatar: profile.avatar_url,
+    email: profile.email,
+    phone: profile.phone,
+    landSize: profile.land_size,
+    experience: profile.experience,
+    agriCreds: profile.agri_creds,
+    joinDate: profile.join_date,
+    language: profile.language,
+    crops: profile.crops,
+    stats: {
+      postsShared: 0, // Will be updated from database
+      helpfulAnswers: 0,
+      questionsAsked: 0,
+      creditsEarned: profile.agri_creds,
+    },
+    achievements: [], // Will be fetched from database
+  });
+
+  // Check for existing session on mount
   useEffect(() => {
-    const savedUser = localStorage.getItem('agrisathi_user');
-    if (savedUser) {
-      const userData = JSON.parse(savedUser);
-      setUser(userData);
-      setIsLoggedIn(true);
-    }
+    const initializeAuth = async () => {
+      try {
+        const currentUser = await authService.getCurrentUser();
+        if (currentUser) {
+          const transformedUser = transformProfile(currentUser);
+          setUser(transformedUser);
+          setIsLoggedIn(true);
+        }
+      } catch (error) {
+        console.error('Failed to initialize auth:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    initializeAuth();
+
+    // Listen to auth state changes
+    const { data: { subscription } } = authService.onAuthStateChange((profile) => {
+      if (profile) {
+        const transformedUser = transformProfile(profile);
+        setUser(transformedUser);
+        setIsLoggedIn(true);
+      } else {
+        setUser(null);
+        setIsLoggedIn(false);
+      }
+      setIsLoading(false);
+    });
+
+    return () => {
+      subscription?.unsubscribe();
+    };
   }, []);
 
-  const login = (userData: Partial<User>) => {
-    const newUser = { ...defaultUser, ...userData };
-    setUser(newUser);
-    setIsLoggedIn(true);
-    localStorage.setItem('agrisathi_user', JSON.stringify(newUser));
+  // Real login with email and password
+  const login = async (email: string, password: string): Promise<boolean> => {
+    try {
+      setIsLoading(true);
+      const response = await authService.signIn(email, password);
+
+      if (response.error) {
+        toast({
+          title: 'Login Failed',
+          description: response.error,
+          variant: 'destructive',
+        });
+        return false;
+      }
+
+      if (response.user) {
+        const transformedUser = transformProfile(response.user);
+        setUser(transformedUser);
+        setIsLoggedIn(true);
+
+        toast({
+          title: 'Login Successful',
+          description: `Welcome back, ${transformedUser.name}!`,
+        });
+        return true;
+      }
+
+      return false;
+    } catch (error) {
+      handleToastError(error, toast);
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const logout = () => {
-    setUser(null);
-    setIsLoggedIn(false);
-    localStorage.removeItem('agrisathi_user');
+  // Real sign up with email and password
+  const signUp = async (email: string, password: string, userData: Partial<User>): Promise<boolean> => {
+    try {
+      setIsLoading(true);
+      const response = await authService.signUp(email, password, {
+        name: userData.name || '',
+        phone: userData.phone || '',
+        location: userData.location || '',
+        land_size: userData.landSize || '',
+        experience: userData.experience || '',
+        language: userData.language || 'hindi',
+        crops: userData.crops || [],
+        avatar_url: userData.avatar || '',
+      });
+
+      if (response.error) {
+        toast({
+          title: 'Sign Up Failed',
+          description: response.error,
+          variant: 'destructive',
+        });
+        return false;
+      }
+
+      if (response.user) {
+        const transformedUser = transformProfile(response.user);
+        setUser(transformedUser);
+        setIsLoggedIn(true);
+
+        toast({
+          title: 'Sign Up Successful',
+          description: `Welcome to AgriSathi, ${transformedUser.name}!`,
+        });
+        return true;
+      }
+
+      return false;
+    } catch (error) {
+      handleToastError(error, toast);
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
   };
 
+  // Real logout
+  const logout = async (): Promise<void> => {
+    try {
+      const response = await authService.signOut();
+
+      if (response.error) {
+        toast({
+          title: 'Logout Failed',
+          description: response.error,
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      setUser(null);
+      setIsLoggedIn(false);
+
+      toast({
+        title: 'Logged Out',
+        description: 'You have been successfully logged out.',
+      });
+    } catch (error) {
+      handleToastError(error, toast);
+    }
+  };
+
+  // Update user profile in database
+  const updateUser = async (updates: Partial<User>): Promise<boolean> => {
+    try {
+      if (!user) return false;
+
+      const profileUpdates = {
+        name: updates.name,
+        phone: updates.phone,
+        location: updates.location,
+        land_size: updates.landSize,
+        experience: updates.experience,
+        language: updates.language,
+        crops: updates.crops,
+        avatar_url: updates.avatar,
+      };
+
+      const response = await authService.updateProfile(profileUpdates);
+
+      if (response.error) {
+        toast({
+          title: 'Update Failed',
+          description: response.error,
+          variant: 'destructive',
+        });
+        return false;
+      }
+
+      if (response.user) {
+        const transformedUser = transformProfile(response.user);
+        setUser(transformedUser);
+
+        toast({
+          title: 'Profile Updated',
+          description: 'Your profile has been successfully updated.',
+        });
+        return true;
+      }
+
+      return false;
+    } catch (error) {
+      handleToastError(error, toast);
+      return false;
+    }
+  };
+
+  // Refresh user data from database
+  const refreshUser = async (): Promise<void> => {
+    try {
+      const currentUser = await authService.getCurrentUser();
+      if (currentUser) {
+        const transformedUser = transformProfile(currentUser);
+        setUser(transformedUser);
+      }
+    } catch (error) {
+      console.error('Failed to refresh user:', error);
+    }
+  };
+
+  // Add AgriCreds (local state for now, will be moved to database)
   const addAgriCreds = (amount: number, reason: string) => {
     if (!user) return;
 
@@ -105,7 +324,6 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
 
     setUser(updatedUser);
-    localStorage.setItem('agrisathi_user', JSON.stringify(updatedUser));
 
     // Add achievement if criteria met
     const newAchievements = [...updatedUser.achievements];
@@ -137,10 +355,10 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (newAchievements.length > updatedUser.achievements.length) {
       const userWithAchievements = { ...updatedUser, achievements: newAchievements };
       setUser(userWithAchievements);
-      localStorage.setItem('agrisathi_user', JSON.stringify(userWithAchievements));
     }
   };
 
+  // Update stats (local state for now)
   const updateStats = (type: 'post' | 'answer' | 'question') => {
     if (!user) return;
 
@@ -155,7 +373,6 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
 
     setUser(updatedUser);
-    localStorage.setItem('agrisathi_user', JSON.stringify(updatedUser));
 
     // Add credits for actions
     const creditRewards = {
@@ -167,22 +384,17 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     addAgriCreds(creditRewards[type], `${type} action`);
   };
 
-  const updateUser = (updates: Partial<User>) => {
-    if (!user) return;
-
-    const updatedUser = { ...user, ...updates };
-    setUser(updatedUser);
-    localStorage.setItem('agrisathi_user', JSON.stringify(updatedUser));
-  };
-
   const value: UserContextType = {
     user,
     isLoggedIn,
+    isLoading,
     login,
+    signUp,
     logout,
     addAgriCreds,
     updateStats,
-    updateUser
+    updateUser,
+    refreshUser,
   };
 
   return (
