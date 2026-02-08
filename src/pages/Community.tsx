@@ -21,7 +21,7 @@ import {
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useUser } from "@/contexts/UserContext";
-import { apiService, CommunityPost, CreatePostRequest, compressImage } from "@/lib/api";
+import { apiService, CommunityPost, CreatePostRequest, compressImage } from "@/services/api";
 import { toast } from "@/hooks/use-toast";
 
 const categoryOptions = [

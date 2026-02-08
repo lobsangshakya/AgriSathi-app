@@ -20,7 +20,7 @@ import {
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useUser } from "@/contexts/UserContext";
 import { CameraScanner } from "@/components/CameraScanner";
-import { apiService, aiService, ChatMessage, ChatContext } from "@/lib/api";
+import { apiService, aiService, ChatMessage, ChatContext } from "@/services/api";
 import { toast } from "@/hooks/use-toast";
 import { useLocation } from "react-router-dom";
 
@@ -39,7 +39,7 @@ const Chat = () => {
   });
   const [apiStatus, setApiStatus] = useState<'mock' | 'real' | 'error'>('mock');
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const recognitionRef = useRef<any>(null);
+  const recognitionRef = useRef<SpeechRecognition | null>(null);
 
   // Check API status on component mount
   useEffect(() => {
@@ -75,7 +75,6 @@ const Chat = () => {
       const testResponse = await apiService.sendChatMessage("test", { language });
       setApiStatus('real');
     } catch (error) {
-      console.log('Using mock APIs for development');
       setApiStatus('mock');
     }
   };
@@ -100,26 +99,18 @@ const Chat = () => {
       }
       
       try {
-        // Debug: Log the current language
-        console.log('Current language:', language);
-        console.log('Chat context:', chatContext);
-        
         // Process with NLP first
         const nlpResult = await aiService.processNaturalLanguage(newMessage, language);
         
         // Create the context with explicit language
         const messageContext = {
           ...chatContext,
-          language: language, // Explicitly set language
+          language: language,
           nlpResult
         };
         
-        console.log('Sending message with context:', messageContext);
-        
         // Send to chatbot API with proper language context
         const botResponse = await apiService.sendChatMessage(newMessage, messageContext);
-        
-        console.log('Bot response received:', botResponse);
         
         setMessages(prev => [...prev, botResponse]);
         setChatContext(prev => ({ ...prev, lastMessage: newMessage, language }));
@@ -193,7 +184,7 @@ const Chat = () => {
     recognitionRef.current.maxAlternatives = 1;
 
     // Handle results
-    recognitionRef.current.onresult = (event: any) => {
+    recognitionRef.current.onresult = (event: SpeechRecognitionEvent) => {
       const result = event.results[0];
       const detectedText = result[0].transcript;
       setNewMessage(detectedText);
@@ -206,7 +197,7 @@ const Chat = () => {
     };
 
     // Handle errors
-    recognitionRef.current.onerror = (event: any) => {
+    recognitionRef.current.onerror = (event: SpeechRecognitionErrorEvent) => {
       console.error('Speech recognition error:', event.error);
       setIsListening(false);
       
@@ -396,18 +387,10 @@ ${analysisResult.preventiveMeasures.map(prev => `• ${prev}`).join('\n')}`,
     }
   }, [language, messages.length]);
 
-  // Debug: Log language changes
-  useEffect(() => {
-    console.log('Language changed to:', language);
-    console.log('Chat context updated:', chatContext);
-  }, [language, chatContext]);
-
   // Test function to verify language switching
   const testLanguageSwitch = async () => {
-    console.log('Testing language switch...');
     try {
       const testResponse = await apiService.sendChatMessage("hello", { language });
-      console.log('Test response:', testResponse);
       toast({
         title: 'Language Test',
         description: `Response in ${language}: ${testResponse.content.substring(0, 50)}...`,

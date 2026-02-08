@@ -1,31 +1,51 @@
-// API Configuration
+/**
+ * API Configuration and Type Definitions
+ * Central configuration for all API endpoints and data structures
+ */
+
+// API endpoints - can be overridden by environment variables
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://api.agrisathi.com';
 const AI_SERVICE_URL = import.meta.env.VITE_AI_SERVICE_URL || 'https://ai.agrisathi.com';
 
-// Types
+// ============================================================================
+// TYPE DEFINITIONS
+// ============================================================================
+
+/**
+ * Disease analysis result structure
+ * Returned by plant disease detection API
+ */
 export interface DiseaseAnalysisResult {
-  disease: string;
-  confidence: number;
-  severity: 'low' | 'medium' | 'high';
-  recommendations: string[];
-  preventiveMeasures: string[];
-  treatment: string[];
-  scientificName?: string;
-  symptoms: string[];
+  disease: string;              // Disease name (e.g., "Leaf Spot")
+  confidence: number;            // Confidence percentage (0-100)
+  severity: 'low' | 'medium' | 'high';  // Disease severity level
+  recommendations: string[];    // Treatment recommendations
+  preventiveMeasures: string[];  // Prevention measures
+  treatment: string[];          // Treatment options
+  scientificName?: string;       // Scientific name of disease
+  symptoms: string[];           // Visible symptoms
 }
 
+/**
+ * Chat message structure
+ * Used for AI chatbot conversations
+ */
 export interface ChatMessage {
-  id: string;
-  sender: 'user' | 'bot';
-  content: string;
-  timestamp: Date;
-  type: 'text' | 'image' | 'voice';
+  id: string;                   // Unique message identifier
+  sender: 'user' | 'bot';      // Message sender
+  content: string;               // Message content
+  timestamp: Date;              // Message timestamp
+  type: 'text' | 'image' | 'voice';  // Message type
 }
 
+/**
+ * Chat context for AI processing
+ * Provides context for better AI responses
+ */
 export interface ChatContext {
-  language: string;
-  lastMessage?: string;
-  nlpResult?: any;
+  language: string;              // User's preferred language
+  lastMessage?: string;          // Previous message for context
+  nlpResult?: any;             // Natural language processing result
 }
 
 export interface WeatherData {

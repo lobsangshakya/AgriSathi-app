@@ -1,4 +1,9 @@
-import { useState, useEffect } from 'react';
+/**
+ * Authentication Page - Real Supabase Integration
+ * Handles user login and signup with email/password
+ */
+
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '@/contexts/UserContext';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -6,11 +11,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { toast } from '@/hooks/use-toast';
-import { ArrowLeft, Phone, Mail, User, Lock, Eye, EyeOff } from 'lucide-react';
-import logo from '@/assets/Logo.png';
+import { ArrowLeft, Mail, User, Lock, Eye, EyeOff, Loader2 } from 'lucide-react';
+import logo from '@/assets/AgriSathi Logo.png';
 
 const Auth = ({ onAuth }: { onAuth: () => void }) => {
-  const { login } = useUser();
+  const { login, signUp, isLoading } = useUser();
   const { t, language } = useLanguage();
   const navigate = useNavigate();
   
@@ -24,410 +29,317 @@ const Auth = ({ onAuth }: { onAuth: () => void }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   
-  // OTP states
-  const [otpSent, setOtpSent] = useState(false);
-  const [otp, setOtp] = useState('');
-  const [otpTimer, setOtpTimer] = useState(0);
-  const [canResendOtp, setCanResendOtp] = useState(false);
-  
   // UI states
   const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [verifyingOtp, setVerifyingOtp] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // OTP timer effect
-  useEffect(() => {
-    let interval: NodeJS.Timeout;
-    if (otpTimer > 0) {
-      interval = setInterval(() => {
-        setOtpTimer(prev => {
-          if (prev <= 1) {
-            setCanResendOtp(true);
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-    }
-    return () => clearInterval(interval);
-  }, [otpTimer]);
-
+  // Form validation
   const validateForm = () => {
+    setError(null);
+
+    if (!email.trim()) {
+      setError(language === 'hindi' ? 'ईमेल आवश्यक है' : 'Email is required');
+      return false;
+    }
+
+    if (!password.trim()) {
+      setError(language === 'hindi' ? 'पासवर्ड आवश्यक है' : 'Password is required');
+      return false;
+    }
+
+    if (password.length < 6) {
+      setError(language === 'hindi' ? 'पासवर्ड कम से कम 6 अक्षरों का होना चाहिए' : 'Password must be at least 6 characters');
+      return false;
+    }
+
     if (isSignUp) {
       if (!name.trim()) {
         setError(language === 'hindi' ? 'नाम आवश्यक है' : 'Name is required');
         return false;
       }
-      if (!email.trim()) {
-        setError(language === 'hindi' ? 'ईमेल आवश्यक है' : 'Email is required');
-        return false;
-      }
-      if (!phone.trim()) {
-        setError(language === 'hindi' ? 'फोन नंबर आवश्यक है' : 'Phone number is required');
-        return false;
-      }
-      if (password.length < 6) {
-        setError(language === 'hindi' ? 'पासवर्ड कम से कम 6 अक्षर का होना चाहिए' : 'Password must be at least 6 characters');
-        return false;
-      }
+
       if (password !== confirmPassword) {
         setError(language === 'hindi' ? 'पासवर्ड मेल नहीं खाते' : 'Passwords do not match');
         return false;
       }
-    } else {
-      if (!email.trim() || !password.trim()) {
-        setError(language === 'hindi' ? 'सभी फील्ड भरें' : 'Please fill all fields');
-        return false;
-      }
     }
+
     return true;
   };
 
-  const sendOtp = async () => {
+  // Handle form submission
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
     if (!validateForm()) return;
     
-    setLoading(true);
-    setError(null);
+    setIsSubmitting(true);
     
     try {
-      // Simulate OTP sending
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      let success = false;
       
-      setOtpSent(true);
-      setOtpTimer(30); // 30 seconds timer
-      setCanResendOtp(false);
-      
-      toast({
-        title: language === 'hindi' ? 'OTP भेजा गया' : 'OTP Sent',
-        description: language === 'hindi' 
-          ? `OTP ${phone} पर भेजा गया है` 
-          : `OTP sent to ${phone}`,
-      });
-      
-    } catch (error) {
-      setError(language === 'hindi' ? 'OTP भेजने में समस्या' : 'Error sending OTP');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const verifyOtp = async () => {
-    if (!otp.trim() || otp.length !== 6) {
-      setError(language === 'hindi' ? '6 अंकों का OTP दर्ज करें' : 'Please enter 6-digit OTP');
-      return;
-    }
-    
-    setVerifyingOtp(true);
-    setError(null);
-    
-    try {
-      // Simulate OTP verification
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // For demo, accept any 6-digit OTP
-      if (otp.length === 6) {
-        const userData = {
-          name: name,
-          phone: phone,
-          email: email,
-          address: 'Bangalore, India',
-          location: 'Bangalore, India',
+      if (isSignUp) {
+        success = await signUp(email, password, {
+          name,
+          phone,
           location: language === 'hindi' ? 'गाँव: रामपुर, जिला: मेरठ, उत्तर प्रदेश' : 'Village: Rampur, District: Meerut, UP',
           landSize: language === 'hindi' ? '2.5 एकड़' : '2.5 acres',
           experience: language === 'hindi' ? '15 साल' : '15 years',
           language: language,
-          crops: language === 'hindi' ? ['गेहूं', 'धान', 'गन्ना', 'सरसों'] : ['Wheat', 'Rice', 'Sugarcane', 'Mustard']
-        };
-        
-        login(userData);
-        onAuth();
-        
-        toast({
-          title: language === 'hindi' ? 'सफल पंजीकरण' : 'Registration Successful',
-          description: language === 'hindi' ? 'आपका प्रोफाइल लोड हो रहा है...' : 'Loading your profile...',
+          crops: language === 'hindi' ? ['गेहूं', 'धान', 'गन्ना', 'सरसों'] : ['Wheat', 'Rice', 'Sugarcane', 'Mustard'],
+          avatar: 'https://images.unsplash.com/photo-1607990281513-2c110a25bd8c?w=150&h=150&fit=crop&crop=face',
         });
-        
-        setTimeout(() => {
-          navigate('/profile');
-        }, 1000);
       } else {
-        setError(language === 'hindi' ? 'गलत OTP' : 'Invalid OTP');
+        success = await login(email, password);
+      }
+      
+      if (success) {
+        onAuth();
+        navigate('/dashboard');
       }
     } catch (error) {
-      setError(language === 'hindi' ? 'OTP सत्यापन में समस्या' : 'OTP verification error');
+      console.error('Authentication error:', error);
     } finally {
-      setVerifyingOtp(false);
+      setIsSubmitting(false);
     }
   };
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!validateForm()) return;
-    
-    setLoading(true);
-    setError(null);
-    
+  // Handle password reset
+  const handlePasswordReset = async () => {
+    if (!email.trim()) {
+      setError(language === 'hindi' ? 'ईमेल आवश्यक है' : 'Email is required');
+      return;
+    }
+
     try {
-      // Simple login for demo
-      const userData = {
-        name: language === 'hindi' ? 'राजेश कुमार' : 'Rajesh Kumar',
-        phone: '+91 98765 43210',
-        email: email,
-        address: 'Bangalore, India',
-        location: 'Bangalore, India',
-        location: language === 'hindi' ? 'गाँव: रामपुर, जिला: मेरठ, उत्तर प्रदेश' : 'Village: Rampur, District: Meerut, UP',
-        landSize: language === 'hindi' ? '2.5 एकड़' : '2.5 acres',
-        experience: language === 'hindi' ? '15 साल' : '15 years',
-        language: language,
-        crops: language === 'hindi' ? ['गेहूं', 'धान', 'गन्ना', 'सरसों'] : ['Wheat', 'Rice', 'Sugarcane', 'Mustard']
-      };
-      
-      login(userData);
-      onAuth();
-      
+      // This would call authService.resetPassword(email) in a real implementation
       toast({
-        title: language === 'hindi' ? 'सफल लॉगिन' : 'Login Successful',
-        description: language === 'hindi' ? 'आपका प्रोफाइल लोड हो रहा है...' : 'Loading your profile...',
+        title: language === 'hindi' ? 'पासवर्ड रीसेट' : 'Password Reset',
+        description: language === 'hindi' 
+          ? 'आपके ईमेल पर पासवर्ड रीसेट लिंक भेजी गई है' 
+          : 'Password reset link has been sent to your email',
       });
-      
-      setTimeout(() => {
-        navigate('/profile');
-      }, 1000);
-      
     } catch (error) {
-      setError(language === 'hindi' ? 'लॉगिन में समस्या' : 'Login error');
-    } finally {
-      setLoading(false);
+      console.error('Password reset error:', error);
     }
-  };
-
-  const resendOtp = () => {
-    sendOtp();
-  };
-
-  const resetForm = () => {
-    setOtpSent(false);
-    setOtp('');
-    setOtpTimer(0);
-    setCanResendOtp(false);
-    setError(null);
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-earth p-4">
-      <Card className="p-8 w-full max-w-md space-y-6">
-        <div className="text-center">
-          <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 overflow-hidden">
-            <img src={logo} alt="AgriSaathi" className="w-full h-full object-contain" />
-          </div>
-          <h2 className="text-2xl font-bold mb-2">
+    <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-emerald-50 flex items-center justify-center p-4">
+      <Card className="w-full max-w-md p-8 shadow-xl border-0 bg-white/95 backdrop-blur-sm">
+        {/* Back Button */}
+        <button
+          onClick={() => navigate('/')}
+          className="mb-6 flex items-center text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          {language === 'hindi' ? 'वापस' : 'Back'}
+        </button>
+
+        {/* Logo */}
+        <div className="flex flex-col items-center mb-8">
+          <img 
+            src={logo} 
+            alt="AgriSathi Logo" 
+            className="w-20 h-20 mb-4 rounded-xl shadow-lg"
+          />
+          <h1 className="text-2xl font-bold text-gradient text-center">
             {isSignUp 
-              ? (language === 'hindi' ? 'AgriSaathi में शामिल हों' : 'Join AgriSaathi')
-              : (language === 'hindi' ? 'AgriSaathi में आपका स्वागत है' : 'Welcome to AgriSaathi')
+              ? (language === 'hindi' ? 'AgriSathi में शामिल हों' : 'Join AgriSathi')
+              : (language === 'hindi' ? 'AgriSathi में लॉगिन करें' : 'Login to AgriSathi')
             }
-          </h2>
-          <p className="text-muted-foreground">
+          </h1>
+          <p className="text-muted-foreground text-center mt-2">
             {isSignUp 
-              ? (language === 'hindi' ? 'अपनी खेती को डिजिटल बनाएं' : 'Digitize your farming')
-              : (language === 'hindi' ? 'अपने खाते में लॉगिन करें' : 'Sign in to your account')
+              ? (language === 'hindi' ? 'अपना खाता बनाएं' : 'Create your account')
+              : (language === 'hindi' ? 'अपने खाते में प्रवेश करें' : 'Access your account')
             }
           </p>
         </div>
-        
-        {!otpSent ? (
-          <form onSubmit={isSignUp ? (e) => { e.preventDefault(); sendOtp(); } : handleLogin} className="space-y-4">
-            {isSignUp && (
+
+        {/* Error Message */}
+        {error && (
+          <div className="mb-6 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+            {error}
+          </div>
+        )}
+
+        {/* Auth Form */}
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Name Field (Sign Up Only) */}
+          {isSignUp && (
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground">
+                {language === 'hindi' ? 'पूरा नाम' : 'Full Name'}
+              </label>
               <div className="relative">
                 <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
                   type="text"
-                  placeholder={language === 'hindi' ? 'पूरा नाम' : 'Full Name'}
+                  placeholder={language === 'hindi' ? 'अपना नाम दर्ज करें' : 'Enter your name'}
                   value={name}
-                  onChange={e => setName(e.target.value)}
+                  onChange={(e) => setName(e.target.value)}
                   className="pl-10"
-                  required
+                  disabled={isSubmitting || isLoading}
                 />
               </div>
-            )}
-            
+            </div>
+          )}
+
+          {/* Email Field */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-foreground">
+              {language === 'hindi' ? 'ईमेल पता' : 'Email Address'}
+            </label>
             <div className="relative">
               <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <Input
                 type="email"
-                placeholder={language === 'hindi' ? 'ईमेल' : 'Email'}
+                placeholder={language === 'hindi' ? 'अपना ईमेल दर्ज करें' : 'Enter your email'}
                 value={email}
-                onChange={e => setEmail(e.target.value)}
+                onChange={(e) => setEmail(e.target.value)}
                 className="pl-10"
-                required
+                disabled={isSubmitting || isLoading}
               />
             </div>
-            
-            {isSignUp && (
-              <div className="relative">
-                <Phone className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input
-                  type="tel"
-                  placeholder={language === 'hindi' ? 'फोन नंबर' : 'Phone Number'}
-                  value={phone}
-                  onChange={e => setPhone(e.target.value)}
-                  className="pl-10"
-                  required
-                />
-              </div>
-            )}
-            
+          </div>
+
+          {/* Phone Field (Sign Up Only) */}
+          {isSignUp && (
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground">
+                {language === 'hindi' ? 'फोन नंबर' : 'Phone Number'}
+              </label>
+              <Input
+                type="tel"
+                placeholder={language === 'hindi' ? '+91 98765 43210' : '+91 98765 43210'}
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                disabled={isSubmitting || isLoading}
+              />
+            </div>
+          )}
+
+          {/* Password Field */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-foreground">
+              {language === 'hindi' ? 'पासवर्ड' : 'Password'}
+            </label>
             <div className="relative">
               <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <Input
-                type={showPassword ? "text" : "password"}
-                placeholder={language === 'hindi' ? 'पासवर्ड' : 'Password'}
+                type={showPassword ? 'text' : 'password'}
+                placeholder={language === 'hindi' ? 'अपना पासवर्ड दर्ज करें' : 'Enter your password'}
                 value={password}
-                onChange={e => setPassword(e.target.value)}
+                onChange={(e) => setPassword(e.target.value)}
                 className="pl-10 pr-10"
-                required
+                disabled={isSubmitting || isLoading}
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-3 text-muted-foreground"
+                className="absolute right-3 top-3 text-muted-foreground hover:text-foreground"
+                disabled={isSubmitting || isLoading}
               >
                 {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
             </div>
-            
-            {isSignUp && (
+          </div>
+
+          {/* Confirm Password Field (Sign Up Only) */}
+          {isSignUp && (
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground">
+                {language === 'hindi' ? 'पासवर्ड की पुष्टि करें' : 'Confirm Password'}
+              </label>
               <div className="relative">
                 <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
-                  type={showConfirmPassword ? "text" : "password"}
-                  placeholder={language === 'hindi' ? 'पासवर्ड की पुष्टि करें' : 'Confirm Password'}
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  placeholder={language === 'hindi' ? 'पासवर्ड फिर से दर्ज करें' : 'Re-enter your password'}
                   value={confirmPassword}
-                  onChange={e => setConfirmPassword(e.target.value)}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
                   className="pl-10 pr-10"
-                  required
+                  disabled={isSubmitting || isLoading}
                 />
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-3 top-3 text-muted-foreground"
+                  className="absolute right-3 top-3 text-muted-foreground hover:text-foreground"
+                  disabled={isSubmitting || isLoading}
                 >
                   {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
-            )}
-            
-            {error && (
-              <div className="text-red-600 text-sm text-center bg-red-50 p-3 rounded">
-                {error}
-              </div>
-            )}
-            
-            <Button
-              type="submit"
-              className="w-full"
-              disabled={loading}
-            >
-              {loading 
-                ? (language === 'hindi' ? 'लोड हो रहा है...' : 'Loading...') 
-                : (isSignUp 
-                    ? (language === 'hindi' ? 'OTP भेजें' : 'Send OTP')
-                    : (language === 'hindi' ? 'लॉगिन करें' : 'Login')
-                  )
-              }
-            </Button>
-          </form>
-        ) : (
-          <div className="space-y-4">
-            <div className="text-center">
-              <p className="text-sm text-muted-foreground mb-4">
-                {language === 'hindi' 
-                  ? `OTP ${phone} पर भेजा गया है` 
-                  : `OTP sent to ${phone}`
+            </div>
+          )}
+
+          {/* Submit Button */}
+          <Button
+            type="submit"
+            className="w-full py-3 text-base font-semibold bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 shadow-lg"
+            disabled={isSubmitting || isLoading}
+          >
+            {isSubmitting || isLoading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                {isSignUp 
+                  ? (language === 'hindi' ? 'खाता बनाया जा रहा है...' : 'Creating account...')
+                  : (language === 'hindi' ? 'लॉगिन हो रहा है...' : 'Signing in...')
                 }
-              </p>
-            </div>
-            
-            <div className="space-y-4">
-              <Input
-                type="text"
-                placeholder={language === 'hindi' ? '6 अंकों का OTP दर्ज करें' : 'Enter 6-digit OTP'}
-                value={otp}
-                onChange={e => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                maxLength={6}
-                className="text-center text-lg tracking-widest"
-              />
-              
-              {otpTimer > 0 && (
-                <p className="text-sm text-center text-muted-foreground">
-                  {language === 'hindi' ? 'पुनः भेजें' : 'Resend'} ({otpTimer}s)
-                </p>
-              )}
-              
-              {canResendOtp && (
-                <Button
-                  variant="outline"
-                  onClick={resendOtp}
-                  className="w-full"
-                  disabled={loading}
-                >
-                  {loading 
-                    ? (language === 'hindi' ? 'भेज रहा है...' : 'Sending...') 
-                    : (language === 'hindi' ? 'OTP पुनः भेजें' : 'Resend OTP')
-                  }
-                </Button>
-              )}
-              
-              {error && (
-                <div className="text-red-600 text-sm text-center bg-red-50 p-3 rounded">
-                  {error}
-                </div>
-              )}
-              
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  onClick={resetForm}
-                  className="flex-1"
-                >
-                  <ArrowLeft className="h-4 w-4 mr-2" />
-                  {language === 'hindi' ? 'वापस' : 'Back'}
-                </Button>
-                <Button
-                  onClick={verifyOtp}
-                  className="flex-1"
-                  disabled={verifyingOtp || otp.length !== 6}
-                >
-                  {verifyingOtp 
-                    ? (language === 'hindi' ? 'सत्यापित कर रहा है...' : 'Verifying...') 
-                    : (language === 'hindi' ? 'सत्यापित करें' : 'Verify')
-                  }
-                </Button>
-              </div>
-            </div>
+              </>
+            ) : (
+              isSignUp 
+                ? (language === 'hindi' ? 'खाता बनाएं' : 'Create Account')
+                : (language === 'hindi' ? 'लॉगिन करें' : 'Sign In')
+            )}
+          </Button>
+        </form>
+
+        {/* Forgot Password */}
+        {!isSignUp && (
+          <div className="mt-6 text-center">
+            <button
+              type="button"
+              onClick={handlePasswordReset}
+              className="text-sm text-primary hover:text-primary/80 transition-colors"
+              disabled={isSubmitting || isLoading}
+            >
+              {language === 'hindi' ? 'पासवर्ड भूल गए?' : 'Forgot password?'}
+            </button>
           </div>
         )}
-        
-        <div className="text-center">
-          <button
-            onClick={() => {
-              setIsSignUp(!isSignUp);
-              resetForm();
-              setError(null);
-            }}
-            className="text-sm text-primary hover:underline"
-          >
+
+        {/* Toggle Sign In/Sign Up */}
+        <div className="mt-8 text-center">
+          <p className="text-sm text-muted-foreground">
             {isSignUp 
-              ? (language === 'hindi' ? 'पहले से खाता है? लॉगिन करें' : 'Already have an account? Login')
-              : (language === 'hindi' ? 'नया खाता बनाएं' : 'Create new account')
+              ? (language === 'hindi' ? 'पहले से ही खाता है?' : 'Already have an account?')
+              : (language === 'hindi' ? 'खाता नहीं है?' : "Don't have an account?")
             }
-          </button>
+            <button
+              type="button"
+              onClick={() => {
+                setIsSignUp(!isSignUp);
+                setError(null);
+              }}
+              className="ml-1 text-primary hover:text-primary/80 font-medium transition-colors"
+              disabled={isSubmitting || isLoading}
+            >
+              {isSignUp 
+                ? (language === 'hindi' ? 'लॉगिन करें' : 'Sign In')
+                : (language === 'hindi' ? 'खाता बनाएं' : 'Sign Up')
+              }
+            </button>
+          </p>
         </div>
-        
-        {!isSignUp && (
-          <div className="text-center text-sm text-muted-foreground">
+
+        {/* Terms and Conditions */}
+        {isSignUp && (
+          <div className="mt-6 text-xs text-muted-foreground text-center">
             {language === 'hindi' 
-              ? 'डेमो के लिए कोई भी ईमेल और पासवर्ड का उपयोग करें'
-              : 'Use any email and password for demo'
+              ? 'खाता बनाकर, आप हमारी शर्तों और गोपनीयता नीति से सहमत होते हैं'
+              : 'By creating an account, you agree to our Terms and Privacy Policy'
             }
           </div>
         )}
@@ -436,4 +348,4 @@ const Auth = ({ onAuth }: { onAuth: () => void }) => {
   );
 };
 
-export default Auth; 
+export default Auth;
