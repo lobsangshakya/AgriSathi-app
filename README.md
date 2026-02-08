@@ -65,7 +65,7 @@ A comprehensive mobile-friendly web application built with React, TypeScript, an
 5. **Open your browser**
    Navigate to `http://localhost:5173` (or the URL shown in your terminal)
 
-## 📱 Available Scripts
+## Available Scripts
 
 - `npm run dev` - Start development server
 - `npm run build` - Build for production
