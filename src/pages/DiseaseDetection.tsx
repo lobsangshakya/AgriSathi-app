@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Camera, Upload, Scan, AlertTriangle, CheckCircle, RefreshCw, Info, FileImage } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { CameraScanner } from "@/components/CameraScanner";
-import { apiService, aiService, compressImage, DiseaseAnalysisResult } from "@/lib/api";
+import { apiService, aiService, compressImage, DiseaseAnalysisResult } from "@/services/api";
 import { toast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 
@@ -24,18 +24,14 @@ const DiseaseDetection = () => {
 
   const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    console.log('File selected:', file); // Debug log
     
     if (file) {
       await processImageFile(file);
-    } else {
-      console.log('No file selected'); // Debug log
     }
   };
 
   const processImageFile = async (file: File) => {
     try {
-      console.log('Processing file:', file.name, file.size, file.type); // Debug log
       
       // Validate file type
       if (!file.type.startsWith('image/')) {
@@ -58,7 +54,6 @@ const DiseaseDetection = () => {
       }
       
       const compressedImage = await compressImage(file);
-      console.log('Image compressed successfully'); // Debug log
       setSelectedImage(compressedImage);
       setAnalysisResult(null);
       
@@ -67,7 +62,6 @@ const DiseaseDetection = () => {
         description: t('disease.imageReadyForAnalysis') || 'Image is ready for analysis',
       });
     } catch (error) {
-      console.error('Image processing error:', error); // Debug log
       toast({
         title: t('common.error') || 'Error',
         description: t('disease.uploadError') || 'Failed to process image',

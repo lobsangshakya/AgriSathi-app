@@ -1,10 +1,12 @@
-import { useState } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Search, Bell, Globe, Sparkles } from "lucide-react";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { toast } from "@/hooks/use-toast";
+import { useDebounce } from "@/utils/performance";
+import { handleToastError } from "@/utils/errorHandler";
 import { 
   DropdownMenu, 
   DropdownMenuContent, 
@@ -26,33 +28,21 @@ export const Header = ({
 }: HeaderProps) => {
   const { language, setLanguage, t } = useLanguage();
   const navigate = useNavigate();
+  const [searchQuery, setSearchQuery] = useState("");
   const [notifications, setNotifications] = useState([
     {
-      id: 1,
-      title: language === 'hindi' ? 'फसल सलाह' : 'Crop Advice',
-      message: language === 'hindi' ? 'आपकी टमाटर फसल के लिए नई सलाह उपलब्ध है' : 'New advice available for your tomato crop',
-      time: '2 min ago',
+      id: "1",
+      title: language === "hindi" ? "नया संदेश" : "New Message",
+      description: language === "hindi" ? "आपके पास एक नया संदेश है" : "You have a new message",
       read: false,
-      type: 'advice',
-      priority: 'high'
+      timestamp: new Date()
     },
     {
-      id: 2,
-      title: language === 'hindi' ? 'मौसम अपडेट' : 'Weather Update',
-      message: language === 'hindi' ? 'कल बारिश की संभावना है, सिंचाई की योजना बनाएं' : 'Rain expected tomorrow, plan irrigation accordingly',
-      time: '15 min ago',
-      read: false,
-      type: 'weather',
-      priority: 'medium'
-    },
-    {
-      id: 3,
-      title: language === 'hindi' ? 'समुदाय अपडेट' : 'Community Update',
-      message: language === 'hindi' ? 'आपके पोस्ट पर 5 नई टिप्पणियां हैं' : '5 new comments on your post',
-      time: '1 hour ago',
+      id: "2", 
+      title: language === "hindi" ? "फसल अपडेट" : "Crop Update",
+      description: language === "hindi" ? "आपकी फसल की स्थिति अपडेट हुई है" : "Your crop status has been updated",
       read: true,
-      type: 'community',
-      priority: 'low'
+      timestamp: new Date(Date.now() - 3600000)
     }
   ]);
 
@@ -60,7 +50,7 @@ export const Header = ({
     setLanguage(language === 'hindi' ? 'english' : 'hindi');
   };
 
-  const markAsRead = (id: number) => {
+  const markAsRead = (id: string) => {
     setNotifications(prev => 
       prev.map(notif => 
         notif.id === id ? { ...notif, read: true } : notif
@@ -121,9 +111,11 @@ export const Header = ({
                     <div className="flex flex-col gap-1">
                       <div className="flex items-center justify-between">
                         <span className="font-medium text-sm">{notification.title}</span>
-                        <span className="text-xs text-muted-foreground">{notification.time}</span>
+                        <span className="text-xs text-muted-foreground">
+                          {new Date(notification.timestamp).toLocaleTimeString()}
+                        </span>
                       </div>
-                      <p className="text-sm text-muted-foreground">{notification.message}</p>
+                      <p className="text-sm text-muted-foreground">{notification.description}</p>
                     </div>
                   </DropdownMenuItem>
                 ))}

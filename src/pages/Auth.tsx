@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { toast } from '@/hooks/use-toast';
 import { ArrowLeft, Phone, Mail, User, Lock, Eye, EyeOff } from 'lucide-react';
-import logo from '@/assets/Logo.png';
+import logo from '@/assets/AgriSathi Logo.png';
 
 const Auth = ({ onAuth }: { onAuth: () => void }) => {
   const { login } = useUser();
@@ -130,8 +130,6 @@ const Auth = ({ onAuth }: { onAuth: () => void }) => {
           name: name,
           phone: phone,
           email: email,
-          address: 'Bangalore, India',
-          location: 'Bangalore, India',
           location: language === 'hindi' ? 'गाँव: रामपुर, जिला: मेरठ, उत्तर प्रदेश' : 'Village: Rampur, District: Meerut, UP',
           landSize: language === 'hindi' ? '2.5 एकड़' : '2.5 acres',
           experience: language === 'hindi' ? '15 साल' : '15 years',
@@ -173,8 +171,6 @@ const Auth = ({ onAuth }: { onAuth: () => void }) => {
         name: language === 'hindi' ? 'राजेश कुमार' : 'Rajesh Kumar',
         phone: '+91 98765 43210',
         email: email,
-        address: 'Bangalore, India',
-        location: 'Bangalore, India',
         location: language === 'hindi' ? 'गाँव: रामपुर, जिला: मेरठ, उत्तर प्रदेश' : 'Village: Rampur, District: Meerut, UP',
         landSize: language === 'hindi' ? '2.5 एकड़' : '2.5 acres',
         experience: language === 'hindi' ? '15 साल' : '15 years',
