@@ -2,7 +2,7 @@
 
 A comprehensive mobile-friendly web application built with React, TypeScript, and Tailwind CSS to support farmers with AI-powered disease detection, multilingual chatbot assistance, and real-time agricultural insights.
 
-## 🌱 Features
+## Features
 
 ### Core Features
 - **AI-Powered Chatbot**: Natural language processing chatbot supporting Hindi and English languages
@@ -21,7 +21,7 @@ A comprehensive mobile-friendly web application built with React, TypeScript, an
 - **Secure Authentication**: User authentication and data protection
 - **Modern UI/UX**: Beautiful, intuitive interface using shadcn/ui components
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
 - Node.js (v18 or higher)
@@ -73,7 +73,7 @@ A comprehensive mobile-friendly web application built with React, TypeScript, an
 - `npm run preview` - Preview production build
 - `npm run lint` - Run ESLint for code quality checks
 
-## 🏗️ Project Structure
+## Project Structure
 
 ```
 AgriSathi-app/
@@ -113,7 +113,7 @@ AgriSathi-app/
 └── vite.config.ts         # Vite build configuration
 ```
 
-## 🔧 Technology Stack
+## Technology Stack
 
 - **Frontend**: React 18, TypeScript, Vite
 - **Styling**: Tailwind CSS, shadcn/ui components
@@ -124,7 +124,7 @@ AgriSathi-app/
 - **Build Tool**: Vite
 - **Code Quality**: ESLint, TypeScript
 
-## 🌐 API Integration
+## API Integration
 
 The app supports both mock and real API integration:
 
@@ -139,7 +139,7 @@ The app supports both mock and real API integration:
 - Custom agricultural APIs for crop recommendations
 - Real-time chatbot responses
 
-## 📱 Usage Guide
+## Usage Guide
 
 ### 1. Authentication
 - Open the app and create an account or login
@@ -171,7 +171,7 @@ The app supports both mock and real API integration:
 - Get personalized advice
 - Video and text chat support
 
-## 🔒 Environment Variables
+## Environment Variables
 
 Create a `.env` file in the root directory:
 
@@ -189,7 +189,7 @@ VITE_API_BASE_URL=https://your-api.com
 VITE_AI_SERVICE_URL=https://your-ai-service.com
 ```
 
-## 🚀 Deployment
+## Deployment
 
 ### Build for Production
 ```bash
@@ -206,7 +206,7 @@ npm run build
 2. Upload the `dist` folder to Netlify
 3. Set environment variables in Netlify dashboard
 
-## 🤝 Contributing
+## Contributing
 
 1. Fork the repository
 2. Create a feature branch: `git checkout -b feature-name`
@@ -214,18 +214,18 @@ npm run build
 4. Push to the branch: `git push origin feature-name`
 5. Submit a pull request
 
-## 📝 License
+## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🆘 Support
+## Support
 
 For support and questions:
 - Create an issue in the GitHub repository
 - Email: support@agrisathi.com
 - Check the [Wiki](https://github.com/your-username/AgriSathi-app/wiki) for detailed documentation
 
-## 🌟 Acknowledgments
+## Acknowledgments
 
 - Farmers and agricultural experts who contributed to the knowledge base
 - Open source community for the amazing tools and libraries
@@ -234,4 +234,4 @@ For support and questions:
 
 ---
 
-**AgriSathi** - Empowering farmers with technology 🌾
+**AgriSathi** - Empowering farmers with technology
