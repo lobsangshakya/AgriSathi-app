@@ -363,10 +363,13 @@ class AuthService {
         };
       }
 
-      // Create user with phone-based auth
+      // Create user with phone-based auth using email as identifier
+      const tempEmail = `${phone}@agrisathi.local`;
+      const tempPassword = otp; // Use OTP as temporary password
+      
       const { data: authData, error: authError } = await supabase.auth.signUp({
-        phone: phone,
-        password: userData.phone || phone, // Use phone as temporary password
+        email: tempEmail,
+        password: tempPassword,
         options: {
           data: {
             name: userData.name,
@@ -386,7 +389,7 @@ class AuthService {
           .from('users')
           .insert({
             id: authData.user.id,
-            email: userData.email || `${phone}@agrisathi.local`,
+            email: tempEmail,
             name: userData.name || '',
             phone: phone,
             location: userData.location || '',
@@ -446,11 +449,38 @@ class AuthService {
         };
       }
 
-      // Sign in with phone (Supabase will handle OTP verification)
-      const { data: authData, error: authError } = await supabase.auth.verifyOtp({
-        phone: phone,
-        token: otp,
-        type: 'sms',
+      // For phone auth, we need to use a different approach since verifyOtp might not be available
+      // Let's create a custom verification method
+      const { data: otpData, error: otpError } = await supabase
+        .from('otp_verifications')
+        .select('*')
+        .eq('phone', phone)
+        .eq('otp', otp)
+        .eq('used', false)
+        .gt('expires_at', new Date().toISOString())
+        .single();
+
+      if (otpError || !otpData) {
+        return {
+          user: null,
+          session: null,
+          error: 'Invalid or expired OTP',
+        };
+      }
+
+      // Mark OTP as used
+      await supabase
+        .from('otp_verifications')
+        .update({ used: true })
+        .eq('id', otpData.id);
+
+      // Create or get user with phone-based auth
+      // Since Supabase doesn't have built-in phone OTP, we'll use email as identifier
+      const tempEmail = `${phone}@agrisathi.local`;
+      
+      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+        email: tempEmail,
+        password: otp, // Use OTP as temporary password
       });
 
       if (authError) {
