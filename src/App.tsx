@@ -17,7 +17,7 @@ import { Layout } from "./components/Layout";
 import { LanguageProvider } from "./contexts/LanguageContext";
 import { UserProvider, useUser } from "./contexts/UserContext";
 import { WalletProvider } from "./contexts/WalletContext";
-import Auth from "./pages/Auth";
+import Auth from "./pages/AuthEnhanced";
 
 const queryClient = new QueryClient();
 
