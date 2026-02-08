@@ -42,6 +42,9 @@ interface UserContextType {
   isLoading: boolean;
   login: (email: string, password: string) => Promise<boolean>;
   signUp: (email: string, password: string, userData: Partial<User>) => Promise<boolean>;
+  signUpWithPhone: (phone: string, name: string, otp: string) => Promise<boolean>;
+  signInWithPhone: (phone: string, otp: string) => Promise<boolean>;
+  sendOTP: (phone: string) => Promise<boolean>;
   logout: () => Promise<void>;
   addAgriCreds: (amount: number, reason: string) => void;
   updateStats: (type: 'post' | 'answer' | 'question') => void;
@@ -297,6 +300,123 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  // Sign up with phone and OTP
+  const signUpWithPhone = async (phone: string, name: string, otp: string): Promise<boolean> => {
+    const { language } = useLanguage();
+    try {
+      setIsLoading(true);
+      const response = await authService.signUpWithPhone(phone, otp, {
+        name,
+        location: language === 'hindi' ? 'गाँव: रामपुर, जिला: मेरठ, उत्तर प्रदेश' : 'Village: Rampur, District: Meerut, UP',
+        land_size: language === 'hindi' ? '2.5 एकड़' : '2.5 acres',
+        experience: language === 'hindi' ? '15 साल' : '15 years',
+        language: language,
+        crops: language === 'hindi' ? ['गेहूं', 'धान', 'गन्ना', 'सरसों'] : ['Wheat', 'Rice', 'Sugarcane', 'Mustard'],
+        avatar_url: 'https://images.unsplash.com/photo-1607990281513-2c110a25bd8c?w=150&h=150&fit=crop&crop=face',
+      });
+
+      if (response.error) {
+        toast({
+          title: 'Sign Up Failed',
+          description: response.error,
+          variant: 'destructive',
+        });
+        return false;
+      }
+
+      if (response.user) {
+        const transformedUser = transformProfile(response.user);
+        setUser(transformedUser);
+        setIsLoggedIn(true);
+
+        toast({
+          title: 'Sign Up Successful',
+          description: `Welcome to AgriSathi, ${transformedUser.name}!`,
+        });
+        return true;
+      }
+
+      return false;
+    } catch (error) {
+      handleToastError(error, toast);
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Sign in with phone and OTP
+  const signInWithPhone = async (phone: string, otp: string): Promise<boolean> => {
+    const { language } = useLanguage();
+    try {
+      setIsLoading(true);
+      const response = await authService.signInWithPhone(phone, otp);
+
+      if (response.error) {
+        toast({
+          title: 'Login Failed',
+          description: response.error,
+          variant: 'destructive',
+        });
+        return false;
+      }
+
+      if (response.user) {
+        const transformedUser = transformProfile(response.user);
+        setUser(transformedUser);
+        setIsLoggedIn(true);
+
+        toast({
+          title: 'Login Successful',
+          description: `Welcome back, ${transformedUser.name}!`,
+        });
+        return true;
+      }
+
+      return false;
+    } catch (error) {
+      handleToastError(error, toast);
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Send OTP to phone
+  const sendOTP = async (phone: string): Promise<boolean> => {
+    const { language } = useLanguage();
+    try {
+      setIsLoading(true);
+      const response = await authService.sendOTP(phone);
+
+      if (response.error) {
+        toast({
+          title: 'OTP Send Failed',
+          description: response.error,
+          variant: 'destructive',
+        });
+        return false;
+      }
+
+      if (response.success) {
+        toast({
+          title: 'OTP Sent',
+          description: language === 'hindi' 
+            ? `OTP ${phone} पर भेज दिया गया है` 
+            : `OTP has been sent to ${phone}`,
+        });
+        return true;
+      }
+
+      return false;
+    } catch (error) {
+      handleToastError(error, toast);
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   // Refresh user data from database
   const refreshUser = async (): Promise<void> => {
     try {
@@ -390,6 +510,9 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     isLoading,
     login,
     signUp,
+    signUpWithPhone,
+    signInWithPhone,
+    sendOTP,
     logout,
     addAgriCreds,
     updateStats,

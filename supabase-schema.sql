@@ -4,6 +4,16 @@
 -- Enable necessary extensions
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
+-- OTP verifications table
+CREATE TABLE IF NOT EXISTS public.otp_verifications (
+    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    phone TEXT UNIQUE NOT NULL,
+    otp TEXT NOT NULL,
+    expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
+    used BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
 -- Users table
 CREATE TABLE IF NOT EXISTS public.users (
     id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
@@ -99,6 +109,9 @@ CREATE TABLE IF NOT EXISTS public.user_stats (
 
 -- Create indexes for better performance
 CREATE INDEX IF NOT EXISTS idx_users_email ON public.users(email);
+CREATE INDEX IF NOT EXISTS idx_users_phone ON public.users(phone);
+CREATE INDEX IF NOT EXISTS idx_otp_verifications_phone ON public.otp_verifications(phone);
+CREATE INDEX IF NOT EXISTS idx_otp_verifications_expires_at ON public.otp_verifications(expires_at);
 CREATE INDEX IF NOT EXISTS idx_community_posts_user_id ON public.community_posts(user_id);
 CREATE INDEX IF NOT EXISTS idx_community_posts_created_at ON public.community_posts(created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_chat_messages_user_id ON public.chat_messages(user_id);
@@ -110,6 +123,7 @@ CREATE INDEX IF NOT EXISTS idx_user_achievements_user_id ON public.user_achievem
 
 -- Row Level Security (RLS) policies
 -- Enable RLS on all tables
+ALTER TABLE public.otp_verifications ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.community_posts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.chat_messages ENABLE ROW LEVEL SECURITY;
@@ -117,6 +131,13 @@ ALTER TABLE public.disease_analysis ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.weather_data ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.user_achievements ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.user_stats ENABLE ROW LEVEL SECURITY;
+
+-- OTP verifications policies
+CREATE POLICY "Anyone can create OTP verification" ON public.otp_verifications
+    FOR INSERT WITH CHECK (true);
+
+CREATE POLICY "Service role can manage OTP verifications" ON public.otp_verifications
+    FOR ALL USING (auth.jwt()->>'role' = 'service_role');
 
 -- Users can only access their own data
 CREATE POLICY "Users can view own profile" ON public.users
