@@ -1,5 +1,5 @@
 import { ReactNode } from "react";
-import { BottomNavigation } from "./BottomNavigation";
+import { BottomNavigationEnhanced } from "./BottomNavigationEnhanced";
 
 interface LayoutProps {
   children: ReactNode;
@@ -11,7 +11,7 @@ export const Layout = ({ children }: LayoutProps) => {
       <main className="pb-20 max-w-md mx-auto">
         {children}
       </main>
-      <BottomNavigation />
+      <BottomNavigationEnhanced />
     </div>
   );
 };
