@@ -20,14 +20,54 @@ import { UserProvider, useUser } from "./contexts/UserContext";
 import { WalletProvider } from "./contexts/WalletContext";
 import Auth from "./pages/AuthEnhanced";
 import ErrorBoundary from "./components/ErrorBoundary";
+import { useState, useEffect } from 'react';
+import AuthModal from './components/AuthModal';
+import { useLanguage } from './contexts/LanguageContext';
 
 const queryClient = new QueryClient();
 
 const AppContent = () => {
   const { isLoggedIn } = useUser();
+  const { language } = useLanguage();
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [authView, setAuthView] = useState<'login' | 'signup'>('login');
+
+  // Show auth modal if not logged in
+  useEffect(() => {
+    if (!isLoggedIn) {
+      setShowAuthModal(true);
+    }
+  }, [isLoggedIn]);
 
   if (!isLoggedIn) {
-    return <Auth onAuth={() => {}} />;
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-50">
+        <div className="flex items-center justify-center min-h-screen p-4">
+          <div className="text-center">
+            <div className="mb-8">
+              <img 
+                src="/src/assets/AgriSathi Logo.png" 
+                alt="AgriSathi" 
+                className="w-24 h-24 mx-auto rounded-2xl shadow-lg"
+              />
+              <h1 className="text-3xl font-bold text-gray-900 mt-4">
+                {language === 'hindi' ? 'AgriSaathi' : 'AgriSathi'}
+              </h1>
+              <p className="text-gray-600 mt-2">
+                {language === 'hindi' 
+                  ? 'आपका स्मार्ट फार्मिंग सहायक' 
+                  : 'Your Smart Farming Assistant'}
+              </p>
+            </div>
+            <AuthModal 
+              isOpen={showAuthModal}
+              onClose={() => setShowAuthModal(false)}
+              initialView={authView}
+            />
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
