@@ -1,10 +1,11 @@
 /**
- * User Context - Authentication with Fallback Support
+ * User Context - Real Authentication with Supabase
  * Manages user authentication state and profile data
  */
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { authWrapper, UnifiedUserProfile } from '@/services/authServiceWrapper';
+import { handleToastError } from '@/utils/errorHandler';
 import { toast } from '@/hooks/use-toast';
 
 export interface Achievement {
@@ -54,16 +55,19 @@ interface UserContextType {
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
 const defaultUser: User = {
-  id: 'user-1',
+  id: '1',
   name: 'राम प्रकाश',
-  location: 'गाँव: रामपुर, जिला: मेरठ, उत्तर प्रदेश',
+  location: 'उत्तर प्रदेश, भारत',
   avatar: 'https://images.unsplash.com/photo-1607990281513-2c110a25bd8c?w=150&h=150&fit=crop&crop=face',
-  email: 'ramprakash@agrisathi.in',
+  email: 'ram.prakash@example.com',
   phone: '+91 98765 43210',
   landSize: '2.5 एकड़',
   experience: '15 साल',
-  agriCreds: 250,
-  joinDate: '2024-01-15',
+  agriCreds: 200,
+  joinDate: new Date().toLocaleDateString('hi-IN', { 
+    year: 'numeric', 
+    month: 'long' 
+  }),
   language: 'hindi',
   crops: ['गेहूं', 'धान', 'गन्ना', 'सरसों'],
   stats: {
@@ -76,7 +80,7 @@ const defaultUser: User = {
 };
 
 /**
- * User Context Provider - Authentication with Fallback Support
+ * User Context Provider - Real Supabase Authentication
  */
 
 export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -84,25 +88,25 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isLoading, setIsLoading] = useState(true);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  // Transform UnifiedUserProfile to User interface
-  const transformProfile = (profile: UnifiedUserProfile): User => ({
+  // Transform UserProfile to User interface
+  const transformProfile = (profile: UserProfile): User => ({
     id: profile.id,
     name: profile.name,
     location: profile.location,
-    avatar: profile.avatar || profile.avatar_url || '',
+    avatar: profile.avatar_url,
     email: profile.email,
     phone: profile.phone,
-    landSize: profile.landSize || profile.land_size || '',
+    landSize: profile.land_size,
     experience: profile.experience,
-    agriCreds: profile.agriCreds || profile.agri_creds || 0,
-    joinDate: profile.joinDate || profile.join_date || '',
+    agriCreds: profile.agri_creds,
+    joinDate: profile.join_date,
     language: profile.language,
     crops: profile.crops,
     stats: {
       postsShared: 0, // Will be updated from database
       helpfulAnswers: 0,
       questionsAsked: 0,
-      creditsEarned: profile.agriCreds || profile.agri_creds || 0,
+      creditsEarned: profile.agri_creds,
     },
     achievements: [], // Will be fetched from database
   });
@@ -111,7 +115,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     const initializeAuth = async () => {
       try {
-        const currentUser = await authWrapper.getCurrentUser();
+        const currentUser = await authService.getCurrentUser();
         if (currentUser) {
           const transformedUser = transformProfile(currentUser);
           setUser(transformedUser);
@@ -127,7 +131,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     initializeAuth();
 
     // Listen to auth state changes
-    const { data: { subscription } } = authWrapper.onAuthStateChange((profile) => {
+    const { data: { subscription } } = authService.onAuthStateChange((profile) => {
       if (profile) {
         const transformedUser = transformProfile(profile);
         setUser(transformedUser);
@@ -148,7 +152,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
       setIsLoading(true);
-      const response = await authWrapper.signIn(email, password);
+      const response = await authService.signIn(email, password);
 
       if (response.error) {
         toast({
@@ -173,11 +177,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       return false;
     } catch (error) {
-      toast({
-        title: 'Login Failed',
-        description: 'An unexpected error occurred',
-        variant: 'destructive',
-      });
+      handleToastError(error, toast);
       return false;
     } finally {
       setIsLoading(false);
@@ -188,7 +188,16 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signUp = async (email: string, password: string, userData: Partial<User>): Promise<boolean> => {
     try {
       setIsLoading(true);
-      const response = await authWrapper.signUp(email, password, userData);
+      const response = await authService.signUp(email, password, {
+        name: userData.name || '',
+        phone: userData.phone || '',
+        location: userData.location || '',
+        land_size: userData.landSize || '',
+        experience: userData.experience || '',
+        language: userData.language || 'hindi',
+        crops: userData.crops || [],
+        avatar_url: userData.avatar || '',
+      });
 
       if (response.error) {
         toast({
@@ -213,11 +222,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       return false;
     } catch (error) {
-      toast({
-        title: 'Sign Up Failed',
-        description: 'An unexpected error occurred',
-        variant: 'destructive',
-      });
+      handleToastError(error, toast);
       return false;
     } finally {
       setIsLoading(false);
@@ -227,7 +232,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Real logout
   const logout = async (): Promise<void> => {
     try {
-      const response = await authWrapper.signOut();
+      const response = await authService.signOut();
 
       if (response.error) {
         toast({
@@ -246,20 +251,27 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
         description: 'You have been successfully logged out.',
       });
     } catch (error) {
-      toast({
-        title: 'Logout Failed',
-        description: 'An unexpected error occurred',
-        variant: 'destructive',
-      });
+      handleToastError(error, toast);
     }
   };
 
-  // Update user profile
+  // Update user profile in database
   const updateUser = async (updates: Partial<User>): Promise<boolean> => {
     try {
       if (!user) return false;
 
-      const response = await authWrapper.updateProfile(updates);
+      const profileUpdates = {
+        name: updates.name,
+        phone: updates.phone,
+        location: updates.location,
+        land_size: updates.landSize,
+        experience: updates.experience,
+        language: updates.language,
+        crops: updates.crops,
+        avatar_url: updates.avatar,
+      };
+
+      const response = await authService.updateProfile(profileUpdates);
 
       if (response.error) {
         toast({
@@ -283,40 +295,24 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       return false;
     } catch (error) {
-      toast({
-        title: 'Update Failed',
-        description: 'An unexpected error occurred',
-        variant: 'destructive',
-      });
+      handleToastError(error, toast);
       return false;
-    }
-  };
-
-  // Refresh user data
-  const refreshUser = async (): Promise<void> => {
-    try {
-      const currentUser = await authWrapper.getCurrentUser();
-      if (currentUser) {
-        const transformedUser = transformProfile(currentUser);
-        setUser(transformedUser);
-      }
-    } catch (error) {
-      console.error('Failed to refresh user:', error);
     }
   };
 
   // Sign up with phone and OTP
   const signUpWithPhone = async (phone: string, name: string, otp: string): Promise<boolean> => {
+    const { language } = useLanguage();
     try {
       setIsLoading(true);
-      const response = await authWrapper.signUpWithPhone(phone, otp, {
+      const response = await authService.signUpWithPhone(phone, otp, {
         name,
-        location: 'Village: Rampur, District: Meerut, UP',
-        landSize: '2.5 acres',
-        experience: '15 years',
-        language: 'hindi',
-        crops: ['Wheat', 'Rice', 'Sugarcane', 'Mustard'],
-        avatar: 'https://images.unsplash.com/photo-1607990281513-2c110a25bd8c?w=150&h=150&fit=crop&crop=face',
+        location: language === 'hindi' ? 'गाँव: रामपुर, जिला: मेरठ, उत्तर प्रदेश' : 'Village: Rampur, District: Meerut, UP',
+        land_size: language === 'hindi' ? '2.5 एकड़' : '2.5 acres',
+        experience: language === 'hindi' ? '15 साल' : '15 years',
+        language: language,
+        crops: language === 'hindi' ? ['गेहूं', 'धान', 'गन्ना', 'सरसों'] : ['Wheat', 'Rice', 'Sugarcane', 'Mustard'],
+        avatar_url: 'https://images.unsplash.com/photo-1607990281513-2c110a25bd8c?w=150&h=150&fit=crop&crop=face',
       });
 
       if (response.error) {
@@ -342,11 +338,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       return false;
     } catch (error) {
-      toast({
-        title: 'Sign Up Failed',
-        description: 'An unexpected error occurred',
-        variant: 'destructive',
-      });
+      handleToastError(error, toast);
       return false;
     } finally {
       setIsLoading(false);
@@ -355,9 +347,10 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Sign in with phone and OTP
   const signInWithPhone = async (phone: string, otp: string): Promise<boolean> => {
+    const { language } = useLanguage();
     try {
       setIsLoading(true);
-      const response = await authWrapper.signInWithPhone(phone, otp);
+      const response = await authService.signInWithPhone(phone, otp);
 
       if (response.error) {
         toast({
@@ -382,11 +375,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       return false;
     } catch (error) {
-      toast({
-        title: 'Login Failed',
-        description: 'An unexpected error occurred',
-        variant: 'destructive',
-      });
+      handleToastError(error, toast);
       return false;
     } finally {
       setIsLoading(false);
@@ -395,9 +384,10 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Send OTP to phone
   const sendOTP = async (phone: string): Promise<boolean> => {
+    const { language } = useLanguage();
     try {
       setIsLoading(true);
-      const response = await authWrapper.sendOTP(phone);
+      const response = await authService.sendOTP(phone);
 
       if (response.error) {
         toast({
@@ -411,21 +401,32 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (response.success) {
         toast({
           title: 'OTP Sent',
-          description: `OTP has been sent to ${phone}`,
+          description: language === 'hindi' 
+            ? `OTP ${phone} पर भेज दिया गया है` 
+            : `OTP has been sent to ${phone}`,
         });
         return true;
       }
 
       return false;
     } catch (error) {
-      toast({
-        title: 'OTP Send Failed',
-        description: 'An unexpected error occurred',
-        variant: 'destructive',
-      });
+      handleToastError(error, toast);
       return false;
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  // Refresh user data from database
+  const refreshUser = async (): Promise<void> => {
+    try {
+      const currentUser = await authService.getCurrentUser();
+      if (currentUser) {
+        const transformedUser = transformProfile(currentUser);
+        setUser(transformedUser);
+      }
+    } catch (error) {
+      console.error('Failed to refresh user:', error);
     }
   };
 

@@ -18,6 +18,7 @@ import { LanguageProvider } from "./contexts/LanguageContext";
 import { UserProvider, useUser } from "./contexts/UserContext";
 import { WalletProvider } from "./contexts/WalletContext";
 import Auth from "./pages/AuthEnhanced";
+import ErrorBoundary from "./components/ErrorBoundary";
 
 const queryClient = new QueryClient();
 
@@ -29,42 +30,45 @@ const AppContent = () => {
   }
 
   return (
-    <Layout>
-      <Routes>
-        <Route path="/" element={<Dashboard />} />
-        <Route path="/community" element={<Community />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/disease-detection" element={<DiseaseDetection />} />
-        <Route path="/chat" element={<Chat />} />
-        <Route path="/expert-consultation" element={<ExpertConsultation />} />
-        <Route path="/agri-credits" element={<AgriCredits />} />
-        <Route path="/wallet" element={<Wallet />} />
-        <Route path="/service-confirmation" element={<ServiceConfirmation />} />
-        {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-    </Layout>
+    <ErrorBoundary>
+      <Layout>
+        <Routes>
+          <Route path="/" element={<Dashboard />} />
+          <Route path="/community" element={<Community />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/disease-detection" element={<DiseaseDetection />} />
+          <Route path="/chat" element={<Chat />} />
+          <Route path="/expert-consultation" element={<ExpertConsultation />} />
+          <Route path="/agri-credits" element={<AgriCredits />} />
+          <Route path="/wallet" element={<Wallet />} />
+          <Route path="/service-confirmation" element={<ServiceConfirmation />} />
+          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </Layout>
+    </ErrorBoundary>
   );
 };
 
 const App = () => {
-
   return (
-    <LanguageProvider>
-      <UserProvider>
-        <WalletProvider>
-          <QueryClientProvider client={queryClient}>
-            <TooltipProvider>
-              <Toaster />
-              <Sonner />
-              <BrowserRouter>
-                <AppContent />
-              </BrowserRouter>
-            </TooltipProvider>
-          </QueryClientProvider>
-        </WalletProvider>
-      </UserProvider>
-    </LanguageProvider>
+    <ErrorBoundary>
+      <LanguageProvider>
+        <UserProvider>
+          <WalletProvider>
+            <QueryClientProvider client={queryClient}>
+              <TooltipProvider>
+                <Toaster />
+                <Sonner />
+                <BrowserRouter>
+                  <AppContent />
+                </BrowserRouter>
+              </TooltipProvider>
+            </QueryClientProvider>
+          </WalletProvider>
+        </UserProvider>
+      </LanguageProvider>
+    </ErrorBoundary>
   );
 };
 
