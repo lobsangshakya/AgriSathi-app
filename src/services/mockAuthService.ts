@@ -1,7 +1,9 @@
 /**
  * Mock Authentication Service
- * Provides working authentication without external dependencies
+ * Provides working authentication with real SMS OTP delivery
  */
+
+import { smsService } from './smsService';
 
 // Mock user profile interface
 export interface MockUserProfile {
@@ -212,26 +214,37 @@ class MockAuthService {
   }
 
   /**
-   * Send OTP (mock implementation)
+   * Send OTP (real SMS implementation)
    */
   async sendOTP(phone: string): Promise<{ success: boolean; error: string | null }> {
     try {
       // Generate 6-digit OTP
       const otp = Math.floor(100000 + Math.random() * 900000).toString();
       
-      // Store OTP in localStorage for demo
+      // Store OTP in localStorage for verification
       localStorage.setItem(`otp_${phone}`, JSON.stringify({
         otp,
         expiresAt: new Date(Date.now() + 5 * 60 * 1000).toISOString(),
       }));
 
-      console.log(`Mock OTP sent to ${phone}: ${otp}`);
+      // Send OTP via SMS service
+      const smsResult = await smsService.sendOTP(phone, otp);
       
-      return {
-        success: true,
-        error: null,
-      };
+      if (smsResult.success) {
+        console.log(`✅ OTP sent successfully to ${phone}: ${otp}`);
+        return {
+          success: true,
+          error: null,
+        };
+      } else {
+        console.error(`❌ SMS failed for ${phone}:`, smsResult.error);
+        return {
+          success: false,
+          error: smsResult.error || 'Failed to send SMS',
+        };
+      }
     } catch (error) {
+      console.error('❌ OTP send error:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Failed to send OTP',
