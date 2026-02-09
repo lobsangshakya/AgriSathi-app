@@ -28,7 +28,8 @@ import {
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useUser } from "@/contexts/UserContext";
 import { CameraScanner } from "@/components/CameraScanner";
-import { apiService, aiService, ChatMessage, ChatContext } from "@/services/api";
+import { apiService, aiService, compressImage, DiseaseAnalysisResult, ChatMessage, ChatContext } from "@/services/api";
+import { workingChatbot } from "@/services/workingChatbot";
 import { toast } from "@/hooks/use-toast";
 import { useLocation } from "react-router-dom";
 import { cn } from "@/utils/utils";
@@ -211,36 +212,12 @@ const ChatEnhanced = () => {
     setIsTyping(true);
 
     try {
-      // Direct implementation for chat response
-      await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 2000));
-      
-      const language = chatContext?.language || 'hindi';
-      const lowerMessage = newMessage.toLowerCase();
-      
-      let responseContent = '';
-      
-      // Simple response logic based on keywords
-      if (lowerMessage.includes('मौसम') || lowerMessage.includes('weather')) {
-        responseContent = language === 'hindi' 
-          ? '🌤️ आज का मौसम खेती के लिए अनुकूल है। तापमान 28°C, नमी 65%, हवा 12 किमी/घंटा। सिंचाई का अच्छा समय है।'
-          : '🌤️ Today\'s weather is favorable for farming. Temperature 28°C, humidity 65%, wind 12 km/h. Good time for irrigation.';
-      } else if (lowerMessage.includes('बीमारी') || lowerMessage.includes('disease')) {
-        responseContent = language === 'hindi' 
-          ? '🌱 फसल की बीमारी के लिए: 1) पौधे की जांच करें 2) नीम का स्प्रे करें 3) विशेषज्ञ से संपर्क करें'
-          : '🌱 For crop disease: 1) Check plants 2) Use neem spray 3) Contact expert';
-      } else if (lowerMessage.includes('बाजार') || lowerMessage.includes('market')) {
-        responseContent = language === 'hindi' 
-          ? '💰 आज का बाजार: टमाटर ₹40/किग्रा, गेहूं ₹2200/क्विंटल, धान ₹2500/क्विंटल। कीमतें अच्छी हैं।'
-          : '💰 Today\'s market: Tomato ₹40/kg, Wheat ₹2200/quintal, Rice ₹2500/quintal. Prices are good.';
-      } else {
-        responseContent = language === 'hindi' 
-          ? '🌾 मैं आपकी मदद करने के लिए यहां हूं। कृपया अपना सवाल विस्तार से बताएं।'
-          : '🌾 I am here to help you. Please describe your question in detail.';
-      }
+      // Use working chatbot for intelligent responses
+      const response = await workingChatbot.processMessage(newMessage, chatContext);
       
       const botMessage: ChatMessage = {
         id: (Date.now() + 1).toString(),
-        content: responseContent,
+        content: response.content,
         sender: 'bot',
         timestamp: new Date(),
         type: 'text'

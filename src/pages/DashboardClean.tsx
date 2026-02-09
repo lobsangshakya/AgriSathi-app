@@ -12,6 +12,7 @@ import { useUser } from '@/contexts/UserContext';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import AuthModal from '@/components/AuthModal';
 import { 
   Camera, 
   MessageCircle, 
@@ -37,6 +38,8 @@ const DashboardClean = () => {
   const { user } = useUser();
   const navigate = useNavigate();
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [authView, setAuthView] = useState<'login' | 'signup'>('login');
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -415,6 +418,13 @@ const DashboardClean = () => {
             </Button>
           </div>
         </Card>
+        
+        {/* Auth Modal */}
+        <AuthModal 
+          isOpen={showAuthModal}
+          onClose={() => setShowAuthModal(false)}
+          initialView={authView}
+        />
       </div>
     </div>
   );
