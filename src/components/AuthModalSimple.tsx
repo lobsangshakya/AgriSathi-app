@@ -287,8 +287,99 @@ const AuthModalSimple = ({ isOpen, onClose, initialView = 'login' }: AuthModalSi
 
         {/* Forms */}
         <div className="p-6">
+          {authMethod === 'phone' ? (
+            <>
+              {!otpSent ? (
+                <div className="space-y-4">
+                  {isSignUp && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        {language === 'hindi' ? 'पूरा नाम' : 'Full Name'}
+                      </label>
+                      <div className="relative">
+                        <User className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                        <Input
+                          type="text"
+                          placeholder={language === 'hindi' ? 'अपना नाम दर्ज करें' : 'Enter your name'}
+                          value={name}
+                          onChange={(e) => setName(e.target.value)}
+                          className="pl-10"
+                          disabled={isSubmitting || isLoading}
+                        />
+                      </div>
+                    </div>
+                  )}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      {language === 'hindi' ? 'फोन नंबर' : 'Phone Number'}
+                    </label>
+                    <div className="relative">
+                      <Phone className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                      <Input
+                        type="tel"
+                        placeholder={language === 'hindi' ? '10 अंकों का नंबर' : '10-digit number'}
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
+                        className="pl-10"
+                        disabled={isSubmitting || isLoading}
+                      />
+                    </div>
+                  </div>
+                  <Button
+                    type="button"
+                    className="w-full py-3 bg-green-600 hover:bg-green-700"
+                    disabled={isSubmitting || isLoading}
+                    onClick={handleSendOTP}
+                  >
+                    {isSubmitting || isLoading ? (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin inline" />
+                    ) : null}
+                    {language === 'hindi' ? 'OTP भेजें' : 'Send OTP'}
+                  </Button>
+                </div>
+              ) : (
+                <form onSubmit={handleVerifyOTP} className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      {language === 'hindi' ? 'OTP दर्ज करें' : 'Enter OTP'}
+                    </label>
+                    <Input
+                      type="text"
+                      inputMode="numeric"
+                      maxLength={6}
+                      placeholder="000000"
+                      value={otp}
+                      onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
+                      disabled={isSubmitting || isLoading}
+                      className="text-center text-lg tracking-widest"
+                    />
+                  </div>
+                  <Button
+                    type="submit"
+                    className="w-full py-3 bg-green-600 hover:bg-green-700"
+                    disabled={!otp.trim() || otp.length < 4 || isSubmitting || isLoading}
+                  >
+                    {isSubmitting || isLoading ? (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin inline" />
+                    ) : null}
+                    {isSignUp
+                      ? (language === 'hindi' ? 'खाता बनाएं' : 'Create Account')
+                      : (language === 'hindi' ? 'लॉगिन करें' : 'Sign In')}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full"
+                    onClick={() => { setOtpSent(false); setOtp(''); }}
+                    disabled={isSubmitting || isLoading}
+                  >
+                    {language === 'hindi' ? 'नया OTP भेजें' : 'Send new OTP'}
+                  </Button>
+                </form>
+              )}
+            </>
+          ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Name Field (Sign Up Only) */}
             {isSignUp && (
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -308,7 +399,6 @@ const AuthModalSimple = ({ isOpen, onClose, initialView = 'login' }: AuthModalSi
               </div>
             )}
 
-            {/* Email Field */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 {language === 'hindi' ? 'ईमेल पता' : 'Email Address'}
@@ -326,7 +416,6 @@ const AuthModalSimple = ({ isOpen, onClose, initialView = 'login' }: AuthModalSi
               </div>
             </div>
 
-            {/* Phone Field (Sign Up Only) */}
             {isSignUp && (
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -334,7 +423,7 @@ const AuthModalSimple = ({ isOpen, onClose, initialView = 'login' }: AuthModalSi
                 </label>
                 <Input
                   type="tel"
-                  placeholder={language === 'hindi' ? '+91 98765 43210' : '+1 (555) 123-4567'}
+                  placeholder={language === 'hindi' ? '+91 98765 43210' : '+91 9876543210'}
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   disabled={isSubmitting || isLoading}
@@ -342,7 +431,6 @@ const AuthModalSimple = ({ isOpen, onClose, initialView = 'login' }: AuthModalSi
               </div>
             )}
 
-            {/* Password Field */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 {language === 'hindi' ? 'पासवर्ड' : 'Password'}
@@ -368,7 +456,6 @@ const AuthModalSimple = ({ isOpen, onClose, initialView = 'login' }: AuthModalSi
               </div>
             </div>
 
-            {/* Confirm Password Field (Sign Up Only) */}
             {isSignUp && (
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -396,27 +483,26 @@ const AuthModalSimple = ({ isOpen, onClose, initialView = 'login' }: AuthModalSi
               </div>
             )}
 
-            {/* Submit Button */}
             <Button
               type="submit"
-              className="w-full py-3 bg-blue-600 hover:bg-blue-700"
+              className="w-full py-3 bg-green-600 hover:bg-green-700"
               disabled={isSubmitting || isLoading}
             >
               {isSubmitting || isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  {isSignUp 
+                  {isSignUp
                     ? (language === 'hindi' ? 'खाता बनाया जा रहा है...' : 'Creating account...')
-                    : (language === 'hindi' ? 'लॉगिन हो रहा है...' : 'Signing in...')
-                  }
+                    : (language === 'hindi' ? 'लॉगिन हो रहा है...' : 'Signing in...')}
                 </>
               ) : (
-                isSignUp 
+                isSignUp
                   ? (language === 'hindi' ? 'खाता बनाएं' : 'Create Account')
                   : (language === 'hindi' ? 'लॉगिन करें' : 'Sign In')
               )}
             </Button>
           </form>
+          )}
 
           {/* Toggle Login/Signup */}
           <div className="mt-6 text-center">
