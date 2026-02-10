@@ -69,49 +69,118 @@ const AuthModalSimple = ({ isOpen, onClose, initialView = 'login' }: AuthModalSi
     setError(null);
   };
 
-  const validateForm = () => {
+  const validateEmailForm = () => {
     setError(null);
-
     if (!email.trim()) {
       setError(language === 'hindi' ? 'ईमेल आवश्यक है' : 'Email is required');
       return false;
     }
-
     if (!password.trim()) {
       setError(language === 'hindi' ? 'पासवर्ड आवश्यक है' : 'Password is required');
       return false;
     }
-
     if (password.length < 6) {
       setError(language === 'hindi' ? 'पासवर्ड कम से कम 6 अक्षरों का होना चाहिए' : 'Password must be at least 6 characters');
       return false;
     }
-
     if (isSignUp) {
       if (!name.trim()) {
         setError(language === 'hindi' ? 'नाम आवश्यक है' : 'Name is required');
         return false;
       }
-
       if (password !== confirmPassword) {
         setError(language === 'hindi' ? 'पासवर्ड मेल नहीं खाते' : 'Passwords do not match');
         return false;
       }
     }
-
     return true;
+  };
+
+  const validatePhoneForm = () => {
+    setError(null);
+    const digits = phone.replace(/\D/g, '');
+    if (digits.length < 10) {
+      setError(language === 'hindi' ? 'वैध फोन नंबर दर्ज करें' : 'Enter a valid 10-digit phone number');
+      return false;
+    }
+    if (isSignUp && !name.trim()) {
+      setError(language === 'hindi' ? 'नाम आवश्यक है' : 'Name is required');
+      return false;
+    }
+    return true;
+  };
+
+  const handleSendOTP = async () => {
+    if (!validatePhoneForm()) return;
+    setIsSubmitting(true);
+    setError(null);
+    try {
+      const normalizedPhone = phone.replace(/\D/g, '').slice(-10);
+      const success = await sendOTP('+' + (normalizedPhone.length === 10 ? '91' : '') + normalizedPhone);
+      if (success) {
+        setOtpSent(true);
+        toast({
+          title: language === 'hindi' ? 'OTP भेजा गया' : 'OTP Sent',
+          description: language === 'hindi' ? 'अपना OTP दर्ज करें' : 'Enter the OTP you received',
+        });
+      }
+    } catch {
+      toast({
+        title: language === 'hindi' ? 'गलती' : 'Error',
+        description: language === 'hindi' ? 'OTP भेजने में समस्या' : 'Failed to send OTP',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleVerifyOTP = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    if (!otp.trim() || otp.length < 4) {
+      setError(language === 'hindi' ? 'कृपया OTP दर्ज करें' : 'Please enter the OTP');
+      return;
+    }
+    setIsSubmitting(true);
+    try {
+      const normalizedPhone = phone.replace(/\D/g, '').slice(-10);
+      const phoneWithCode = '+' + (normalizedPhone.length === 10 ? '91' : '') + normalizedPhone;
+      let success = false;
+      if (isSignUp) {
+        success = await signUpWithPhone(phoneWithCode, name.trim() || (language === 'hindi' ? 'किसान' : 'Farmer'), otp.trim());
+      } else {
+        success = await signInWithPhone(phoneWithCode, otp.trim());
+      }
+      if (success) {
+        toast({
+          title: language === 'hindi' ? 'सफलता!' : 'Success!',
+          description: isSignUp
+            ? (language === 'hindi' ? 'खाता बनाया गया' : 'Account created successfully')
+            : (language === 'hindi' ? 'लॉगिन सफल' : 'Login successful'),
+        });
+        onClose();
+        navigate('/');
+      }
+    } catch {
+      toast({
+        title: language === 'hindi' ? 'गलती' : 'Error',
+        description: language === 'hindi' ? 'गलत OTP या समस्या' : 'Invalid OTP or something went wrong',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!validateForm()) return;
-    
+    if (authMethod === 'phone') return;
+    if (!validateEmailForm()) return;
     setIsSubmitting(true);
-    
+    setError(null);
     try {
       let success = false;
-      
       if (isSignUp) {
         success = await signUp(email, password, {
           name,
@@ -125,19 +194,22 @@ const AuthModalSimple = ({ isOpen, onClose, initialView = 'login' }: AuthModalSi
       } else {
         success = await login(email, password);
       }
-      
       if (success) {
         toast({
           title: language === 'hindi' ? 'सफलता!' : 'Success!',
-          description: isSignUp 
+          description: isSignUp
             ? (language === 'hindi' ? 'खाता बनाया गया' : 'Account created successfully')
             : (language === 'hindi' ? 'लॉगिन सफल' : 'Login successful'),
         });
         onClose();
         navigate('/');
       }
-    } catch (error) {
-      // Handle authentication error silently
+    } catch {
+      toast({
+        title: language === 'hindi' ? 'गलती' : 'Error',
+        description: language === 'hindi' ? 'कुछ गलत हुआ। फिर कोशिश करें।' : 'Something went wrong. Please try again.',
+        variant: 'destructive',
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -145,6 +217,8 @@ const AuthModalSimple = ({ isOpen, onClose, initialView = 'login' }: AuthModalSi
 
   const switchAuthMethod = (method: AuthMethod) => {
     setAuthMethod(method);
+    setOtpSent(false);
+    setOtp('');
     setError(null);
   };
 
