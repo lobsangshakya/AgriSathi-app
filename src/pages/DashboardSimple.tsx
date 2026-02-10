@@ -9,16 +9,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useUser } from '@/contexts/UserContext';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { 
-  MessageCircle, 
-  Camera, 
-  LogOut, 
-  User,
-  Sun,
-  Droplets,
-  Phone
-} from 'lucide-react';
+import { MessageCircle, Camera, LogOut } from 'lucide-react';
 import { cn } from '@/utils/utils';
 
 const DashboardSimple = () => {
@@ -43,8 +34,8 @@ const DashboardSimple = () => {
     {
       id: 'chatbot',
       title: language === 'hindi' ? 'कृषि सहायक' : 'Farming Assistant',
-      description: language === 'hindi' 
-        ? 'फसलों, मौसम, बाजार के बारे में पूछें' 
+      description: language === 'hindi'
+        ? 'फसलों, मौसम, बाजार के बारे में पूछें'
         : 'Ask about crops, weather, market',
       icon: MessageCircle,
       color: 'bg-green-500 hover:bg-green-600',
@@ -53,33 +44,12 @@ const DashboardSimple = () => {
     {
       id: 'scanner',
       title: language === 'hindi' ? 'फसल जांच' : 'Crop Scanner',
-      description: language === 'hindi' 
-        ? 'बीमारी की पहचान करें' 
+      description: language === 'hindi'
+        ? 'बीमारी की पहचान करें'
         : 'Detect crop diseases',
       icon: Camera,
       color: 'bg-blue-500 hover:bg-blue-600',
       route: '/disease-detection'
-    }
-  ];
-
-  const quickInfo = [
-    {
-      icon: Sun,
-      label: language === 'hindi' ? 'आज का मौसम' : "Today's Weather",
-      value: language === 'hindi' ? '28°C सूरज' : '28°C Sunny',
-      color: 'text-orange-500'
-    },
-    {
-      icon: Droplets,
-      label: language === 'hindi' ? 'सिंचाई' : 'Irrigation',
-      value: language === 'hindi' ? 'शाम को अच्छा' : 'Evening best',
-      color: 'text-blue-500'
-    },
-    {
-      icon: Phone,
-      label: language === 'hindi' ? 'विशेषज्ञ' : 'Expert Help',
-      value: language === 'hindi' ? 'उपलब्ध' : 'Available',
-      color: 'text-green-500'
     }
   ];
 
@@ -113,71 +83,31 @@ const DashboardSimple = () => {
         </div>
       </div>
 
-      <div className="max-w-md mx-auto px-4 py-6 space-y-6">
-        {/* Quick Info Bar */}
-        <div className="grid grid-cols-3 gap-3">
-          {quickInfo.map((info, index) => {
-            const Icon = info.icon;
+      <div className="max-w-md mx-auto px-4 py-6">
+        <div className="space-y-3">
+          <h2 className="text-base font-semibold text-gray-900">
+            {language === 'hindi' ? 'मुख्य सेवाएं' : 'Main Services'}
+          </h2>
+          {mainFeatures.map((feature) => {
+            const Icon = feature.icon;
             return (
-              <Card key={index} className="p-3 text-center">
-                <Icon className={cn("w-5 h-5 mx-auto mb-1", info.color)} />
-                <p className="text-xs text-gray-600">{info.label}</p>
-                <p className="text-sm font-medium text-gray-900">{info.value}</p>
+              <Card key={feature.id} className="overflow-hidden">
+                <button
+                  onClick={() => navigate(feature.route)}
+                  className="w-full p-4 flex items-center gap-4 hover:bg-gray-50 transition-colors text-left"
+                >
+                  <div className={cn('p-3 rounded-lg text-white shrink-0', feature.color)}>
+                    <Icon className="w-6 h-6" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold text-gray-900">{feature.title}</h3>
+                    <p className="text-sm text-gray-600">{feature.description}</p>
+                  </div>
+                </button>
               </Card>
             );
           })}
         </div>
-
-        {/* Main Features */}
-        <div className="space-y-4">
-          <h2 className="text-lg font-semibold text-gray-900">
-            {language === 'hindi' ? 'मुख्य सेवाएं' : 'Main Services'}
-          </h2>
-          <div className="space-y-3">
-            {mainFeatures.map((feature) => {
-              const Icon = feature.icon;
-              return (
-                <Card key={feature.id} className="overflow-hidden">
-                  <button
-                    onClick={() => navigate(feature.route)}
-                    className="w-full p-4 flex items-center gap-4 hover:bg-gray-50 transition-colors"
-                  >
-                    <div className={cn("p-3 rounded-lg text-white", feature.color)}>
-                      <Icon className="w-6 h-6" />
-                    </div>
-                    <div className="flex-1 text-left">
-                      <h3 className="font-semibold text-gray-900">{feature.title}</h3>
-                      <p className="text-sm text-gray-600">{feature.description}</p>
-                    </div>
-                  </button>
-                </Card>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* User Status */}
-        <Card className="p-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-green-100 rounded-full">
-              <User className="w-5 h-5 text-green-600" />
-            </div>
-            <div className="flex-1">
-              <h3 className="font-semibold text-gray-900">
-                {language === 'hindi' ? 'खाता स्थिति' : 'Account Status'}
-              </h3>
-              <p className="text-sm text-gray-600">
-                {language === 'hindi' 
-                  ? `${user?.name || 'किसान भाई'} - सक्रिय` 
-                  : `${user?.name || 'Farmer'} - Active`
-                }
-              </p>
-            </div>
-            <Badge variant="secondary" className="bg-green-100 text-green-800">
-              {language === 'hindi' ? 'ऑनलाइन' : 'Online'}
-            </Badge>
-          </div>
-        </Card>
       </div>
     </div>
   );
