@@ -6,6 +6,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { authWrapper, UnifiedUserProfile } from '@/services/authServiceWrapper';
 import { toast } from '@/hooks/use-toast';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 export interface Achievement {
   title: string;
@@ -80,9 +81,12 @@ const defaultUser: User = {
  */
 
 export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { language } = useLanguage();
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  const isHindi = language === 'hindi';
 
   // Transform UnifiedUserProfile to User interface
   const transformProfile = (profile: UnifiedUserProfile): User => ({
@@ -152,7 +156,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (response.error) {
         toast({
-          title: 'Login Failed',
+          title: isHindi ? 'लॉगिन विफल' : 'Login Failed',
           description: response.error,
           variant: 'destructive',
         });
@@ -165,8 +169,8 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setIsLoggedIn(true);
 
         toast({
-          title: 'Login Successful',
-          description: `Welcome back, ${transformedUser.name}!`,
+          title: isHindi ? 'लॉगिन सफल' : 'Login Successful',
+          description: isHindi ? `वापस स्वागत है, ${transformedUser.name}!` : `Welcome back, ${transformedUser.name}!`,
         });
         return true;
       }
@@ -174,8 +178,8 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return false;
     } catch (error) {
       toast({
-        title: 'Login Failed',
-        description: 'An unexpected error occurred',
+        title: isHindi ? 'लॉगिन विफल' : 'Login Failed',
+        description: isHindi ? 'एक त्रुटि हुई' : 'An unexpected error occurred',
         variant: 'destructive',
       });
       return false;
@@ -192,7 +196,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (response.error) {
         toast({
-          title: 'Sign Up Failed',
+          title: isHindi ? 'खाता बनाना विफल' : 'Sign Up Failed',
           description: response.error,
           variant: 'destructive',
         });
@@ -205,8 +209,8 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setIsLoggedIn(true);
 
         toast({
-          title: 'Sign Up Successful',
-          description: `Welcome to AgriSathi, ${transformedUser.name}!`,
+          title: isHindi ? 'खाता बन गया' : 'Sign Up Successful',
+          description: isHindi ? `AgriSathi में स्वागत है, ${transformedUser.name}!` : `Welcome to AgriSathi, ${transformedUser.name}!`,
         });
         return true;
       }
@@ -214,8 +218,8 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return false;
     } catch (error) {
       toast({
-        title: 'Sign Up Failed',
-        description: 'An unexpected error occurred',
+        title: isHindi ? 'खाता बनाना विफल' : 'Sign Up Failed',
+        description: isHindi ? 'एक त्रुटि हुई' : 'An unexpected error occurred',
         variant: 'destructive',
       });
       return false;
@@ -231,7 +235,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (response.error) {
         toast({
-          title: 'Logout Failed',
+          title: isHindi ? 'लॉगआउट विफल' : 'Logout Failed',
           description: response.error,
           variant: 'destructive',
         });
@@ -242,13 +246,13 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setIsLoggedIn(false);
 
       toast({
-        title: 'Logged Out',
-        description: 'You have been successfully logged out.',
+        title: isHindi ? 'लॉगआउट हो गया' : 'Logged Out',
+        description: isHindi ? 'आप सफलतापूर्वक लॉग आउट हो गए।' : 'You have been successfully logged out.',
       });
     } catch (error) {
       toast({
-        title: 'Logout Failed',
-        description: 'An unexpected error occurred',
+        title: isHindi ? 'लॉगआउट विफल' : 'Logout Failed',
+        description: isHindi ? 'एक त्रुटि हुई' : 'An unexpected error occurred',
         variant: 'destructive',
       });
     }
@@ -263,7 +267,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (response.error) {
         toast({
-          title: 'Update Failed',
+          title: isHindi ? 'अपडेट विफल' : 'Update Failed',
           description: response.error,
           variant: 'destructive',
         });
@@ -275,8 +279,8 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser(transformedUser);
 
         toast({
-          title: 'Profile Updated',
-          description: 'Your profile has been successfully updated.',
+          title: isHindi ? 'प्रोफाइल अपडेट' : 'Profile Updated',
+          description: isHindi ? 'आपकी प्रोफाइल अपडेट हो गई।' : 'Your profile has been successfully updated.',
         });
         return true;
       }
@@ -284,8 +288,8 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return false;
     } catch (error) {
       toast({
-        title: 'Update Failed',
-        description: 'An unexpected error occurred',
+        title: isHindi ? 'अपडेट विफल' : 'Update Failed',
+        description: isHindi ? 'एक त्रुटि हुई' : 'An unexpected error occurred',
         variant: 'destructive',
       });
       return false;
@@ -321,7 +325,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (response.error) {
         toast({
-          title: 'Sign Up Failed',
+          title: isHindi ? 'खाता बनाना विफल' : 'Sign Up Failed',
           description: response.error,
           variant: 'destructive',
         });
@@ -334,8 +338,8 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setIsLoggedIn(true);
 
         toast({
-          title: 'Sign Up Successful',
-          description: `Welcome to AgriSathi, ${transformedUser.name}!`,
+          title: isHindi ? 'खाता बन गया' : 'Sign Up Successful',
+          description: isHindi ? `AgriSathi में स्वागत है, ${transformedUser.name}!` : `Welcome to AgriSathi, ${transformedUser.name}!`,
         });
         return true;
       }
@@ -343,8 +347,8 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return false;
     } catch (error) {
       toast({
-        title: 'Sign Up Failed',
-        description: 'An unexpected error occurred',
+        title: isHindi ? 'खाता बनाना विफल' : 'Sign Up Failed',
+        description: isHindi ? 'एक त्रुटि हुई' : 'An unexpected error occurred',
         variant: 'destructive',
       });
       return false;
@@ -361,7 +365,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (response.error) {
         toast({
-          title: 'Login Failed',
+          title: isHindi ? 'लॉगिन विफल' : 'Login Failed',
           description: response.error,
           variant: 'destructive',
         });
@@ -374,8 +378,8 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setIsLoggedIn(true);
 
         toast({
-          title: 'Login Successful',
-          description: `Welcome back, ${transformedUser.name}!`,
+          title: isHindi ? 'लॉगिन सफल' : 'Login Successful',
+          description: isHindi ? `वापस स्वागत है, ${transformedUser.name}!` : `Welcome back, ${transformedUser.name}!`,
         });
         return true;
       }
@@ -383,8 +387,8 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return false;
     } catch (error) {
       toast({
-        title: 'Login Failed',
-        description: 'An unexpected error occurred',
+        title: isHindi ? 'लॉगिन विफल' : 'Login Failed',
+        description: isHindi ? 'एक त्रुटि हुई' : 'An unexpected error occurred',
         variant: 'destructive',
       });
       return false;
@@ -401,7 +405,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (response.error) {
         toast({
-          title: 'OTP Send Failed',
+          title: isHindi ? 'OTP भेजना विफल' : 'OTP Send Failed',
           description: response.error,
           variant: 'destructive',
         });
@@ -410,8 +414,8 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (response.success) {
         toast({
-          title: 'OTP Sent',
-          description: `OTP has been sent to ${phone}`,
+          title: isHindi ? 'OTP भेजा गया' : 'OTP Sent',
+          description: isHindi ? `OTP ${phone} पर भेजा गया` : `OTP has been sent to ${phone}`,
         });
         return true;
       }
@@ -419,8 +423,8 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return false;
     } catch (error) {
       toast({
-        title: 'OTP Send Failed',
-        description: 'An unexpected error occurred',
+        title: isHindi ? 'OTP भेजना विफल' : 'OTP Send Failed',
+        description: isHindi ? 'एक त्रुटि हुई' : 'An unexpected error occurred',
         variant: 'destructive',
       });
       return false;
