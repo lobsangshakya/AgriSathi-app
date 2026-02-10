@@ -32,11 +32,10 @@ interface AuthModalSimpleProps {
 type AuthMethod = 'email' | 'phone';
 
 const AuthModalSimple = ({ isOpen, onClose, initialView = 'login' }: AuthModalSimpleProps) => {
-  const { login, signUp, isLoading } = useUser();
+  const { login, signUp, sendOTP, signInWithPhone, signUpWithPhone, isLoading } = useUser();
   const { language } = useLanguage();
   const navigate = useNavigate();
-  
-  // Form states
+
   const [isSignUp, setIsSignUp] = useState(initialView === 'signup');
   const [authMethod, setAuthMethod] = useState<AuthMethod>('email');
   const [name, setName] = useState('');
@@ -44,6 +43,8 @@ const AuthModalSimple = ({ isOpen, onClose, initialView = 'login' }: AuthModalSi
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [otp, setOtp] = useState('');
+  const [otpSent, setOtpSent] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -63,6 +64,8 @@ const AuthModalSimple = ({ isOpen, onClose, initialView = 'login' }: AuthModalSi
     setPhone('');
     setPassword('');
     setConfirmPassword('');
+    setOtp('');
+    setOtpSent(false);
     setError(null);
   };
 
@@ -131,7 +134,7 @@ const AuthModalSimple = ({ isOpen, onClose, initialView = 'login' }: AuthModalSi
             : (language === 'hindi' ? 'लॉगिन सफल' : 'Login successful'),
         });
         onClose();
-        navigate('/dashboard');
+        navigate('/');
       }
     } catch (error) {
       // Handle authentication error silently
