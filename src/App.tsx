@@ -3,11 +3,11 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Dashboard from "./pages/DashboardClean";
+import Dashboard from "./pages/DashboardSimple";
 import Community from "./pages/Community";
 import Profile from "./pages/Profile";
-import DiseaseDetection from "./pages/DiseaseDetectionEnhanced";
-import Chat from "./pages/ChatEnhanced";
+import DiseaseDetection from "./pages/DiseaseDetectionSimple";
+import Chat from "./pages/ChatSimple";
 import ExpertConsultation from "./pages/ExpertConsultation";
 import AgriCredits from "./pages/AgriCredits";
 import Wallet from "./pages/Wallet";
@@ -21,7 +21,7 @@ import { WalletProvider } from "./contexts/WalletContext";
 import Auth from "./pages/AuthEnhanced";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { useState, useEffect } from 'react';
-import AuthModal from './components/AuthModal';
+import AuthModalSimple from './components/AuthModalSimple';
 import { useLanguage } from './contexts/LanguageContext';
 
 const queryClient = new QueryClient();
@@ -59,7 +59,7 @@ const AppContent = () => {
                   : 'Your Smart Farming Assistant'}
               </p>
             </div>
-            <AuthModal 
+            <AuthModalSimple 
               isOpen={showAuthModal}
               onClose={() => setShowAuthModal(false)}
               initialView={authView}
