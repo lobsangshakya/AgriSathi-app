@@ -343,18 +343,18 @@ const ChatSimple = () => {
               <Button
                 onClick={handleSendMessage}
                 disabled={!newMessage.trim() || isTyping}
-                className="bg-blue-600 hover:bg-blue-700"
+                className="bg-green-600 hover:bg-green-700"
               >
                 <Send className="w-4 h-4" />
               </Button>
             </div>
 
-            <div className="mt-2 text-xs text-gray-500 text-center">
-              {language === 'hindi' 
-                ? '💡 टिप: फसल की फोटो भेजकर बीमारी की पहचान कर सकते हैं' 
-                : '💡 Tip: Send crop photos for disease detection'
-              }
-            </div>
+            <p className="mt-2 text-xs text-gray-500 text-center">
+              {language === 'hindi' ? 'हिंदी या अंग्रेज़ी में पूछें' : 'Ask in Hindi or English'}
+            </p>
+            <p className="mt-0.5 text-xs text-gray-400 text-center">
+              {language === 'hindi' ? '💡 टिप: फसल की फोटो भेजकर बीमारी की पहचान कर सकते हैं' : '💡 Tip: Send crop photos for disease detection'}
+            </p>
           </div>
         </Card>
       </div>

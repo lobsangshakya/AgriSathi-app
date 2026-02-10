@@ -231,7 +231,9 @@ class MockAuthService {
       const smsResult = await smsService.sendOTP(phone, otp);
       
       if (smsResult.success) {
-        console.log(`✅ OTP sent successfully to ${phone}: ${otp}`);
+        if (import.meta.env.DEV) {
+          console.info(`OTP for ${phone}: ${otp}`);
+        }
         return {
           success: true,
           error: null,

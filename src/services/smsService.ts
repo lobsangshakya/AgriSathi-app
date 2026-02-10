@@ -49,7 +49,7 @@ class SMSService {
   async sendOTP(phone: string, otp: string): Promise<SMSResponse> {
     // In development, show OTP in UI and console
     if (this.isDevelopment) {
-      console.log(`🔔 Development OTP for ${phone}: ${otp}`);
+      if (import.meta.env.DEV) console.info(`OTP for ${phone}: ${otp}`);
       return this.showDevelopmentOTP(phone, otp);
     }
 

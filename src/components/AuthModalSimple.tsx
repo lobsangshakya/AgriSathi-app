@@ -115,8 +115,10 @@ const AuthModalSimple = ({ isOpen, onClose, initialView = 'login' }: AuthModalSi
     setIsSubmitting(true);
     setError(null);
     try {
-      const normalizedPhone = phone.replace(/\D/g, '').slice(-10);
-      const success = await sendOTP('+' + (normalizedPhone.length === 10 ? '91' : '') + normalizedPhone);
+      const digits = phone.replace(/\D/g, '');
+      const tenDigits = digits.length >= 10 ? digits.slice(-10) : digits;
+      const phoneWithCode = tenDigits.length === 10 ? '+91' + tenDigits : '+' + digits;
+      const success = await sendOTP(phoneWithCode);
       if (success) {
         setOtpSent(true);
         toast({
@@ -144,8 +146,9 @@ const AuthModalSimple = ({ isOpen, onClose, initialView = 'login' }: AuthModalSi
     }
     setIsSubmitting(true);
     try {
-      const normalizedPhone = phone.replace(/\D/g, '').slice(-10);
-      const phoneWithCode = '+' + (normalizedPhone.length === 10 ? '91' : '') + normalizedPhone;
+      const digits = phone.replace(/\D/g, '');
+      const tenDigits = digits.length >= 10 ? digits.slice(-10) : digits;
+      const phoneWithCode = tenDigits.length === 10 ? '+91' + tenDigits : '+' + digits;
       let success = false;
       if (isSignUp) {
         success = await signUpWithPhone(phoneWithCode, name.trim() || (language === 'hindi' ? 'किसान' : 'Farmer'), otp.trim());

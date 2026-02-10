@@ -286,7 +286,7 @@ class AuthService {
 
       // In production, integrate with SMS service like Twilio, MessageBird, etc.
       // For demo, we'll simulate SMS sending
-      console.log(`OTP sent to ${phone}: ${otp}`);
+      if (import.meta.env.DEV) console.info(`OTP sent to ${phone}: ${otp}`);
       
       // Show success message (in production, this would be sent via SMS)
       return {
