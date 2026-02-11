@@ -27,8 +27,6 @@ Secure authentication (email/phone OTP).
 
 Clean, farmer-focused UI/UX using shadcn/ui components.
 
-Current Flow / Summary of Changes
-
 Authentication
 
 Post-login redirect now goes to / (dashboard).
