@@ -45,7 +45,7 @@ const DiseaseDetectionSimple = () => {
   const [isDragOver, setIsDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleImageUpload = async (event: any) => {
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     
     if (file) {
@@ -95,7 +95,7 @@ const DiseaseDetectionSimple = () => {
 
     try {
       const result = await diseaseDetectionService.analyzeImage(selectedImage);
-      setAnalysisResult(result.result);
+      setAnalysisResult(result);
       toast({
         title: language === 'hindi' ? 'विश्लेषण पूर्ण' : 'Analysis Complete',
         description: language === 'hindi'
