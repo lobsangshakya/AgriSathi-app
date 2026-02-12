@@ -231,22 +231,17 @@ class MockAuthService {
       const smsResult = await smsService.sendOTP(phone, otp);
       
       if (smsResult.success) {
-        if (import.meta.env.DEV) {
-          console.info(`OTP for ${phone}: ${otp}`);
-        }
         return {
           success: true,
           error: null,
         };
       } else {
-        console.error(`❌ SMS failed for ${phone}:`, smsResult.error);
         return {
           success: false,
           error: smsResult.error || 'Failed to send SMS',
         };
       }
     } catch (error) {
-      console.error('❌ OTP send error:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Failed to send OTP',

@@ -34,9 +34,7 @@ class DiseaseDetectionService {
     this.isDevelopment = import.meta.env.VITE_APP_ENV === 'development';
 
     if (!this.plantApiKey && !this.huggingFaceApiKey) {
-      if (this.isDevelopment) {
-        console.warn('No disease detection API keys found. Using mock data.');
-      }
+      // No disease detection API keys found. Using mock data.
     }
   }
 
@@ -74,9 +72,6 @@ class DiseaseDetectionService {
       return this.getMockDetectionResult();
 
     } catch (error) {
-      if (this.isDevelopment) {
-        console.error('Disease detection error:', error);
-      }
       return {
         success: false,
         error: 'Failed to analyze image. Please try again.'
@@ -136,9 +131,6 @@ class DiseaseDetectionService {
       };
 
     } catch (error) {
-      if (this.isDevelopment) {
-        console.error('Plant.id API error:', error);
-      }
       return {
         success: false,
         error: 'Plant disease detection service unavailable'
@@ -212,9 +204,6 @@ class DiseaseDetectionService {
       };
 
     } catch (error) {
-      if (this.isDevelopment) {
-        console.error('Hugging Face API error:', error);
-      }
       return {
         success: false,
         error: 'Disease detection service unavailable'

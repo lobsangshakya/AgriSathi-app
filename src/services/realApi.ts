@@ -255,7 +255,7 @@ export class RealApiService {
           type: 'text'
         };
       } catch (error) {
-        console.error('Weather API error:', error);
+        // Weather API error, using fallback
       }
     }
 

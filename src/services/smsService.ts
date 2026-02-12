@@ -47,9 +47,8 @@ class SMSService {
    * Send OTP via SMS
    */
   async sendOTP(phone: string, otp: string): Promise<SMSResponse> {
-    // In development, show OTP in UI and console
+    // In development, show OTP in UI
     if (this.isDevelopment) {
-      if (import.meta.env.DEV) console.info(`OTP for ${phone}: ${otp}`);
       return this.showDevelopmentOTP(phone, otp);
     }
 

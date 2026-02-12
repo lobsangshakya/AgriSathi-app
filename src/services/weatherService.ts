@@ -41,9 +41,7 @@ class WeatherService {
     this.isDevelopment = import.meta.env.VITE_APP_ENV === 'development';
 
     if (!this.apiKey) {
-      if (this.isDevelopment) {
-        console.warn('OpenWeather API key not found. Using mock data.');
-      }
+      // OpenWeather API key not found. Using mock data.
     }
   }
 
@@ -198,9 +196,6 @@ class WeatherService {
       };
 
     } catch (error) {
-      if (this.isDevelopment) {
-        console.error('Weather service error:', error);
-      }
       return this.getMockWeatherData();
     }
   }
