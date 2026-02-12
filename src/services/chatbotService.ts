@@ -1,12 +1,12 @@
 /**
  * Production-Ready Chatbot Service
- * Handles real AI responses using OpenAI/Gemini APIs with fallback to local processing
+ * Integrates with OpenAI and Gemini APIs with local fallback
  */
 
-export interface ChatMessage {
-  role: 'user' | 'assistant' | 'system';
-  content: string;
-  timestamp: string;
+export interface ChatContext {
+  language: 'hindi' | 'english';
+  lastMessage?: string;
+  sessionId?: string;
 }
 
 export interface ChatResponse {
@@ -15,434 +15,360 @@ export interface ChatResponse {
   followUpQuestions?: string[];
 }
 
-export interface ChatContext {
-  language: string;
-  location?: string;
-  crop?: string;
-  previousMessages?: ChatMessage[];
+export interface ChatMessage {
+  id: string;
+  content: string;
+  role: 'user' | 'assistant';
+  timestamp: Date;
 }
 
 class ChatbotService {
-  private openaiApiKey: string;
-  private geminiApiKey: string;
-  private isDevelopment: boolean;
   private conversationHistory: Map<string, ChatMessage[]> = new Map();
+  private openaiApiKey: string | null = null;
+  private geminiApiKey: string | null = null;
 
   constructor() {
-    this.openaiApiKey = import.meta.env.VITE_OPENAI_API_KEY || '';
-    this.geminiApiKey = import.meta.env.VITE_GEMINI_API_KEY || '';
-    this.isDevelopment = import.meta.env.VITE_APP_ENV === 'development';
-
-    if (!this.openaiApiKey && !this.geminiApiKey) {
-      if (this.isDevelopment) {
-        console.warn('No chatbot API keys found. Using local processing.');
-      }
-    }
+    this.openaiApiKey = import.meta.env.VITE_OPENAI_API_KEY || null;
+    this.geminiApiKey = import.meta.env.VITE_GEMINI_API_KEY || null;
   }
 
-  // Process user message and get AI response
-  async processMessage(
-    message: string, 
-    context: ChatContext,
-    sessionId: string = 'default'
-  ): Promise<ChatResponse> {
-    try {
-      // Get conversation history
-      const history = this.conversationHistory.get(sessionId) || [];
-      
-      // Add user message to history
-      const userMessage: ChatMessage = {
-        role: 'user',
-        content: message,
-        timestamp: new Date().toISOString()
-      };
-      
-      const updatedHistory = [...history, userMessage];
-      
-      let response: ChatResponse;
+  private getLocalResponse(message: string, context: ChatContext): ChatResponse {
+    const lowerMessage = message.toLowerCase();
+    const language = context.language || 'english';
 
-      // Try OpenAI first
+    // Greeting responses
+    if (this.isGreeting(lowerMessage)) {
+        return {
+            content: this.getGreetingResponse(language),
+            suggestions: [
+              language === 'hindi' ? 'आज का मौसम कैसा है?' : 'What is weather today?',
+              language === 'hindi' ? 'फसल की बीमारी कैसे पहचानें?' : 'How to identify crop diseases?',
+              language === 'hindi' ? 'गेहूं का भाव क्या है?' : 'What is the price of wheat?'
+            ]
+          };
+    }
+
+    // Weather queries
+    if (this.isWeatherQuery(lowerMessage)) {
+      return {
+            content: this.getWeatherResponse(language),
+            suggestions: [
+              language === 'hindi' ? 'बारिश कब होगी?' : 'When will it rain?',
+              language === 'hindi' ? 'तापमान कितना है?' : 'What is the temperature?'
+            ]
+          };
+    }
+
+    // Disease queries
+    if (this.isDiseaseQuery(lowerMessage)) {
+      return {
+            content: this.getDiseaseResponse(language),
+            suggestions: [
+              language === 'hindi' ? 'टमाटर की बीमारी' : 'Tomato diseases',
+              language === 'hindi' ? 'धान की बीमारी' : 'Rice diseases',
+              language === 'hindi' ? 'कीटनाशक कौन सा उपयोग करें?' : 'Which pesticide to use?'
+            ]
+          };
+    }
+
+    // Market queries
+    if (this.isMarketQuery(lowerMessage)) {
+      return {
+            content: this.getMarketResponse(language),
+            suggestions: [
+              language === 'hindi' ? 'गेहूं का भाव' : 'Wheat price',
+              language === 'hindi' ? 'चावल का भाव' : 'Rice price',
+              language === 'hindi' ? 'सब्जियों का भाव' : 'Vegetable prices'
+            ]
+          };
+    }
+
+    // Fertilizer queries
+    if (this.isFertilizerQuery(lowerMessage)) {
+      return {
+            content: this.getFertilizerResponse(language),
+            suggestions: [
+              language === 'hindi' ? 'यूरिया का उपयोग' : 'Urea usage',
+              language === 'hindi' ? 'DAP कब लगाएं?' : 'When to apply DAP?',
+              language === 'hindi' ? 'जैविक खाद' : 'Organic fertilizer'
+            ]
+          };
+    }
+
+    // Default response
+    return {
+            content: this.getDefaultResponse(language),
+            suggestions: [
+              language === 'hindi' ? 'फसल संरक्षण' : 'Crop protection',
+              language === 'hindi' ? 'सिंचाई युक्तियाँ' : 'Irrigation tips',
+              language === 'hindi' ? 'बीज चयन' : 'Seed selection'
+            ]
+          };
+  }
+
+  private isGreeting(message: string): boolean {
+    const greetings = ['hello', 'hi', 'namaste', 'नमस्ते', 'hey', 'good morning', 'good evening'];
+    return greetings.some(greeting => message.includes(greeting));
+  }
+
+  private isWeatherQuery(message: string): boolean {
+    const weatherKeywords = ['weather', 'मौसम', 'rain', 'बारिश', 'temperature', 'तापमान', 'climate', 'जलवायु'];
+    return weatherKeywords.some(keyword => message.includes(keyword));
+  }
+
+  private isDiseaseQuery(message: string): boolean {
+    const diseaseKeywords = ['disease', 'बीमारी', 'pest', 'कीट', 'infection', 'संक्रमण', 'virus', 'वायरस', 'fungus', 'फंगस'];
+    return diseaseKeywords.some(keyword => message.includes(keyword));
+  }
+
+  private isMarketQuery(message: string): boolean {
+    const marketKeywords = ['price', 'भाव', 'market', 'बाजार', 'rate', 'दर', 'cost', 'कीमत', 'sell', 'बेचना'];
+    return marketKeywords.some(keyword => message.includes(keyword));
+  }
+
+  private isFertilizerQuery(message: string): boolean {
+    const fertilizerKeywords = ['fertilizer', 'खाद', 'urea', 'यूरिया', 'dap', 'npk', 'nutrient', 'पोषक तत्व'];
+    return fertilizerKeywords.some(keyword => message.includes(keyword));
+  }
+
+  private getGreetingResponse(language: string): string {
+    return language === 'hindi' 
+      ? '🌾 नमस्ते किसान भाई! मैं आपका कृषि सहायक हूं। मैं आपको फसलों, मौसम, बीमारियों, बाजार भाव और खाद के बारे में जानकारी दे सकता हूं। अपना सवाल पूछें।'
+      : '🌾 Hello! I am your farming assistant. I can help you with information about crops, weather, diseases, market prices, and fertilizers. Ask your question.';
+  }
+
+  private getWeatherResponse(language: string): string {
+    return language === 'hindi'
+      ? 'मौसम की जानकारी के लिए, मैं आपको वेदर ऐप का उपयोग करने की सलाह देता हूं। आप अपने शहर का मौसम देख सकते हैं। क्या आप किसी विशेष फसल के लिए मौसम की जानकारी चाहते हैं?'
+      : 'For weather information, I recommend checking a weather app for your specific location. Different crops have different weather requirements. Are you looking for weather information for a specific crop?';
+  }
+
+  private getDiseaseResponse(language: string): string {
+    return language === 'hindi'
+      ? 'फसल की बीमारी की पहचान के लिए, आप हमारे डिजीज डिटेक्शन फीचर का उपयोग कर सकते हैं। फसल की फोटो लें और स्कैन करें। सामान्य बीमारियों के लिए: पौधों को अच्छी तरह देखें, पीले पत्ते, दाग, या कीड़े की जांच करें।'
+      : 'For crop disease identification, you can use our disease detection feature. Take a photo of crop and scan it. For common diseases: check plants regularly for yellow leaves, spots, or pests.';
+  }
+
+  private getMarketResponse(language: string): string {
+    return language === 'hindi'
+      ? 'बाजार भाव हर दिन बदलते रहते हैं। मंडी की वेबसाइट पर जाकर या कृषि विभाग की वेबसाइट पर भाव देख सकते हैं। आज के औसत भाव: गेहूं ₹2000-2500/क्विंटल, चावल ₹3000-3500/क्विंटल।'
+      : 'Market prices change daily. Check mandi websites or agriculture department websites for current prices. Today\'s average prices: Wheat ₹2000-2500/quintal, Rice ₹3000-3500/quintal.';
+  }
+
+  private getFertilizerResponse(language: string): string {
+    return language === 'hindi'
+      ? 'खाद का उपयोग मिट्टी की जांच के अनुसार करें। सामान्य: यूरिया 50-60 किग्रा/हेक्टेयर, DAP 100-120 किग्रा/हेक्टेयर। जैविक खाद का भी उपयोग करें - गोबर की खाद 5-6 टन/हेक्टेयर।'
+      : 'Use fertilizers based on soil testing. General: Urea 50-60 kg/hectare, DAP 100-120 kg/hectare. Also use organic fertilizers - cow dung manure 5-6 tons/hectare.';
+  }
+
+  private getDefaultResponse(language: string): string {
+    return language === 'hindi'
+      ? 'मैं आपकी कृषि संबंधी सहायता के लिए यहां हूं। मैं फसलों, मौसम, बीमारियों, बाजार भाव, और खाद के बारे में जानकारी दे सकता हूं। कृपया अपना सवाल विस्तार से बताएं।'
+      : 'I am here to help with your farming needs. I can provide information about crops, weather, diseases, market prices, and fertilizers. Please ask your question in detail.';
+  }
+
+  private getErrorMessage(language: string): string {
+    return language === 'hindi'
+      ? 'क्षमा करें, समस्या हुई। कृपया फिर से कोशिश करें।'
+      : 'Sorry, there was a problem. Please try again.';
+  }
+
+  private buildSystemPrompt(context: ChatContext): string {
+    const language = context.language || 'english';
+    
+    if (language === 'hindi') {
+      return `आप एक कृषि विशेषज्ञ सहायक हैं। आप किसानों को फसलों, मौसम, बीमारियों, बाजार भाव, और खाद के बारे में सटीक जानकारी देते हैं। अपने जवाब हिंदी में दें और उपयोगी सुझाव भी दें।`;
+    }
+    
+    return `You are an agricultural expert assistant. You help farmers with accurate information about crops, weather, diseases, market prices, and fertilizers. Provide helpful and practical advice.`;
+  }
+
+  private generateSuggestions(message: string, context: ChatContext): string[] {
+    const language = context.language || 'english';
+    const suggestions = [];
+
+    if (language === 'hindi') {
+      suggestions.push('फसल संरक्षण', 'सिंचाई युक्तियाँ', 'बीज चयन');
+    } else {
+      suggestions.push('Crop protection', 'Irrigation tips', 'Seed selection');
+    }
+
+    return suggestions;
+  }
+
+  private generateFollowUpQuestions(message: string, context: ChatContext): string[] {
+    const language = context.language || 'english';
+    const questions = [];
+
+    if (language === 'hindi') {
+      questions.push('आप किस फसल की बात कर रहे हैं?', 'आपका क्षेत्र कौन सा है?', 'क्या आपको और कोई समस्या है?');
+    } else {
+      questions.push('Which crop are you referring to?', 'What is your region?', 'Do you have any other problems?');
+    }
+
+    return questions;
+  }
+
+  async processMessage(message: string, context: ChatContext): Promise<ChatResponse> {
+    try {
+      // Try OpenAI first with timeout
       if (this.openaiApiKey) {
         try {
-          response = await this.getOpenAIResponse(message, context, updatedHistory);
+          const response = await Promise.race([
+            this.callOpenAI(message, context),
+            new Promise<never>((_, reject) => setTimeout(() => reject(new Error('OpenAI timeout')), 10000)
+          ]);
+          if (response) {
+            return response;
+          }
         } catch (error) {
-          if (this.isDevelopment) {
-            console.error('OpenAI API error:', error);
-          }
-          // Fallback to Gemini
-          if (this.geminiApiKey) {
-            response = await this.getGeminiResponse(message, context, updatedHistory);
-          } else {
-            response = await this.getLocalResponse(message, context);
-          }
+          // Continue to Gemini
         }
-      } else if (this.geminiApiKey) {
-        // Use Gemini if OpenAI is not available
-        response = await this.getGeminiResponse(message, context, updatedHistory);
-      } else {
-        // Use local processing
-        response = await this.getLocalResponse(message, context);
       }
 
-      // Add assistant response to history
-      const assistantMessage: ChatMessage = {
-        role: 'assistant',
-        content: response.content,
-        timestamp: new Date().toISOString()
-      };
-      
-      this.conversationHistory.set(sessionId, [...updatedHistory, assistantMessage]);
-      
-      // Keep only last 10 messages in memory
-      if (this.conversationHistory.get(sessionId)!.length > 10) {
-        const trimmedHistory = this.conversationHistory.get(sessionId)!.slice(-10);
-        this.conversationHistory.set(sessionId, trimmedHistory);
+      // Try Gemini as fallback with timeout
+      if (this.geminiApiKey) {
+        try {
+          const response = await Promise.race([
+            this.callGemini(message, context),
+            new Promise<never>((_, reject) => setTimeout(() => reject(new Error('Gemini timeout')), 10000)
+          ]);
+          if (response) {
+            return response;
+          }
+        } catch (error) {
+          // Continue to local fallback
+        }
       }
 
-      return response;
-
+      // Local fallback
+      return this.getLocalResponse(message, context);
     } catch (error) {
-      if (this.isDevelopment) {
-        console.error('Chatbot service error:', error);
-      }
-      
       return {
-        content: this.getErrorMessage(context.language),
-        suggestions: [
-          'Try asking about weather conditions',
-          'Ask about crop diseases',
-          'Inquire about market prices'
-        ]
+        content: this.getErrorMessage(context.language || 'english')
       };
     }
   }
 
-  // Get response from OpenAI
-  private async getOpenAIResponse(
-    message: string, 
-    context: ChatContext, 
-    history: ChatMessage[]
-  ): Promise<ChatResponse> {
-    const systemPrompt = this.buildSystemPrompt(context);
-    
-    const messages = [
-      { role: 'system', content: systemPrompt },
-      ...history.map(msg => ({
-        role: msg.role,
-        content: msg.content
-      }))
-    ];
+  private async callOpenAI(message: string, context: ChatContext): Promise<ChatResponse | null> {
+    if (!this.openaiApiKey) return null;
 
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${this.openaiApiKey}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        model: 'gpt-3.5-turbo',
-        messages,
-        max_tokens: 500,
-        temperature: 0.7
-      })
-    });
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 8000);
 
-    if (!response.ok) {
-      throw new Error(`OpenAI API error: ${response.status}`);
-    }
-
-    const data = await response.json();
-    const content = data.choices[0]?.message?.content || 'I apologize, but I could not process your request.';
-
-    return {
-      content,
-      suggestions: this.generateSuggestions(message, context),
-      followUpQuestions: this.generateFollowUpQuestions(message, context)
-    };
-  }
-
-  // Get response from Gemini
-  private async getGeminiResponse(
-    message: string, 
-    context: ChatContext, 
-    history: ChatMessage[]
-  ): Promise<ChatResponse> {
-    const systemPrompt = this.buildSystemPrompt(context);
-    
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${this.geminiApiKey}`,
-      {
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Authorization': `Bearer ${this.openaiApiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'gpt-3.5-turbo',
+          messages: [
+            {
+              role: 'system',
+              content: this.buildSystemPrompt(context)
+            },
+            {
+              role: 'user',
+              content: message
+            }
+          ],
+          max_tokens: 500,
+          temperature: 0.7
+        }),
+        signal: controller.signal
+      });
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        throw new Error(`OpenAI API error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      const content = data.choices[0]?.message?.content || this.getErrorMessage(context.language || 'english');
+
+      return {
+        content,
+        suggestions: this.generateSuggestions(message, context),
+        followUpQuestions: this.generateFollowUpQuestions(message, context)
+      };
+    } catch (error) {
+      if (error.name === 'AbortError') {
+        throw new Error('OpenAI request timeout');
+      }
+      return null;
+    }
+  }
+
+  private async callGemini(message: string, context: ChatContext): Promise<ChatResponse | null> {
+    if (!this.geminiApiKey) return null;
+
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 8000);
+
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${this.geminiApiKey}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           contents: [
             {
               parts: [
-                { text: systemPrompt },
-                ...history.map(msg => ({
-                  text: `${msg.role}: ${msg.content}`
-                }))
+                { text: this.buildSystemPrompt(context) },
+                { text: message }
               ]
             }
           ]
-        })
+        }),
+        signal: controller.signal
+      });
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        throw new Error(`Gemini API error: ${response.status}`);
       }
-    });
 
-    if (!response.ok) {
-      throw new Error(`Gemini API error: ${response.status}`);
-    }
+      const data = await response.json();
+      const content = data.candidates[0]?.content?.parts[0]?.text || this.getErrorMessage(context.language || 'english');
 
-    const data = await response.json();
-    const content = data.candidates[0]?.content?.parts[0]?.text || 'I apologize, but I could not process your request.';
-
-    return {
-      content,
-      suggestions: this.generateSuggestions(message, context),
-      followUpQuestions: this.generateFollowUpQuestions(message, context)
-    };
-  }
-
-  // Get local response (fallback)
-  private async getLocalResponse(
-    message: string, 
-    context: ChatContext
-  ): Promise<ChatResponse> {
-    // Simulate processing delay
-    await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 1000));
-
-    const lowerMessage = message.toLowerCase();
-    const language = context.language;
-
-    // Detect query type and generate response
-    if (this.isGreeting(lowerMessage)) {
       return {
-        content: this.getGreetingResponse(language),
-        suggestions: [
-          'Ask about weather conditions',
-          'Inquire about crop diseases',
-          'Check market prices'
-        ]
+        content,
+        suggestions: this.generateSuggestions(message, context),
+        followUpQuestions: this.generateFollowUpQuestions(message, context)
       };
+    } catch (error) {
+      if (error.name === 'AbortError') {
+        throw new Error('Gemini request timeout');
+      }
+      return null;
     }
-
-    if (this.isWeatherQuery(lowerMessage)) {
-      return {
-        content: this.getWeatherResponse(language),
-        suggestions: [
-          'Ask about irrigation timing',
-          'Inquire about crop-specific weather needs',
-          'Check rainfall forecast'
-        ]
-      };
-    }
-
-    if (this.isDiseaseQuery(lowerMessage)) {
-      return {
-        content: this.getDiseaseResponse(language),
-        suggestions: [
-          'Upload a photo for disease detection',
-          'Ask about specific disease symptoms',
-          'Inquire about organic treatments'
-        ]
-      };
-    }
-
-    if (this.isMarketQuery(lowerMessage)) {
-      return {
-        content: this.getMarketResponse(language),
-        suggestions: [
-          'Ask about specific crop prices',
-          'Inquire about market trends',
-          'Check best selling times'
-        ]
-      };
-    }
-
-    if (this.isFertilizerQuery(lowerMessage)) {
-      return {
-        content: this.getFertilizerResponse(language),
-        suggestions: [
-          'Ask about organic alternatives',
-          'Inquire about application timing',
-          'Check soil testing recommendations'
-        ]
-      };
-    }
-
-    // Default response
-    return {
-      content: this.getDefaultResponse(language),
-      suggestions: [
-        'Ask about weather conditions',
-        'Inquire about crop diseases',
-        'Check market prices',
-        'Ask about farming practices'
-      ],
-      followUpQuestions: [
-        'What type of crop are you growing?',
-        'What is your current farming challenge?',
-        'Would you like weather information for your area?'
-      ]
-    };
   }
 
-  // Build system prompt for AI models
-  private buildSystemPrompt(context: ChatContext): string {
-    const language = context.language === 'hindi' ? 'Hindi' : 'English';
-    
-    return `You are AgriSathi, an expert agricultural assistant for farmers. You communicate primarily in ${language}.
-
-Your expertise includes:
-- Crop disease identification and treatment
-- Weather analysis and farming advice
-- Market price information and trends
-- Sustainable farming practices
-- Organic farming methods
-- Irrigation and water management
-- Soil health and fertilization
-
-Guidelines:
-- Provide practical, actionable advice
-- Consider small-scale farming constraints
-- Suggest both traditional and modern solutions
-- Prioritize organic and sustainable methods
-- Be concise but thorough
-- Include specific measurements and timing when relevant
-- Consider local climate and conditions
-
-Current context:
-- Language: ${language}
-- Location: ${context.location || 'Not specified'}
-- Crop: ${context.crop || 'Not specified'}
-
-Provide helpful, farmer-friendly responses that can be immediately implemented.`;
-  }
-
-  // Query type detection methods
-  private isGreeting(message: string): boolean {
-    const greetings = ['hello', 'hi', 'namaste', 'hey', 'good morning', 'good evening'];
-    return greetings.some(greeting => message.includes(greeting));
-  }
-
-  private isWeatherQuery(message: string): boolean {
-    const weatherKeywords = ['weather', 'temperature', 'rain', 'climate', 'मौसम', 'बारिश', 'तापमान'];
-    return weatherKeywords.some(keyword => message.includes(keyword));
-  }
-
-  private isDiseaseQuery(message: string): boolean {
-    const diseaseKeywords = ['disease', 'pest', 'infection', 'fungus', 'बीमारी', 'कीट', 'फंगस'];
-    return diseaseKeywords.some(keyword => message.includes(keyword));
-  }
-
-  private isMarketQuery(message: string): boolean {
-    const marketKeywords = ['price', 'market', 'sell', 'rate', 'भाव', 'बाजार', 'कीमत'];
-    return marketKeywords.some(keyword => message.includes(keyword));
-  }
-
-  private isFertilizerQuery(message: string): boolean {
-    const fertilizerKeywords = ['fertilizer', 'nutrient', 'soil', 'खाद', 'मिट्टी', 'पोषक तत्व'];
-    return fertilizerKeywords.some(keyword => message.includes(keyword));
-  }
-
-  // Response generators
-  private getGreetingResponse(language: string): string {
-    if (language === 'hindi') {
-      return '🌾 नमस्ते किसान भाई! मैं आपका कृषि सहायक हूं। आज मैं आपकी क्या सहायता कर सकता हूं?';
-    }
-    return '🌾 Hello farmer! I am your agricultural assistant. How can I help you today?';
-  }
-
-  private getWeatherResponse(language: string): string {
-    if (language === 'hindi') {
-      return '🌤️ आज का मौसम खेती के लिए अनुकूल है। तापमान 28°C, नमी 65%, हवा 12 किमी/घंटा। शाम को सिंचाई करने का बेसा अच्छा समय है।';
-    }
-    return '🌤️ Today\'s weather is favorable for farming. Temperature 28°C, humidity 65%, wind 12 km/h. Evening is the best time for irrigation.';
-  }
-
-  private getDiseaseResponse(language: string): string {
-    if (language === 'hindi') {
-      return '🌱 फसल की बीमारी के लिए: 1) पौधे की जांच करें 2) नीम का स्प्रे करें 3) विशेषज्ञ से संपर्क करें। बेहतर पहचान के लिए फसल की फोटो भेजें।';
-    }
-    return '🌱 For crop diseases: 1) Check plants regularly 2) Use neem spray 3) Contact agricultural expert. Send crop photos for better identification.';
-  }
-
-  private getMarketResponse(language: string): string {
-    if (language === 'hindi') {
-      return '💰 आज का बाजार: टमाटर ₹40/किग्रा, गेहूं ₹2200/क्विंटल, धान ₹2500/क्विंटल। कीमतें अच्छी हैं।';
-    }
-    return '💰 Today\'s market: Tomato ₹40/kg, Wheat ₹2200/quintal, Rice ₹2500/quintal. Prices are good.';
-  }
-
-  private getFertilizerResponse(language: string): string {
-    if (language === 'hindi') {
-      return '🧪 खाद के लिए: 1) मिट्टी जांच करवाएं 2) गोबर का उपयोग करें 3) NPK का सही अनुपात करें। जैविक खेती को प्राथमिकता दें।';
-    }
-    return '🧪 For fertilizers: 1) Test your soil 2) Use compost 3) Apply NPK in correct ratio. Prioritize organic farming.';
-  }
-
-  private getDefaultResponse(language: string): string {
-    if (language === 'hindi') {
-      return '🌾 मैं आपकी मदद करने के लिए यहां हूं। कृपया अपना सवाल विस्तार से बताएं। मैं बीमारी, मौसम, बाजार, और खेती के बारे में जानकारी दे सकता हूं।';
-    }
-    return '🌾 I am here to help you with farming. Please describe your question in detail. I can assist with diseases, weather, market prices, and farming practices.';
-  }
-
-  private getErrorMessage(language: string): string {
-    if (language === 'hindi') {
-      return 'क्षमा करें, समस्या हुई। कृपया फिर से कोशिश करें।';
-    }
-    return 'Sorry, there was a problem. Please try again.';
-  }
-
-  // Generate suggestions based on context
-  private generateSuggestions(message: string, context: ChatContext): string[] {
-    const suggestions = [];
-    
-    if (!this.isWeatherQuery(message)) {
-      suggestions.push('Check current weather conditions');
-    }
-    
-    if (!this.isDiseaseQuery(message)) {
-      suggestions.push('Learn about common crop diseases');
-    }
-    
-    if (!this.isMarketQuery(message)) {
-      suggestions.push('View market prices');
-    }
-    
-    return suggestions.slice(0, 3);
-  }
-
-  // Generate follow-up questions
-  private generateFollowUpQuestions(message: string, context: ChatContext): string[] {
-    const questions = [];
-    
-    if (!context.crop) {
-      questions.push('What crop are you currently growing?');
-    }
-    
-    if (!context.location) {
-      questions.push('What is your farming location?');
-    }
-    
-    questions.push('Would you like specific farming advice?');
-    
-    return questions.slice(0, 2);
-  }
-
-  // Clear conversation history
-  clearHistory(sessionId: string = 'default'): void {
+  clearHistory(sessionId: string): void {
     this.conversationHistory.delete(sessionId);
   }
 
-  // Get conversation history
-  getHistory(sessionId: string = 'default'): ChatMessage[] {
+  getHistory(sessionId: string): ChatMessage[] {
     return this.conversationHistory.get(sessionId) || [];
+  }
+
+  addToHistory(sessionId: string, message: ChatMessage): void {
+    const history = this.conversationHistory.get(sessionId) || [];
+    history.push(message);
+    
+    // Keep only last 20 messages
+    if (history.length > 20) {
+      history.splice(0, history.length - 20);
+    }
+    
+    this.conversationHistory.set(sessionId, history);
   }
 }
 
-// Create singleton instance
 export const chatbotService = new ChatbotService();

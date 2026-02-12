@@ -196,7 +196,6 @@ class AuthService {
 
       return profileData;
     } catch (error) {
-      console.error('Failed to get current user:', error);
       return null;
     }
   }
@@ -283,10 +282,6 @@ class AuthService {
         throw new AppError(error.message, 'OTP_SEND_ERROR');
       }
 
-      // In production, integrate with SMS service like Twilio, MessageBird, etc.
-      // For demo, we'll simulate SMS sending
-      if (import.meta.env.DEV) console.info(`OTP sent to ${phone}: ${otp}`);
-      
       // Show success message (in production, this would be sent via SMS)
       return {
         success: true,
