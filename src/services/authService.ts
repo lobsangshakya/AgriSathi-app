@@ -1,11 +1,10 @@
 /**
- * Authentication Service
- * Handles all authentication operations with Supabase
+ * Authentication Service - Supabase when configured, else wrapper uses mock
  */
 
-import { supabase, Database } from '@/utils/supabaseClient';
+import { supabase } from '@/utils/supabaseClient';
+import { AppError } from '@/utils/errorHandler';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
-import { handleToastError, AppError } from '@/utils/errorHandler';
 
 // User profile interface matching database schema
 export interface UserProfile {
@@ -40,8 +39,8 @@ class AuthService {
    * Sign up new user with email and password
    */
   async signUp(email: string, password: string, userData: Partial<UserProfile>): Promise<AuthResponse> {
+    if (!supabase) return { user: null, session: null, error: 'Authentication not configured.' };
     try {
-      // Create auth user
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
         password,
@@ -79,8 +78,6 @@ class AuthService {
           .single();
 
         if (profileError) {
-          // If profile creation fails, delete the auth user
-          await supabase.auth.admin.deleteUser(authData.user.id);
           throw new AppError(profileError.message, 'PROFILE_CREATION_ERROR');
         }
 
@@ -96,7 +93,6 @@ class AuthService {
         session: null,
         error: 'Failed to create user account',
       };
-
     } catch (error) {
       return {
         user: null,
@@ -110,6 +106,7 @@ class AuthService {
    * Sign in user with email and password
    */
   async signIn(email: string, password: string): Promise<AuthResponse> {
+    if (!supabase) return { user: null, session: null, error: 'Authentication not configured.' };
     try {
       const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
         email,
@@ -158,6 +155,7 @@ class AuthService {
    * Sign out current user
    */
   async signOut(): Promise<{ error: string | null }> {
+    if (!supabase) return { error: null };
     try {
       const { error } = await supabase.auth.signOut();
       
@@ -177,6 +175,7 @@ class AuthService {
    * Get current authenticated user
    */
   async getCurrentUser(): Promise<UserProfile | null> {
+    if (!supabase) return null;
     try {
       const { data: { user } } = await supabase.auth.getUser();
 
@@ -206,6 +205,7 @@ class AuthService {
    * Update user profile
    */
   async updateProfile(updates: Partial<UserProfile>): Promise<{ user: UserProfile | null; error: string | null }> {
+    if (!supabase) return { user: null, error: 'Authentication not configured.' };
     try {
       const { data: { user } } = await supabase.auth.getUser();
 
@@ -243,6 +243,7 @@ class AuthService {
    * Reset password
    */
   async resetPassword(email: string): Promise<{ error: string | null }> {
+    if (!supabase) return { error: 'Authentication not configured.' };
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${window.location.origin}/reset-password`,
@@ -264,11 +265,9 @@ class AuthService {
    * Send OTP to phone number
    */
   async sendOTP(phone: string): Promise<{ success: boolean; error: string | null }> {
+    if (!supabase) return { success: false, error: 'Authentication not configured.' };
     try {
-      // Generate 6-digit OTP
       const otp = Math.floor(100000 + Math.random() * 900000).toString();
-      
-      // Store OTP with expiration (5 minutes)
       const { error } = await supabase
         .from('otp_verifications')
         .upsert({
@@ -305,6 +304,7 @@ class AuthService {
    * Verify OTP
    */
   async verifyOTP(phone: string, otp: string): Promise<{ success: boolean; error: string | null }> {
+    if (!supabase) return { success: false, error: 'Authentication not configured.' };
     try {
       const { data: otpData, error } = await supabase
         .from('otp_verifications')
@@ -351,8 +351,8 @@ class AuthService {
     otp: string, 
     userData: Partial<UserProfile>
   ): Promise<AuthResponse> {
+    if (!supabase) return { user: null, session: null, error: 'Authentication not configured.' };
     try {
-      // First verify OTP
       const otpVerification = await this.verifyOTP(phone, otp);
       
       if (!otpVerification.success) {
@@ -406,8 +406,6 @@ class AuthService {
           .single();
 
         if (profileError) {
-          // If profile creation fails, delete the auth user
-          await supabase.auth.admin.deleteUser(authData.user.id);
           throw new AppError(profileError.message, 'PROFILE_CREATION_ERROR');
         }
 
@@ -423,7 +421,6 @@ class AuthService {
         session: null,
         error: 'Failed to create user account',
       };
-
     } catch (error) {
       return {
         user: null,
@@ -437,8 +434,8 @@ class AuthService {
    * Sign in with phone and OTP
    */
   async signInWithPhone(phone: string, otp: string): Promise<AuthResponse> {
+    if (!supabase) return { user: null, session: null, error: 'Authentication not configured.' };
     try {
-      // First verify OTP
       const otpVerification = await this.verifyOTP(phone, otp);
       
       if (!otpVerification.success) {
@@ -521,15 +518,16 @@ class AuthService {
     }
   }
   onAuthStateChange(callback: (user: UserProfile | null) => void) {
+    if (!supabase) {
+      return { data: { subscription: { unsubscribe: () => {} } } };
+    }
     return supabase.auth.onAuthStateChange(async (event, session) => {
       if (session?.user) {
-        // Fetch user profile when auth state changes
         const { data: profileData } = await supabase
           .from('users')
           .select('*')
           .eq('id', session.user.id)
           .single();
-
         callback(profileData || null);
       } else {
         callback(null);
