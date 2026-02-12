@@ -1,10 +1,10 @@
 /**
- * User Context - Authentication with Fallback Support
- * Manages user authentication state and profile data
+ * Production-Ready User Context
+ * Manages user authentication state and profile data with real APIs
  */
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { authWrapper, UnifiedUserProfile } from '@/services/authServiceWrapper';
+import { authService, UserProfile } from '@/services/authService';
 import { toast } from '@/hooks/use-toast';
 import { useLanguage } from '@/contexts/LanguageContext';
 
@@ -48,97 +48,83 @@ interface UserContextType {
   logout: () => Promise<void>;
   addAgriCreds: (amount: number, reason: string) => void;
   updateStats: (type: 'post' | 'answer' | 'question') => void;
-  updateUser: (updates: Partial<User>) => Promise<boolean>;
+  updateUserProfile: (updates: Partial<User>) => Promise<boolean>;
   refreshUser: () => Promise<void>;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
-const defaultUser: User = {
-  id: 'user-1',
-  name: 'राम प्रकाश',
-  location: 'गाँव: रामपुर, जिला: मेरठ, उत्तर प्रदेश',
-  avatar: 'https://images.unsplash.com/photo-1607990281513-2c110a25bd8c?w=150&h=150&fit=crop&crop=face',
-  email: 'ramprakash@agrisathi.in',
-  phone: '+91 98765 43210',
-  landSize: '2.5 एकड़',
-  experience: '15 साल',
-  agriCreds: 250,
-  joinDate: '2024-01-15',
-  language: 'hindi',
-  crops: ['गेहूं', 'धान', 'गन्ना', 'सरसों'],
-  stats: {
-    postsShared: 0,
-    helpfulAnswers: 0,
-    questionsAsked: 0,
-    creditsEarned: 0
-  },
-  achievements: []
+export const useUser = () => {
+  const context = useContext(UserContext);
+  if (context === undefined) {
+    throw new Error('useUser must be used within a UserProvider');
+  }
+  return context;
 };
 
-/**
- * User Context Provider - Authentication with Fallback Support
- */
+interface UserProviderProps {
+  children: React.ReactNode;
+}
 
-export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { language } = useLanguage();
+export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const { language, t } = useLanguage();
 
-  const isHindi = language === 'hindi';
+  // Convert UserProfile to User format
+  const convertToUser = (profile: UserProfile): User => {
+    return {
+      id: profile.id,
+      name: profile.name,
+      location: profile.location || 'Village: Unknown, District: Unknown',
+      avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${profile.id}`,
+      email: profile.email,
+      phone: profile.phone || '',
+      landSize: profile.landSize || 'Not specified',
+      experience: profile.experience || 'Not specified',
+      agriCreds: 100, // Default credits
+      joinDate: new Date(profile.created_at).toLocaleDateString(),
+      language: profile.language,
+      crops: profile.crops,
+      stats: {
+        postsShared: 0,
+        helpfulAnswers: 0,
+        questionsAsked: 0,
+        creditsEarned: 0,
+      },
+      achievements: [],
+    };
+  };
 
-  // Transform UnifiedUserProfile to User interface
-  const transformProfile = (profile: UnifiedUserProfile): User => ({
-    id: profile.id,
-    name: profile.name,
-    location: profile.location,
-    avatar: profile.avatar || profile.avatar_url || '',
-    email: profile.email,
-    phone: profile.phone,
-    landSize: profile.landSize || profile.land_size || '',
-    experience: profile.experience,
-    agriCreds: profile.agriCreds || profile.agri_creds || 0,
-    joinDate: profile.joinDate || profile.join_date || '',
-    language: profile.language,
-    crops: profile.crops,
-    stats: {
-      postsShared: 0, // Will be updated from database
-      helpfulAnswers: 0,
-      questionsAsked: 0,
-      creditsEarned: profile.agriCreds || profile.agri_creds || 0,
-    },
-    achievements: [], // Will be fetched from database
-  });
-
-  // Check for existing session on mount
+  // Initialize user on mount
   useEffect(() => {
-    const initializeAuth = async () => {
+    const initializeUser = async () => {
       try {
-        const currentUser = await authWrapper.getCurrentUser();
+        const currentUser = await authService.getCurrentUser();
         if (currentUser) {
-          const transformedUser = transformProfile(currentUser);
-          setUser(transformedUser);
-          setIsLoggedIn(true);
+          const profile = await authService.getUserProfile(currentUser.id);
+          if (profile) {
+            setUser(convertToUser(profile));
+          }
         }
       } catch (error) {
-        console.error('Failed to initialize auth:', error);
+        // Silently handle initialization errors
       } finally {
         setIsLoading(false);
       }
     };
 
-    initializeAuth();
+    initializeUser();
 
     // Listen to auth state changes
-    const { data: { subscription } } = authWrapper.onAuthStateChange((profile) => {
-      if (profile) {
-        const transformedUser = transformProfile(profile);
-        setUser(transformedUser);
-        setIsLoggedIn(true);
+    const { data: { subscription } } = authService.onAuthStateChange(async (authUser) => {
+      if (authUser) {
+        const profile = await authService.getUserProfile(authUser.id);
+        if (profile) {
+          setUser(convertToUser(profile));
+        }
       } else {
         setUser(null);
-        setIsLoggedIn(false);
       }
       setIsLoading(false);
     });
@@ -148,38 +134,32 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
   }, []);
 
-  // Real login with email and password
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
       setIsLoading(true);
-      const response = await authWrapper.signIn(email, password);
-
-      if (response.error) {
+      const result = await authService.signIn(email, password);
+      
+      if (result.success && result.user && result.profile) {
+        setUser(convertToUser(result.profile));
+        
         toast({
-          title: isHindi ? 'लॉगिन विफल' : 'Login Failed',
-          description: response.error,
+          title: t('auth.loginSuccess') || 'Login Successful',
+          description: t('auth.welcomeBack') || `Welcome back, ${result.profile.name}!`,
+        });
+        
+        return true;
+      } else {
+        toast({
+          title: t('auth.loginFailed') || 'Login Failed',
+          description: result.error || 'Invalid credentials',
           variant: 'destructive',
         });
         return false;
       }
-
-      if (response.user) {
-        const transformedUser = transformProfile(response.user);
-        setUser(transformedUser);
-        setIsLoggedIn(true);
-
-        toast({
-          title: isHindi ? 'लॉगिन सफल' : 'Login Successful',
-          description: isHindi ? `वापस स्वागत है, ${transformedUser.name}!` : `Welcome back, ${transformedUser.name}!`,
-        });
-        return true;
-      }
-
-      return false;
     } catch (error) {
       toast({
-        title: isHindi ? 'लॉगिन विफल' : 'Login Failed',
-        description: isHindi ? 'एक त्रुटि हुई' : 'An unexpected error occurred',
+        title: t('auth.error') || 'Error',
+        description: t('auth.loginError') || 'Login failed. Please try again.',
         variant: 'destructive',
       });
       return false;
@@ -188,38 +168,32 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  // Real sign up with email and password
   const signUp = async (email: string, password: string, userData: Partial<User>): Promise<boolean> => {
     try {
       setIsLoading(true);
-      const response = await authWrapper.signUp(email, password, userData);
-
-      if (response.error) {
+      const result = await authService.signUp(email, password, userData);
+      
+      if (result.success && result.user && result.profile) {
+        setUser(convertToUser(result.profile));
+        
         toast({
-          title: isHindi ? 'खाता बनाना विफल' : 'Sign Up Failed',
-          description: response.error,
+          title: t('auth.signupSuccess') || 'Account Created',
+          description: t('auth.welcome') || `Welcome to AgriSathi, ${result.profile.name}!`,
+        });
+        
+        return true;
+      } else {
+        toast({
+          title: t('auth.signupFailed') || 'Sign Up Failed',
+          description: result.error || 'Failed to create account',
           variant: 'destructive',
         });
         return false;
       }
-
-      if (response.user) {
-        const transformedUser = transformProfile(response.user);
-        setUser(transformedUser);
-        setIsLoggedIn(true);
-
-        toast({
-          title: isHindi ? 'खाता बन गया' : 'Sign Up Successful',
-          description: isHindi ? `AgriSathi में स्वागत है, ${transformedUser.name}!` : `Welcome to AgriSathi, ${transformedUser.name}!`,
-        });
-        return true;
-      }
-
-      return false;
     } catch (error) {
       toast({
-        title: isHindi ? 'खाता बनाना विफल' : 'Sign Up Failed',
-        description: isHindi ? 'एक त्रुटि हुई' : 'An unexpected error occurred',
+        title: t('auth.error') || 'Error',
+        description: t('auth.signupError') || 'Sign up failed. Please try again.',
         variant: 'destructive',
       });
       return false;
@@ -228,167 +202,32 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  // Real logout
-  const logout = async (): Promise<void> => {
-    try {
-      const response = await authWrapper.signOut();
-
-      if (response.error) {
-        toast({
-          title: isHindi ? 'लॉगआउट विफल' : 'Logout Failed',
-          description: response.error,
-          variant: 'destructive',
-        });
-        return;
-      }
-
-      setUser(null);
-      setIsLoggedIn(false);
-
-      toast({
-        title: isHindi ? 'लॉगआउट हो गया' : 'Logged Out',
-        description: isHindi ? 'आप सफलतापूर्वक लॉग आउट हो गए।' : 'You have been successfully logged out.',
-      });
-    } catch (error) {
-      toast({
-        title: isHindi ? 'लॉगआउट विफल' : 'Logout Failed',
-        description: isHindi ? 'एक त्रुटि हुई' : 'An unexpected error occurred',
-        variant: 'destructive',
-      });
-    }
-  };
-
-  // Update user profile
-  const updateUser = async (updates: Partial<User>): Promise<boolean> => {
-    try {
-      if (!user) return false;
-
-      const response = await authWrapper.updateProfile(updates);
-
-      if (response.error) {
-        toast({
-          title: isHindi ? 'अपडेट विफल' : 'Update Failed',
-          description: response.error,
-          variant: 'destructive',
-        });
-        return false;
-      }
-
-      if (response.user) {
-        const transformedUser = transformProfile(response.user);
-        setUser(transformedUser);
-
-        toast({
-          title: isHindi ? 'प्रोफाइल अपडेट' : 'Profile Updated',
-          description: isHindi ? 'आपकी प्रोफाइल अपडेट हो गई।' : 'Your profile has been successfully updated.',
-        });
-        return true;
-      }
-
-      return false;
-    } catch (error) {
-      toast({
-        title: isHindi ? 'अपडेट विफल' : 'Update Failed',
-        description: isHindi ? 'एक त्रुटि हुई' : 'An unexpected error occurred',
-        variant: 'destructive',
-      });
-      return false;
-    }
-  };
-
-  // Refresh user data
-  const refreshUser = async (): Promise<void> => {
-    try {
-      const currentUser = await authWrapper.getCurrentUser();
-      if (currentUser) {
-        const transformedUser = transformProfile(currentUser);
-        setUser(transformedUser);
-      }
-    } catch (error) {
-      console.error('Failed to refresh user:', error);
-    }
-  };
-
-  // Sign up with phone and OTP
-  const signUpWithPhone = async (phone: string, name: string, otp: string): Promise<boolean> => {
-    try {
-      setIsLoading(true);
-      const response = await authWrapper.signUpWithPhone(phone, otp, {
-        name,
-        location: 'Village: Rampur, District: Meerut, UP',
-        landSize: '2.5 acres',
-        experience: '15 years',
-        language: 'hindi',
-        crops: ['Wheat', 'Rice', 'Sugarcane', 'Mustard'],
-        avatar: 'https://images.unsplash.com/photo-1607990281513-2c110a25bd8c?w=150&h=150&fit=crop&crop=face',
-      });
-
-      if (response.error) {
-        toast({
-          title: isHindi ? 'खाता बनाना विफल' : 'Sign Up Failed',
-          description: response.error,
-          variant: 'destructive',
-        });
-        return false;
-      }
-
-      if (response.user) {
-        const transformedUser = transformProfile(response.user);
-        setUser(transformedUser);
-        setIsLoggedIn(true);
-
-        toast({
-          title: isHindi ? 'खाता बन गया' : 'Sign Up Successful',
-          description: isHindi ? `AgriSathi में स्वागत है, ${transformedUser.name}!` : `Welcome to AgriSathi, ${transformedUser.name}!`,
-        });
-        return true;
-      }
-
-      return false;
-    } catch (error) {
-      toast({
-        title: isHindi ? 'खाता बनाना विफल' : 'Sign Up Failed',
-        description: isHindi ? 'एक त्रुटि हुई' : 'An unexpected error occurred',
-        variant: 'destructive',
-      });
-      return false;
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Sign in with phone and OTP
   const signInWithPhone = async (phone: string, otp: string): Promise<boolean> => {
     try {
       setIsLoading(true);
-      const response = await authWrapper.signInWithPhone(phone, otp);
-
-      if (response.error) {
+      const result = await authService.verifyPhoneOTP(phone, otp);
+      
+      if (result.success && result.user && result.profile) {
+        setUser(convertToUser(result.profile));
+        
         toast({
-          title: isHindi ? 'लॉगिन विफल' : 'Login Failed',
-          description: response.error,
+          title: t('auth.loginSuccess') || 'Login Successful',
+          description: t('auth.welcomeBack') || `Welcome back, ${result.profile.name}!`,
+        });
+        
+        return true;
+      } else {
+        toast({
+          title: t('auth.otpFailed') || 'OTP Verification Failed',
+          description: result.error || 'Invalid OTP',
           variant: 'destructive',
         });
         return false;
       }
-
-      if (response.user) {
-        const transformedUser = transformProfile(response.user);
-        setUser(transformedUser);
-        setIsLoggedIn(true);
-
-        toast({
-          title: isHindi ? 'लॉगिन सफल' : 'Login Successful',
-          description: isHindi ? `वापस स्वागत है, ${transformedUser.name}!` : `Welcome back, ${transformedUser.name}!`,
-        });
-        return true;
-      }
-
-      return false;
     } catch (error) {
       toast({
-        title: isHindi ? 'लॉगिन विफल' : 'Login Failed',
-        description: isHindi ? 'एक त्रुटि हुई' : 'An unexpected error occurred',
+        title: t('auth.error') || 'Error',
+        description: t('auth.otpError') || 'OTP verification failed. Please try again.',
         variant: 'destructive',
       });
       return false;
@@ -397,119 +236,146 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  // Send OTP to phone
+  const signUpWithPhone = async (phone: string, name: string, otp: string): Promise<boolean> => {
+    // For phone signup, we use the same OTP verification flow
+    return signInWithPhone(phone, otp);
+  };
+
   const sendOTP = async (phone: string): Promise<boolean> => {
     try {
-      setIsLoading(true);
-      const response = await authWrapper.sendOTP(phone);
-
-      if (response.error) {
+      const result = await authService.signInWithPhone(phone);
+      
+      if (result.success) {
         toast({
-          title: isHindi ? 'OTP भेजना विफल' : 'OTP Send Failed',
-          description: response.error,
+          title: t('auth.otpSent') || 'OTP Sent',
+          description: result.message || 'OTP has been sent to your phone number',
+        });
+        return true;
+      } else {
+        toast({
+          title: t('auth.otpFailed') || 'OTP Failed',
+          description: result.error || 'Failed to send OTP',
           variant: 'destructive',
         });
         return false;
       }
-
-      if (response.success) {
-        toast({
-          title: isHindi ? 'OTP भेजा गया' : 'OTP Sent',
-          description: isHindi ? `OTP ${phone} पर भेजा गया` : `OTP has been sent to ${phone}`,
-        });
-        return true;
-      }
-
-      return false;
     } catch (error) {
       toast({
-        title: isHindi ? 'OTP भेजना विफल' : 'OTP Send Failed',
-        description: isHindi ? 'एक त्रुटि हुई' : 'An unexpected error occurred',
+        title: t('auth.error') || 'Error',
+        description: t('auth.otpError') || 'Failed to send OTP. Please try again.',
         variant: 'destructive',
       });
       return false;
-    } finally {
-      setIsLoading(false);
     }
   };
 
-  // Add AgriCreds (local state for now, will be moved to database)
+  const logout = async (): Promise<void> => {
+    try {
+      const result = await authService.signOut();
+      
+      if (result.success) {
+        setUser(null);
+        
+        toast({
+          title: t('auth.logoutSuccess') || 'Logged Out',
+          description: t('auth.logoutMessage') || 'You have been logged out successfully',
+        });
+      } else {
+        toast({
+          title: t('auth.error') || 'Error',
+          description: result.error || 'Logout failed',
+          variant: 'destructive',
+        });
+      }
+    } catch (error) {
+      toast({
+        title: t('auth.error') || 'Error',
+        description: t('auth.logoutError') || 'Logout failed. Please try again.',
+        variant: 'destructive',
+      });
+    }
+  };
+
   const addAgriCreds = (amount: number, reason: string) => {
-    if (!user) return;
-
-    const updatedUser = {
-      ...user,
-      agriCreds: user.agriCreds + amount,
-      stats: {
-        ...user.stats,
-        creditsEarned: user.stats.creditsEarned + amount
-      }
-    };
-
-    setUser(updatedUser);
-
-    // Add achievement if criteria met
-    const newAchievements = [...updatedUser.achievements];
-    
-    if (updatedUser.agriCreds >= 100 && !newAchievements.find(a => a.title === 'Beginner Farmer')) {
-      newAchievements.push({
-        title: 'Beginner Farmer',
-        points: 100,
-        icon: '🌱'
+    if (user) {
+      setUser(prev => prev ? {
+        ...prev,
+        agriCreds: prev.agriCreds + amount,
+      } : null);
+      
+      toast({
+        title: t('credits.earned') || 'Credits Earned',
+        description: `${amount} credits earned: ${reason}`,
       });
-    }
-    
-    if (updatedUser.agriCreds >= 500 && !newAchievements.find(a => a.title === 'Community Contributor')) {
-      newAchievements.push({
-        title: 'Community Contributor',
-        points: 500,
-        icon: '🏆'
-      });
-    }
-    
-    if (updatedUser.agriCreds >= 1000 && !newAchievements.find(a => a.title === 'Expert Farmer')) {
-      newAchievements.push({
-        title: 'Expert Farmer',
-        points: 1000,
-        icon: '👨‍🌾'
-      });
-    }
-
-    if (newAchievements.length > updatedUser.achievements.length) {
-      const userWithAchievements = { ...updatedUser, achievements: newAchievements };
-      setUser(userWithAchievements);
     }
   };
 
-  // Update stats (local state for now)
   const updateStats = (type: 'post' | 'answer' | 'question') => {
-    if (!user) return;
+    if (user) {
+      setUser(prev => prev ? {
+        ...prev,
+        stats: {
+          ...prev.stats,
+          postsShared: type === 'post' ? prev.stats.postsShared + 1 : prev.stats.postsShared,
+          helpfulAnswers: type === 'answer' ? prev.stats.helpfulAnswers + 1 : prev.stats.helpfulAnswers,
+          questionsAsked: type === 'question' ? prev.stats.questionsAsked + 1 : prev.stats.questionsAsked,
+          creditsEarned: prev.stats.creditsEarned + 10,
+        },
+        agriCreds: prev.agriCreds + 10,
+      } : null);
+    }
+  };
 
-    const updatedUser = {
-      ...user,
-      stats: {
-        ...user.stats,
-        postsShared: type === 'post' ? user.stats.postsShared + 1 : user.stats.postsShared,
-        helpfulAnswers: type === 'answer' ? user.stats.helpfulAnswers + 1 : user.stats.helpfulAnswers,
-        questionsAsked: type === 'question' ? user.stats.questionsAsked + 1 : user.stats.questionsAsked
+  const updateUserProfile = async (updates: Partial<User>): Promise<boolean> => {
+    if (!user) return false;
+    
+    try {
+      const result = await authService.updateProfile(user.id, updates);
+      
+      if (result.success && result.profile) {
+        setUser(convertToUser(result.profile));
+        
+        toast({
+          title: t('profile.updated') || 'Profile Updated',
+          description: t('profile.updateSuccess') || 'Your profile has been updated successfully',
+        });
+        
+        return true;
+      } else {
+        toast({
+          title: t('profile.updateFailed') || 'Update Failed',
+          description: result.error || 'Failed to update profile',
+          variant: 'destructive',
+        });
+        return false;
       }
-    };
+    } catch (error) {
+      toast({
+        title: t('auth.error') || 'Error',
+        description: t('profile.updateError') || 'Failed to update profile. Please try again.',
+        variant: 'destructive',
+      });
+      return false;
+    }
+  };
 
-    setUser(updatedUser);
-
-    // Add credits for actions
-    const creditRewards = {
-      post: 10,
-      answer: 15,
-      question: 5
-    };
-
-    addAgriCreds(creditRewards[type], `${type} action`);
+  const refreshUser = async (): Promise<void> => {
+    try {
+      const currentUser = await authService.getCurrentUser();
+      if (currentUser) {
+        const profile = await authService.getUserProfile(currentUser.id);
+        if (profile) {
+          setUser(convertToUser(profile));
+        }
+      }
+    } catch (error) {
+      // Silently handle refresh errors
+    }
   };
 
   const value: UserContextType = {
     user,
-    isLoggedIn,
+    isLoggedIn: !!user,
     isLoading,
     login,
     signUp,
@@ -519,21 +385,11 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     logout,
     addAgriCreds,
     updateStats,
-    updateUser,
+    updateUserProfile,
     refreshUser,
   };
 
-  return (
-    <UserContext.Provider value={value}>
-      {children}
-    </UserContext.Provider>
-  );
+  return <UserContext.Provider value={value}>{children}</UserContext.Provider>;
 };
 
-export const useUser = () => {
-  const context = useContext(UserContext);
-  if (context === undefined) {
-    throw new Error('useUser must be used within a UserProvider');
-  }
-  return context;
-};
+export default UserProvider;

@@ -20,72 +20,42 @@ import {
   ArrowRight
 } from "lucide-react";
 import { CameraScanner } from "@/components/CameraScanner";
-import { compressImage, DiseaseAnalysisResult } from "@/services/api";
+import { diseaseDetectionService, DiseaseDetectionResult } from "@/services/diseaseDetectionService";
 import { toast } from "@/hooks/use-toast";
 import { cn } from "@/utils/utils";
+
+interface AnalysisResult {
+  disease: string;
+  confidence: number;
+  severity: 'low' | 'medium' | 'high';
+  description: string;
+  symptoms: string[];
+  treatment: string[];
+  preventiveMeasures: string[];
+  recommendations: string[];
+}
 
 const DiseaseDetectionSimple = () => {
   const { language } = useLanguage();
   const navigate = useNavigate();
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [analysisResult, setAnalysisResult] = useState<DiseaseAnalysisResult | null>(null);
+  const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
   const [isCameraOpen, setIsCameraOpen] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (event: any) => {
     const file = event.target.files?.[0];
     
     if (file) {
-      await processImageFile(file);
+      processImageFile(file);
     }
   };
 
   const processImageFile = async (file: File) => {
-    try {
-      // Validate file type
-      if (!file.type.startsWith('image/')) {
-        toast({
-          title: language === 'hindi' ? 'गलती' : 'Error',
-          description: language === 'hindi' 
-            ? 'कृपया एक वैध छवि फ़ाइल चुनें' 
-            : 'Please select a valid image file',
-          variant: 'destructive',
-        });
-        return;
-      }
-      
-      // Validate file size (max 10MB)
-      if (file.size > 10 * 1024 * 1024) {
-        toast({
-          title: language === 'hindi' ? 'गलती' : 'Error',
-          description: language === 'hindi' 
-            ? 'फ़ाइल का आकार 10MB से कम होना चाहिए' 
-            : 'File size should be less than 10MB',
-          variant: 'destructive',
-        });
-        return;
-      }
-
-      // Compress and process image
-      const compressedImage = await compressImage(file);
-      setSelectedImage(compressedImage);
-      
-      toast({
-        title: language === 'hindi' ? 'सफलता' : 'Success',
-        description: language === 'hindi' 
-          ? 'छवि अपलोड हो गई। अब विश्लेषण करें।' 
-          : 'Image uploaded. Now start analysis.',
-      });
-    } catch (error) {
-      toast({
-        title: language === 'hindi' ? 'गलती' : 'Error',
-        description: language === 'hindi' 
-          ? 'छवि प्रोसेस करने में समस्या' 
-          : 'Error processing image',
-        variant: 'destructive',
-      });
+    if (file) {
+      setSelectedImage(URL.createObjectURL(file));
     }
   };
 
@@ -122,60 +92,14 @@ const DiseaseDetectionSimple = () => {
     }
 
     setIsAnalyzing(true);
-    
-    try {
-      // Simulate AI analysis
-      await new Promise(resolve => setTimeout(resolve, 3000));
-      
-      // Mock analysis result
-      const mockResult: DiseaseAnalysisResult = {
-        disease: language === 'hindi' ? 'टमाटर का पीला मोज़ेक वाइरस' : 'Tomato Yellow Mosaic Virus',
-        confidence: 85,
-        severity: 'medium',
-        recommendations: language === 'hindi' ? [
-          'प्रभावित पौधे हटा दें और नष्ट कर दें',
-          'फसल चक्र का पालन करें',
-          'प्रतिरोधी किस्में का उपयोग करें'
-        ] : [
-          'Remove and destroy affected plants',
-          'Follow crop rotation',
-          'Use resistant varieties'
-        ],
-        preventiveMeasures: language === 'hindi' ? [
-          'बीज उपचार करें',
-          'कीट नियंत्रण करें',
-          'साफ-सफाई बनाए रखें'
-        ] : [
-          'Treat seeds',
-          'Control pests',
-          'Maintain cleanliness'
-        ],
-        treatment: language === 'hindi' ? [
-          'नीम तेल स्प्रे करें',
-          'जैविक कीटनाशक का उपयोग करें',
-          'पोषक तत्वों का प्रबंधन करें'
-        ] : [
-          'Spray neem oil',
-          'Use organic pesticides',
-          'Manage nutrients'
-        ],
-        symptoms: language === 'hindi' ? [
-          'पत्तियों पर पीले धब्बे',
-          'पौधे का विकास धीमा',
-          'फल छोटे व विकृत'
-        ] : [
-          'Yellow spots on leaves',
-          'Stunted plant growth',
-          'Small and deformed fruits'
-        ]
-      };
 
-      setAnalysisResult(mockResult);
-      
+    try {
+      const result = await diseaseDetectionService.analyzeImage(selectedImage);
+      setAnalysisResult(result.result);
       toast({
         title: language === 'hindi' ? 'विश्लेषण पूर्ण' : 'Analysis Complete',
-        description: language === 'hindi' 
-          ? 'बीमारी की पहचान हो गई है। नीचे देखें।' 
+        description: language === 'hindi'
+          ? 'बीमारी की पहचान हो गई है। नीचे देखें।'
           : 'Disease identified. See results below.',
       });
     } catch (error) {

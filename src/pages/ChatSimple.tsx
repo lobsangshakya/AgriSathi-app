@@ -19,25 +19,20 @@ import {
   MessageSquare
 } from "lucide-react";
 import { CameraScanner } from "@/components/CameraScanner";
-import { workingChatbot } from "@/services/workingChatbot";
-import { ChatMessage, ChatContext } from "@/services/api";
+import { chatbotService } from "@/services/chatbotService";
 import { toast } from "@/hooks/use-toast";
 import { cn } from "@/utils/utils";
 
 const ChatSimple = () => {
   const { language } = useLanguage();
   const { user } = useUser();
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [messages, setMessages] = useState<any[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [showCamera, setShowCamera] = useState(false);
-  const [chatContext, setChatContext] = useState<ChatContext>({ 
-    language,
-    lastMessage: ''
-  });
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const recognitionRef = useRef<SpeechRecognition | null>(null);
+  const recognitionRef = useRef<any>(null);
 
   // Quick questions for farmers
   const quickQuestions = language === 'hindi' ? [
@@ -57,10 +52,10 @@ const ChatSimple = () => {
     
     // Welcome message
     if (messages.length === 0) {
-      const welcomeMessage: ChatMessage = {
+      const welcomeMessage = {
         id: 'welcome',
         content: language === 'hindi' 
-          ? '🌾 नमस्ते! मैं आपका कृषि सहायक हूं। अपना सवाल पूछें।'
+          ? '🌾 नमस्ते किसान भाई! मैं आपका कृषि सहायक हूं। अपना सवाल पूछें।'
           : '🌾 Hello! I am your farming assistant. Ask your question.',
         sender: 'bot',
         timestamp: new Date(),
@@ -78,7 +73,7 @@ const ChatSimple = () => {
       recognitionRef.current.interimResults = false;
       recognitionRef.current.lang = language === 'hindi' ? 'hi-IN' : 'en-US';
 
-      recognitionRef.current.onresult = (event: SpeechRecognitionEvent) => {
+      recognitionRef.current.onresult = (event: any) => {
         const transcript = event.results[0][0].transcript;
         setNewMessage(transcript);
         setIsListening(false);
@@ -104,7 +99,7 @@ const ChatSimple = () => {
   const handleSendMessage = async () => {
     if (!newMessage.trim()) return;
 
-    const userMessage: ChatMessage = {
+    const userMessage = {
       id: Date.now().toString(),
       content: newMessage,
       sender: 'user',
@@ -117,9 +112,9 @@ const ChatSimple = () => {
     setIsTyping(true);
 
     try {
-      const response = await workingChatbot.processMessage(newMessage, chatContext);
+      const response = await chatbotService.processMessage(newMessage, { language });
       
-      const botMessage: ChatMessage = {
+      const botMessage = {
         id: (Date.now() + 1).toString(),
         content: response.content,
         sender: 'bot',
@@ -128,12 +123,8 @@ const ChatSimple = () => {
       };
 
       setMessages(prev => [...prev, botMessage]);
-      setChatContext({
-        language,
-        lastMessage: newMessage
-      });
     } catch (error) {
-      const errorMessage: ChatMessage = {
+      const errorMessage = {
         id: (Date.now() + 1).toString(),
         content: language === 'hindi' 
           ? 'क्षमा करें, समस्या हुई। फिर से कोशिश करें।' 
@@ -281,7 +272,7 @@ const ChatSimple = () => {
             <CameraScanner
               isOpen={showCamera}
               onImageCapture={(imageData: string) => {
-                const imageMessage: ChatMessage = {
+                const imageMessage = {
                   id: Date.now().toString(),
                   content: language === 'hindi' 
                     ? '📸 फसल की फोटो भेजी गई।' 
@@ -343,18 +334,18 @@ const ChatSimple = () => {
               <Button
                 onClick={handleSendMessage}
                 disabled={!newMessage.trim() || isTyping}
-                className="bg-green-600 hover:bg-green-700"
+                className="bg-blue-600 hover:bg-blue-700"
               >
                 <Send className="w-4 h-4" />
               </Button>
             </div>
 
-            <p className="mt-2 text-xs text-gray-500 text-center">
-              {language === 'hindi' ? 'हिंदी या अंग्रेज़ी में पूछें' : 'Ask in Hindi or English'}
-            </p>
-            <p className="mt-0.5 text-xs text-gray-400 text-center">
-              {language === 'hindi' ? '💡 टिप: फसल की फोटो भेजकर बीमारी की पहचान कर सकते हैं' : '💡 Tip: Send crop photos for disease detection'}
-            </p>
+            <div className="mt-2 text-xs text-gray-500 text-center">
+              {language === 'hindi' 
+                ? '💡 टिप: फसल की फोटो भेजकर बीमारी की पहचान कर सकते हैं' 
+                : '💡 Tip: Send crop photos for disease detection'
+              }
+            </div>
           </div>
         </Card>
       </div>
