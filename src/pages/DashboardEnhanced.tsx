@@ -81,28 +81,28 @@ const Dashboard = () => {
     {
       title: 'Disease Detection',
       description: 'AI-powered crop health analysis',
-      icon: '🔬',
+      icon: '',
       color: 'bg-gradient-to-br from-red-500 to-orange-500',
       href: '/disease-detection'
     },
     {
       title: 'Weather Forecast',
       description: 'Real-time weather updates',
-      icon: '🌤',
+      icon: '',
       color: 'bg-gradient-to-br from-blue-500 to-cyan-500',
       href: '/weather'
     },
     {
       title: 'Expert Chat',
       description: 'Connect with farming experts',
-      icon: '💬',
+      icon: '',
       color: 'bg-gradient-to-br from-purple-500 to-pink-500',
       href: '/chat'
     },
     {
       title: 'Market Prices',
       description: 'Current market rates',
-      icon: '💰',
+      icon: '',
       color: 'bg-gradient-to-br from-green-500 to-emerald-500',
       href: '/market'
     }
@@ -112,19 +112,19 @@ const Dashboard = () => {
     {
       title: 'Beginner Farmer',
       points: 100,
-      icon: '🌱',
+      icon: '',
       unlocked: true
     },
     {
       title: 'Crop Expert',
       points: 500,
-      icon: '🌾',
+      icon: '',
       unlocked: false
     },
     {
       title: 'Community Leader',
       points: 1000,
-      icon: '👨‍🌾',
+      icon: '',
       unlocked: false
     }
   ];
@@ -233,7 +233,7 @@ const Dashboard = () => {
               </div>
               <div>
                 <h2 className="text-2xl font-bold text-gray-900">
-                  Welcome back, {user?.name || 'Farmer'}! 👋
+                  Welcome back, {user?.name || 'Farmer'}! 
                 </h2>
                 <p className="text-gray-600 mt-1">
                   Here's your farming overview for {currentTime.toLocaleDateString()}
@@ -356,7 +356,7 @@ const Dashboard = () => {
                   <div className="font-semibold text-white">{achievement.title}</div>
                   <div className="text-sm text-white/80">{achievement.points} points</div>
                   {!achievement.unlocked && (
-                    <div className="text-xs text-white/60 mt-2">🔒 Locked</div>
+                    <div className="text-xs text-white/60 mt-2"> Locked</div>
                   )}
                 </motion.div>
               ))}

@@ -35,7 +35,7 @@ const QuickActionsEnhanced = () => {
     {
       title: 'Disease Detection',
       description: 'AI-powered crop health analysis',
-      icon: '🔬',
+      icon: '',
       color: 'bg-gradient-to-br from-red-500 to-orange-500',
       href: '/disease-detection',
       badge: 'AI'
@@ -43,7 +43,7 @@ const QuickActionsEnhanced = () => {
     {
       title: 'Weather Forecast',
       description: 'Real-time weather updates',
-      icon: '🌤',
+      icon: '',
       color: 'bg-gradient-to-br from-blue-500 to-cyan-500',
       href: '/weather',
       badge: 'Live'
@@ -51,7 +51,7 @@ const QuickActionsEnhanced = () => {
     {
       title: 'Expert Chat',
       description: 'Connect with farming experts',
-      icon: '💬',
+      icon: '',
       color: 'bg-gradient-to-br from-purple-500 to-pink-500',
       href: '/chat',
       badge: 'Online'
@@ -59,7 +59,7 @@ const QuickActionsEnhanced = () => {
     {
       title: 'Market Prices',
       description: 'Current market rates',
-      icon: '💰',
+      icon: '',
       color: 'bg-gradient-to-br from-green-500 to-emerald-500',
       href: '/market',
       badge: 'Updated'

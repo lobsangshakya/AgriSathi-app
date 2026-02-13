@@ -34,7 +34,7 @@ const processEnv = {
 const parsed = envSchema.safeParse(processEnv);
 
 if (!parsed.success) {
-  console.error('❌ Invalid environment variables:', parsed.error.flatten().fieldErrors);
+  console.error(' Invalid environment variables:', parsed.error.flatten().fieldErrors);
   // We don't throw here to avoid crashing the app immediately, but logs will show errors
 }
 

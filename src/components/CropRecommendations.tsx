@@ -20,7 +20,7 @@ export const CropRecommendations = () => {
       marketPrice: "₹15-20",
       marketUnitKey: "crops.market_unit.kg",
       sowingTimeKey: "crops.sowing.oct_nov",
-      icon: "🍅",
+      icon: "",
       color: "from-red-500 to-pink-600",
       bgColor: "bg-red-500/10",
       iconColor: "text-red-600",
@@ -37,7 +37,7 @@ export const CropRecommendations = () => {
       marketPrice: "₹2200-2500",
       marketUnitKey: "crops.market_unit.qtl",
       sowingTimeKey: "crops.sowing.nov_dec",
-      icon: "🌾",
+      icon: "",
       color: "from-amber-500 to-orange-600",
       bgColor: "bg-amber-500/10",
       iconColor: "text-amber-600",
@@ -51,14 +51,14 @@ export const CropRecommendations = () => {
     {
       key: "alerts.tomato_pest",
       type: "warning",
-      icon: "🐛",
+      icon: "",
       color: "from-orange-50 to-red-50",
       borderColor: "border-orange-200"
     },
     {
       key: "alerts.irrigation_needed",
       type: "info",
-      icon: "💧",
+      icon: "",
       color: "from-blue-50 to-cyan-50",
       borderColor: "border-blue-200"
     }

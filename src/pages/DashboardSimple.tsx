@@ -1,6 +1,6 @@
 /**
  * Simplified Dashboard - Clean and Farmer-Friendly
- * Focus on core features: Chatbot, Scanner, Weather, Login/Logout
+ * Focus on core features: Chatbot, Scanner, Weather, Community
  */
 
 import { useState, useEffect, useCallback } from 'react';
@@ -9,40 +9,43 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useUser } from '@/contexts/UserContext';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { MessageCircle, Camera, LogOut, Cloud } from 'lucide-react';
-import { cn } from '@/utils/utils';
-import { apiService, getLocation } from '@/services/api';
+import { LogOut, Cloud, Droplets, Wind, Users } from 'lucide-react';
+import { apiService } from '@/services/api';
 import type { WeatherData } from '@/services/api';
+import { motion } from 'framer-motion';
+
+// Assets
+import weatherBg from '@/assets/dashboard_weather_bg.png';
+import chatbotImg from '@/assets/dashboard_chatbot.png';
+import scannerImg from '@/assets/dashboard_scanner.png';
 
 const DashboardSimple = () => {
   const { language } = useLanguage();
-  const { user, logout } = useUser();
+  const { user, logout, locationData, detectLocation } = useUser();
   const navigate = useNavigate();
   const [currentTime, setCurrentTime] = useState(new Date());
   const [weather, setWeather] = useState<WeatherData | null>(null);
-  const [weatherStatus, setWeatherStatus] = useState<'idle' | 'loading' | 'ok' | 'denied' | 'error'>('idle');
+  const [weatherStatus, setWeatherStatus] = useState<'idle' | 'loading' | 'ok' | 'error'>('idle');
 
   const fetchWeather = useCallback(() => {
+    if (!locationData) return;
+
     setWeatherStatus('loading');
-    getLocation()
-      .then(({ latitude, longitude }) => apiService.getWeatherData(latitude, longitude))
+    apiService.getWeatherData(locationData.latitude, locationData.longitude)
       .then((data) => {
         setWeather(data);
         setWeatherStatus('ok');
       })
-      .catch((err) => {
-        const msg = err?.message ?? '';
-        if (msg.includes('denied') || err?.code === 1) {
-          setWeatherStatus('denied');
-        } else {
-          setWeatherStatus('error');
-        }
+      .catch(() => {
+        setWeatherStatus('error');
       });
-  }, []);
+  }, [locationData]);
 
   useEffect(() => {
-    fetchWeather();
-  }, [fetchWeather]);
+    if (locationData) {
+      fetchWeather();
+    }
+  }, [locationData, fetchWeather]);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -56,41 +59,33 @@ const DashboardSimple = () => {
     navigate('/');
   };
 
-  const mainFeatures = [
-    {
-      id: 'chatbot',
-      title: language === 'hindi' ? 'कृषि सहायक' : 'Farming Assistant',
-      description: language === 'hindi'
-        ? 'फसलों, मौसम, बाजार के बारे में पूछें'
-        : 'Ask about crops, weather, market',
-      icon: MessageCircle,
-      color: 'bg-green-500 hover:bg-green-600',
-      route: '/chat'
-    },
-    {
-      id: 'scanner',
-      title: language === 'hindi' ? 'फसल जांच' : 'Crop Scanner',
-      description: language === 'hindi'
-        ? 'बीमारी की पहचान करें'
-        : 'Detect crop diseases',
-      icon: Camera,
-      color: 'bg-blue-500 hover:bg-blue-600',
-      route: '/disease-detection'
+  const container = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1
+      }
     }
-  ];
+  };
+
+  const item = {
+    hidden: { y: 20, opacity: 0 },
+    show: { y: 0, opacity: 1 }
+  };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Simple Header */}
-      <div className="bg-white border-b border-gray-200">
+    <div className="min-h-screen bg-gray-50 pb-20">
+      {/* Header */}
+      <div className="bg-white border-b border-gray-100 sticky top-0 z-10 shadow-sm">
         <div className="max-w-md mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-xl font-bold text-gray-900">
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-green-600 to-green-800 bg-clip-text text-transparent">
                 {language === 'hindi' ? 'AgriSaathi' : 'AgriSathi'}
               </h1>
-              <p className="text-sm text-gray-600">
-                {language === 'hindi' 
+              <p className="text-xs font-medium text-gray-500 mt-0.5">
+                {language === 'hindi'
                   ? `${user?.name || 'किसान भाई'} | ${currentTime.toLocaleTimeString('hi-IN', { hour: '2-digit', minute: '2-digit' })}`
                   : `${user?.name || 'Farmer'} | ${currentTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}`
                 }
@@ -98,78 +93,165 @@ const DashboardSimple = () => {
             </div>
             <Button
               onClick={handleLogout}
-              variant="outline"
-              size="sm"
-              className="flex items-center gap-2"
+              variant="ghost"
+              size="icon"
+              className="text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-full"
             >
-              <LogOut className="w-4 h-4" />
-              {language === 'hindi' ? 'लॉगआउट' : 'Logout'}
+              <LogOut className="w-5 h-5" />
             </Button>
           </div>
         </div>
       </div>
 
-      <div className="max-w-md mx-auto px-4 py-6">
-        {/* Weather (location-based) */}
-        <Card className="mb-4 overflow-hidden">
-          <div className="p-4 flex items-center gap-4">
-            <div className="p-3 rounded-lg bg-sky-500 text-white shrink-0">
-              <Cloud className="w-6 h-6" />
+      <motion.div
+        className="max-w-md mx-auto px-4 py-6 space-y-6"
+        variants={container}
+        initial="hidden"
+        animate="show"
+      >
+        {/* Weather Card */}
+        <motion.div variants={item}>
+          <Card className="overflow-hidden rounded-2xl border-0 shadow-lg relative h-48 group">
+            <div className="absolute inset-0 bg-gray-900">
+              <img
+                src={weatherBg}
+                alt="Weather Background"
+                className="w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-700"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
             </div>
-            <div className="flex-1 min-w-0">
-              <h3 className="font-semibold text-gray-900">
-                {language === 'hindi' ? 'मौसम' : 'Weather'}
-              </h3>
-              {weatherStatus === 'loading' && (
-                <p className="text-sm text-gray-600">
-                  {language === 'hindi' ? 'स्थान और मौसम लोड हो रहा है...' : 'Loading location & weather...'}
-                </p>
-              )}
-              {weatherStatus === 'denied' && (
-                <p className="text-sm text-gray-600">
-                  {language === 'hindi' ? 'स्थान की अनुमति नहीं मिली। मौसम दिखाने के लिए लोकेशन चालू करें।' : 'Location permission denied. Enable location to see weather.'}
-                </p>
-              )}
-              {weatherStatus === 'error' && (
-                <p className="text-sm text-gray-600">
-                  {language === 'hindi' ? 'मौसम लोड नहीं हो सका।' : 'Could not load weather.'}
-                </p>
-              )}
-              {weatherStatus === 'ok' && weather && (
-                <p className="text-sm text-gray-900">
-                  {Math.round(weather.temperature)}°C · {weather.description}
-                  {' '}({language === 'hindi' ? 'नमी ' : 'Humidity '}{weather.humidity}%)
-                </p>
-              )}
-            </div>
-          </div>
-        </Card>
 
-        <div className="space-y-3">
-          <h2 className="text-base font-semibold text-gray-900">
-            {language === 'hindi' ? 'मुख्य सेवाएं' : 'Main Services'}
-          </h2>
-          {mainFeatures.map((feature) => {
-            const Icon = feature.icon;
-            return (
-              <Card key={feature.id} className="overflow-hidden">
-                <button
-                  onClick={() => navigate(feature.route)}
-                  className="w-full p-4 flex items-center gap-4 hover:bg-gray-50 transition-colors text-left"
-                >
-                  <div className={cn('p-3 rounded-lg text-white shrink-0', feature.color)}>
-                    <Icon className="w-6 h-6" />
+            <div className="relative h-full p-5 flex flex-col justify-between text-white">
+              <div className="flex justify-between items-start">
+                <div>
+                  <h3 className="font-semibold text-lg opacity-90">
+                    {language === 'hindi' ? 'आज का मौसम' : "Today's Weather"}
+                  </h3>
+                  <p className="text-sm opacity-75">
+                    {!locationData && (language === 'hindi' ? 'स्थान का पता लगाया जा रहा है...' : 'Detecting location...')}
+                    {locationData && weatherStatus === 'loading' && (language === 'hindi' ? 'लोड हो रहा है...' : 'Loading...')}
+                    {weatherStatus === 'error' && (language === 'hindi' ? 'अनुपलब्ध' : 'Unavailable')}
+                    {weatherStatus === 'ok' && weather?.location}
+                  </p>
+                </div>
+                {weatherStatus === 'ok' && weather && (
+                  <div className="bg-white/20 backdrop-blur-md p-2 rounded-xl">
+                    <img
+                      src={`https://openweathermap.org/img/wn/${weather.icon}@2x.png`}
+                      alt="Weather Icon"
+                      className="w-8 h-8"
+                    />
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-gray-900">{feature.title}</h3>
-                    <p className="text-sm text-gray-600">{feature.description}</p>
+                )}
+              </div>
+
+              {weatherStatus === 'ok' && weather ? (
+                <div>
+                  <div className="text-4xl font-bold mb-1">
+                    {Math.round(weather.temperature)}°
                   </div>
-                </button>
-              </Card>
-            );
-          })}
+                  <div className="flex gap-4 text-sm opacity-90">
+                    <span className="flex items-center gap-1">
+                      <Droplets className="w-3 h-3" /> {weather.humidity}%
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <Wind className="w-3 h-3" /> {weather.windSpeed} m/s
+                    </span>
+                  </div>
+                  <p className="text-sm mt-2 font-medium capitalize opacity-90">
+                    {weather.description}
+                  </p>
+                </div>
+              ) : (
+                <div className="flex items-center justify-center h-full">
+                  {(!locationData || weatherStatus === 'loading') ? (
+                    <Cloud className="w-8 h-8 animate-pulse opacity-50" />
+                  ) : (
+                    <Button
+                      variant="outline"
+                      className="bg-white/10 border-white/20 text-white hover:bg-white/20 backdrop-blur-sm"
+                      onClick={() => detectLocation()}
+                    >
+                      {language === 'hindi' ? 'स्थान सक्षम करें' : 'Enable Location'}
+                    </Button>
+                  )}
+                </div>
+              )}
+            </div>
+          </Card>
+        </motion.div>
+
+        {/* Features Grid */}
+        <div className="grid grid-cols-2 gap-4">
+          {/* Chatbot Card */}
+          <motion.div variants={item} whileHover={{ y: -4 }} whileTap={{ scale: 0.97 }}>
+            <Card
+              className="overflow-hidden rounded-2xl border-0 shadow-md cursor-pointer h-36 relative bg-gradient-to-br from-emerald-50 to-white"
+              onClick={() => navigate('/chat')}
+            >
+              <div className="absolute right-0 bottom-0 w-20 h-20 opacity-80 translate-x-2 translate-y-2">
+                <img src={chatbotImg} alt="Chatbot" className="w-full h-full object-contain drop-shadow-xl" />
+              </div>
+              <div className="p-4 h-full flex flex-col justify-center relative z-10">
+                <div className="w-9 h-9 bg-green-100 rounded-xl flex items-center justify-center mb-2 text-green-600">
+                </div>
+                <h3 className="font-bold text-gray-900 text-sm leading-tight mb-0.5">
+                  {language === 'hindi' ? 'कृषि सहायक' : 'Farm Assistant'}
+                </h3>
+                <p className="text-xs text-gray-500 leading-snug">
+                  {language === 'hindi' ? 'फसलों के बारे में पूछें' : 'Ask about crops'}
+                </p>
+              </div>
+            </Card>
+          </motion.div>
+
+          {/* Scanner Card */}
+          <motion.div variants={item} whileHover={{ y: -4 }} whileTap={{ scale: 0.97 }}>
+            <Card
+              className="overflow-hidden rounded-2xl border-0 shadow-md cursor-pointer h-36 relative bg-gradient-to-br from-blue-50 to-white"
+              onClick={() => navigate('/disease-detection')}
+            >
+              <div className="absolute right-0 bottom-0 w-20 h-20 opacity-80 translate-x-2 translate-y-2">
+                <img src={scannerImg} alt="Scanner" className="w-full h-full object-contain drop-shadow-xl" />
+              </div>
+              <div className="p-4 h-full flex flex-col justify-center relative z-10">
+                <div className="w-9 h-9 bg-blue-100 rounded-xl flex items-center justify-center mb-2 text-blue-600">
+                </div>
+                <h3 className="font-bold text-gray-900 text-sm leading-tight mb-0.5">
+                  {language === 'hindi' ? 'फसल डॉक्टर' : 'Crop Doctor'}
+                </h3>
+                <p className="text-xs text-gray-500 leading-snug">
+                  {language === 'hindi' ? 'बीमारी पहचानें' : 'Detect diseases'}
+                </p>
+              </div>
+            </Card>
+          </motion.div>
+
+          {/* Community Card */}
+          <motion.div variants={item} whileHover={{ y: -4 }} whileTap={{ scale: 0.97 }} className="col-span-2">
+            <Card
+              className="overflow-hidden rounded-2xl border-0 shadow-md cursor-pointer h-28 relative bg-gradient-to-br from-orange-50 to-amber-50"
+              onClick={() => navigate('/community')}
+            >
+              <div className="p-4 h-full flex items-center gap-4 relative z-10">
+                <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center text-orange-600 flex-shrink-0">
+                  <Users className="w-6 h-6" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-gray-900 text-base leading-tight mb-0.5">
+                    {language === 'hindi' ? 'किसान समुदाय' : 'Farmer Community'}
+                  </h3>
+                  <p className="text-sm text-gray-500 leading-snug">
+                    {language === 'hindi'
+                      ? 'अनुभव साझा करें, सवाल पूछें'
+                      : 'Share experiences, ask questions'}
+                  </p>
+                </div>
+              </div>
+            </Card>
+          </motion.div>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 };

@@ -29,19 +29,19 @@ const DiseaseDetectionEnhanced = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const cropTypes = language === 'hindi' ? [
-    { id: 'tomato', name: 'टमाटर', icon: '🍅' },
-    { id: 'wheat', name: 'गेहूं', icon: '🌾' },
-    { id: 'rice', name: 'धान', icon: '🌾' },
-    { id: 'cotton', name: 'कपास', icon: '🌿' },
-    { id: 'sugarcane', name: 'गन्ना', icon: '🎋' },
-    { id: 'potato', name: 'आलू', icon: '🥔' }
+    { id: 'tomato', name: 'टमाटर', icon: '' },
+    { id: 'wheat', name: 'गेहूं', icon: '' },
+    { id: 'rice', name: 'धान', icon: '' },
+    { id: 'cotton', name: 'कपास', icon: '' },
+    { id: 'sugarcane', name: 'गन्ना', icon: '' },
+    { id: 'potato', name: 'आलू', icon: '' }
   ] : [
-    { id: 'tomato', name: 'Tomato', icon: '🍅' },
-    { id: 'wheat', name: 'Wheat', icon: '🌾' },
-    { id: 'rice', name: 'Rice', icon: '🌾' },
-    { id: 'cotton', name: 'Cotton', icon: '🌿' },
-    { id: 'sugarcane', name: 'Sugarcane', icon: '🎋' },
-    { id: 'potato', name: 'Potato', icon: '🥔' }
+    { id: 'tomato', name: 'Tomato', icon: '' },
+    { id: 'wheat', name: 'Wheat', icon: '' },
+    { id: 'rice', name: 'Rice', icon: '' },
+    { id: 'cotton', name: 'Cotton', icon: '' },
+    { id: 'sugarcane', name: 'Sugarcane', icon: '' },
+    { id: 'potato', name: 'Potato', icon: '' }
   ];
 
   const tips = language === 'hindi' ? [
@@ -496,7 +496,7 @@ const DiseaseDetectionEnhanced = () => {
                   <ul className="space-y-1">
                     {analysisResult.treatment.map((treatment, index) => (
                       <li key={index} className="text-sm text-gray-600 flex items-start gap-2">
-                        <span className="text-green-500 mt-1">✓</span>
+                        <span className="text-green-500 mt-1"></span>
                         {treatment}
                       </li>
                     ))}

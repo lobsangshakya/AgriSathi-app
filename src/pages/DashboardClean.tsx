@@ -49,8 +49,8 @@ const DashboardClean = () => {
   }, []);
 
   const welcomeMessage = language === 'hindi' 
-    ? `नमस्ते ${user?.name || 'किसान भाई'}! 🌾`
-    : `Hello ${user?.name || 'Farmer'}! 🌾`;
+    ? `नमस्ते ${user?.name || 'किसान भाई'}! `
+    : `Hello ${user?.name || 'Farmer'}! `;
 
   const todayDate = currentTime.toLocaleDateString(language === 'hindi' ? 'hi-IN' : 'en-US', {
     weekday: 'long',
@@ -164,7 +164,7 @@ const DashboardClean = () => {
     humidity: 65,
     windSpeed: 12,
     condition: language === 'hindi' ? 'आंशिक बादल' : 'Partly Cloudy',
-    icon: '⛅',
+    icon: '',
     rainChance: 20
   };
 
@@ -173,16 +173,16 @@ const DashboardClean = () => {
       type: 'warning',
       icon: AlertTriangle,
       message: language === 'hindi' 
-        ? '🐛 टमाटर में कीट प्रकोप की संभावना' 
-        : '🐛 Possible pest attack in tomatoes',
+        ? ' टमाटर में कीट प्रकोप की संभावना' 
+        : ' Possible pest attack in tomatoes',
       action: language === 'hindi' ? 'जांच करें' : 'Check Now'
     },
     {
       type: 'info',
       icon: Droplets,
       message: language === 'hindi' 
-        ? '💧 कल सुबह सिंचाई करने का समय' 
-        : '💧 Good time for irrigation tomorrow morning',
+        ? ' कल सुबह सिंचाई करने का समय' 
+        : ' Good time for irrigation tomorrow morning',
       action: language === 'hindi' ? 'याद रखें' : 'Remember'
     }
   ];

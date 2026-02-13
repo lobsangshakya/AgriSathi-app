@@ -143,8 +143,8 @@ const ChatEnhanced = () => {
       const welcomeMessage: ChatMessage = {
         id: 'welcome',
         content: language === 'hindi' 
-          ? '🌾 नमस्ते! मैं आपका कृषि सहायक हूं। मैं आपकी फसलों, मौसम, बाजार और खेती से जुड़े सभी सवालों का जवाब दे सकता हूं। क्या जानना चाहते हैं?'
-          : '🌾 Hello! I am your farming assistant. I can help you with crops, weather, market, and all farming-related questions. What would you like to know?',
+          ? ' नमस्ते! मैं आपका कृषि सहायक हूं। मैं आपकी फसलों, मौसम, बाजार और खेती से जुड़े सभी सवालों का जवाब दे सकता हूं। क्या जानना चाहते हैं?'
+          : ' Hello! I am your farming assistant. I can help you with crops, weather, market, and all farming-related questions. What would you like to know?',
         sender: 'bot',
         timestamp: new Date(),
         type: 'text'
@@ -440,8 +440,8 @@ const ChatEnhanced = () => {
                     const imageMessage: ChatMessage = {
                       id: Date.now().toString(),
                       content: language === 'hindi' 
-                        ? '📸 फसल की फोटो भेजी गई। कृपया बीमारी के लक्षण बताएं।' 
-                        : '📸 Crop photo sent. Please describe the disease symptoms.',
+                        ? ' फसल की फोटो भेजी गई। कृपया बीमारी के लक्षण बताएं।' 
+                        : ' Crop photo sent. Please describe the disease symptoms.',
                       sender: 'user',
                       timestamp: new Date(),
                       type: 'image'
@@ -506,8 +506,8 @@ const ChatEnhanced = () => {
             {/* Help Text */}
             <div className="mt-2 text-xs text-gray-500 text-center">
               {language === 'hindi' 
-                ? '💡 टिप: फसल की फोटो भेजकर बीमारी की पहचान कर सकते हैं' 
-                : '💡 Tip: Send crop photos for disease detection'
+                ? ' टिप: फसल की फोटो भेजकर बीमारी की पहचान कर सकते हैं' 
+                : ' Tip: Send crop photos for disease detection'
               }
             </div>
           </div>

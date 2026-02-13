@@ -39,7 +39,7 @@ const WeatherCardEnhanced = () => {
     humidity: 65,
     windSpeed: 12,
     description: 'Partly cloudy',
-    icon: '⛅',
+    icon: '',
     location: 'Meerut, Uttar Pradesh',
     forecast: [
       { day: 'Monday', high: 32, low: 22, condition: 'Sunny' },
@@ -77,15 +77,15 @@ const WeatherCardEnhanced = () => {
 
   const getWeatherIcon = (icon: string) => {
     const iconMap: { [key: string]: string } = {
-      '☀️': 'sun',
-      '⛅': 'cloud',
-      '☁️': 'cloud-rain',
-      '🌤️': 'cloud-sun-rain',
-      '🌧️': 'cloud-moon',
-      '🌦️': 'moon',
-      '⛈️': 'cloud-lightning',
-      '🌩️': 'cloud-showers',
-      '🌪️': 'cloud-rainbow',
+      '': 'sun',
+      '': 'cloud',
+      '': 'cloud-rain',
+      '': 'cloud-sun-rain',
+      '': 'cloud-moon',
+      '': 'moon',
+      '': 'cloud-lightning',
+      '': 'cloud-showers',
+      '': 'cloud-rainbow',
     };
     return iconMap[icon] || 'sun';
   };

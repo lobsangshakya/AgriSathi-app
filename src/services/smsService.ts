@@ -34,7 +34,7 @@ class SMSService {
   private loadConfig(): SMSConfig {
     // Try to load from environment variables
     const provider = (import.meta.env.VITE_SMS_PROVIDER as SMSProvider) || 'fast2sms';
-    
+
     return {
       provider,
       apiKey: import.meta.env.VITE_SMS_API_KEY,
@@ -71,11 +71,9 @@ class SMSService {
    * Development OTP Display
    */
   private showDevelopmentOTP(phone: string, otp: string): SMSResponse {
-    // Store OTP for verification
-    localStorage.setItem(`otp_${phone}`, JSON.stringify({
-      otp,
-      expiresAt: new Date(Date.now() + 5 * 60 * 1000).toISOString(),
-    }));
+    // In development, show OTP in UI
+    // Note: OTP is actually stored and verified by MockAuthService
+    // This display is just for the user visibility.
 
     // Create a visible OTP display for development
     const otpDisplay = document.createElement('div');
@@ -94,7 +92,7 @@ class SMSService {
       max-width: 300px;
     `;
     otpDisplay.innerHTML = `
-      <div style="font-weight: bold; margin-bottom: 8px;">🔔 Development OTP</div>
+      <div style="font-weight: bold; margin-bottom: 8px;">Development OTP</div>
       <div>Phone: ${phone}</div>
       <div style="font-size: 20px; font-weight: bold; margin: 8px 0;">${otp}</div>
       <div style="font-size: 12px; opacity: 0.9;">Valid for 5 minutes</div>
@@ -109,9 +107,9 @@ class SMSService {
         font-size: 12px;
       ">Dismiss</button>
     `;
-    
+
     document.body.appendChild(otpDisplay);
-    
+
     // Auto-remove after 10 seconds
     setTimeout(() => {
       if (otpDisplay.parentElement) {

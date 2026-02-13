@@ -202,7 +202,7 @@ export const CameraScanner = ({ onImageCapture, onClose, isOpen }: CameraScanner
               onClick={onClose}
               className="text-white hover:bg-white/20"
             >
-              ✕
+              
             </Button>
 
             {/* Capture Button */}

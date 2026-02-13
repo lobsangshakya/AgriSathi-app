@@ -30,6 +30,7 @@ export interface LocationData {
   longitude: number;
   city: string;
   country: string;
+  state?: string;
 }
 
 class WeatherService {
@@ -127,11 +128,41 @@ class WeatherService {
     });
   }
 
-  // Reverse geocoding to get city name
-  private async reverseGeocode(lat: number, lon: number): Promise<LocationData> {
+  // Search for city by name
+  async searchCity(query: string): Promise<LocationData[]> {
+    if (!this.apiKey || !query || query.length < 3) {
+      return [];
+    }
+
     try {
       const response = await fetch(
-        `${this.baseUrl}/reverse?lat=${lat}&lon=${lon}&limit=1&appid=${this.apiKey}`
+        `${this.baseUrl.replace('/data/2.5', '/geo/1.0')}/direct?q=${encodeURIComponent(query)}&limit=5&appid=${this.apiKey}`
+      );
+
+      if (!response.ok) {
+        throw new Error('City search failed');
+      }
+
+      const data = await response.json();
+
+      return data.map((item: any) => ({
+        latitude: item.lat,
+        longitude: item.lon,
+        city: item.name,
+        country: item.country,
+        state: item.state
+      }));
+    } catch (error) {
+      console.error('City search error:', error);
+      return [];
+    }
+  }
+
+  // Reverse geocoding to get city name
+  async reverseGeocode(lat: number, lon: number): Promise<LocationData> {
+    try {
+      const response = await fetch(
+        `${this.baseUrl.replace('/data/2.5', '/geo/1.0')}/reverse?lat=${lat}&lon=${lon}&limit=1&appid=${this.apiKey}`
       );
 
       if (!response.ok) {
@@ -145,7 +176,8 @@ class WeatherService {
           latitude: lat,
           longitude: lon,
           city: data[0].name || 'Unknown',
-          country: data[0].country || 'Unknown'
+          country: data[0].country || 'Unknown',
+          state: data[0].state
         };
       }
 
@@ -316,29 +348,34 @@ class WeatherService {
 
     // Temperature-based advice
     if (weather.temperature > 35) {
-      advice.push('🌡️ High temperature: Increase irrigation frequency and provide shade to sensitive crops');
+      advice.push('High temperature: Increase irrigation frequency and provide shade to sensitive crops');
     } else if (weather.temperature < 10) {
-      advice.push('🥶 Low temperature: Protect crops from frost, consider delayed planting');
+      advice.push('Low temperature: Protect crops from frost, consider delayed planting');
     } else {
-      advice.push('🌡️ Optimal temperature: Good conditions for most crops');
+      advice.push('Optimal temperature: Good conditions for most crops');
     }
 
     // Humidity-based advice
     if (weather.humidity > 80) {
-      advice.push('💧 High humidity: Watch for fungal diseases, ensure proper air circulation');
+      advice.push('High humidity: Watch for fungal diseases, ensure proper air circulation');
     } else if (weather.humidity < 30) {
-      advice.push('💧 Low humidity: Increase irrigation, mulch to retain soil moisture');
+      advice.push('Low humidity: Increase irrigation, mulch to retain soil moisture');
     }
 
     // Wind-based advice
     if (weather.windSpeed > 20) {
-      advice.push('💨 Strong winds: Secure greenhouse structures, avoid spraying pesticides');
+      advice.push('Strong winds: Secure greenhouse structures, avoid spraying pesticides');
     }
 
     // Rain-based advice
     const hasRain = weather.forecast.some(day => day.precipitation > 50);
     if (hasRain) {
-      advice.push('🌧️ Rain expected: Plan irrigation accordingly, prepare drainage');
+      advice.push('Rain expected: Plan irrigation accordingly, prepare drainage');
+    }
+
+    // Location specific advice (Mock)
+    if (weather.location.includes('Delhi')) {
+      advice.push('Delhi Region: Watch for air quality affecting sensitive crops');
     }
 
     return advice;

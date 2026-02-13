@@ -10,6 +10,11 @@ export interface ChatContext {
   lastMessage?: string;
   sessionId?: string;
   history?: { role: 'user' | 'assistant' | 'system', content: string }[];
+  location?: {
+    latitude: number;
+    longitude: number;
+    address?: string;
+  };
 }
 
 export interface ChatResponse {
@@ -35,38 +40,46 @@ class ChatbotService {
     this.geminiApiKey = env.VITE_GEMINI_API_KEY || null;
   }
 
-  // ... (keep local response methods) ...
-
   // Keep private methods for keyword detection and local responses
+  private checkKeywords(message: string, keywords: string[]): boolean {
+    return keywords.some(keyword => {
+      // Use regex to match whole words only, supporting both English and Hindi/Unicode
+      // \b doesn't work well with non-ASCII, so we use a more robust boundary check
+      const escapedKeyword = keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const regex = new RegExp(`(^|\\s|[.,!?;])${escapedKeyword}(\\s|[.,!?;]|$)`, 'i');
+      return regex.test(message);
+    });
+  }
+
   private isGreeting(message: string): boolean {
-    const greetings = ['hello', 'hi', 'namaste', 'नमस्ते', 'hey', 'good morning', 'good evening'];
-    return greetings.some(greeting => message.includes(greeting));
+    const greetings = ['hello', 'hi', 'namaste', 'नमस्ते', 'hey', 'good morning', 'good evening', 'hi there', 'help', 'मदद'];
+    return this.checkKeywords(message, greetings);
   }
 
   private isWeatherQuery(message: string): boolean {
-    const weatherKeywords = ['weather', 'मौसम', 'rain', 'बारिश', 'temperature', 'तापमान', 'climate', 'जलवायु'];
-    return weatherKeywords.some(keyword => message.includes(keyword));
+    const weatherKeywords = ['weather', 'मौसम', 'rain', 'बारिश', 'temperature', 'तापमान', 'climate', 'जलवायु', 'monsoon', 'मानसून', 'heat', 'गर्मी', 'cold', 'सर्दी'];
+    return this.checkKeywords(message, weatherKeywords);
   }
 
   private isDiseaseQuery(message: string): boolean {
-    const diseaseKeywords = ['disease', 'बीमारी', 'pest', 'कीट', 'infection', 'संक्रमण', 'virus', 'वायरस', 'fungus', 'फंगस'];
-    return diseaseKeywords.some(keyword => message.includes(keyword));
+    const diseaseKeywords = ['disease', 'बीमारी', 'pest', 'कीट', 'infection', 'संक्रमण', 'virus', 'वायरस', 'fungus', 'फंगस', 'yellow', 'पीला', 'spot', 'धब्बा', 'worm', 'कीड़ा'];
+    return this.checkKeywords(message, diseaseKeywords);
   }
 
   private isMarketQuery(message: string): boolean {
-    const marketKeywords = ['price', 'भाव', 'market', 'बाजार', 'rate', 'दर', 'cost', 'कीमत', 'sell', 'बेचना'];
-    return marketKeywords.some(keyword => message.includes(keyword));
+    const marketKeywords = ['price', 'भाव', 'market', 'बाजार', 'rate', 'दर', 'cost', 'कीमत', 'sell', 'बेचना', 'mandi', 'मंडी', 'paisa', 'पैसा', 'wheat', 'गेहूं', 'rice', 'चावल', 'tomato', 'टमाटर'];
+    return this.checkKeywords(message, marketKeywords);
   }
 
   private isFertilizerQuery(message: string): boolean {
-    const fertilizerKeywords = ['fertilizer', 'खाद', 'urea', 'यूरिया', 'dap', 'npk', 'nutrient', 'पोषक तत्व'];
-    return fertilizerKeywords.some(keyword => message.includes(keyword));
+    const fertilizerKeywords = ['fertilizer', 'खाद', 'urea', 'यूरिया', 'dap', 'npk', 'nutrient', 'पोषक तत्व', 'potash', 'पोटाश', 'pesticide', 'कीटनाशक'];
+    return this.checkKeywords(message, fertilizerKeywords);
   }
 
   private getGreetingResponse(language: string): string {
     return language === 'hindi'
-      ? '🌾 नमस्ते किसान भाई! मैं आपका कृषि सहायक हूं। मैं आपको फसलों, मौसम, बीमारियों, बाजार भाव और खाद के बारे में जानकारी दे सकता हूं। अपना सवाल पूछें।'
-      : '🌾 Hello! I am your farming assistant. I can help you with information about crops, weather, diseases, market prices, and fertilizers. Ask your question.';
+      ? 'नमस्ते किसान भाई! मैं आपका कृषि सहायक हूं। मैं आपको फसलों, मौसम, बीमारियों, बाजार भाव और खाद के बारे में जानकारी दे सकता हूं। अपना सवाल पूछें।'
+      : 'Hello! I am your farming assistant. I can help you with information about crops, weather, diseases, market prices, and fertilizers. Ask your question.';
   }
 
   private getWeatherResponse(language: string): string {
@@ -105,6 +118,7 @@ class ChatbotService {
 
     // Greeting responses
     if (this.isGreeting(lowerMessage)) {
+      console.log('[ChatbotService] Intent: Greeting');
       return {
         content: this.getGreetingResponse(language),
         suggestions: [
@@ -117,6 +131,7 @@ class ChatbotService {
 
     // Weather queries
     if (this.isWeatherQuery(lowerMessage)) {
+      console.log('[ChatbotService] Intent: Weather');
       return {
         content: this.getWeatherResponse(language),
         suggestions: [
@@ -128,6 +143,7 @@ class ChatbotService {
 
     // Disease queries
     if (this.isDiseaseQuery(lowerMessage)) {
+      console.log('[ChatbotService] Intent: Disease');
       return {
         content: this.getDiseaseResponse(language),
         suggestions: [
@@ -140,6 +156,7 @@ class ChatbotService {
 
     // Market queries
     if (this.isMarketQuery(lowerMessage)) {
+      console.log('[ChatbotService] Intent: Market');
       return {
         content: this.getMarketResponse(language),
         suggestions: [
@@ -152,6 +169,7 @@ class ChatbotService {
 
     // Fertilizer queries
     if (this.isFertilizerQuery(lowerMessage)) {
+      console.log('[ChatbotService] Intent: Fertilizer');
       return {
         content: this.getFertilizerResponse(language),
         suggestions: [
@@ -163,6 +181,7 @@ class ChatbotService {
     }
 
     // Default response
+    console.log('[ChatbotService] Intent: Unknown/General');
     return {
       content: this.getDefaultResponse(language),
       suggestions: [
@@ -182,12 +201,15 @@ class ChatbotService {
 
   private buildSystemPrompt(context: ChatContext): string {
     const language = context.language || 'english';
+    const locationInfo = context.location
+      ? `\nUser Location: Latitude ${context.location.latitude}, Longitude ${context.location.longitude}${context.location.address ? `, Address: ${context.location.address}` : ''}`
+      : '';
 
     if (language === 'hindi') {
-      return `आप एक कृषि विशेषज्ञ सहायक हैं। आप किसानों को फसलों, मौसम, बीमारियों, बाजार भाव, और खाद के बारे में सटीक जानकारी देते हैं। अपने जवाब हिंदी में दें और उपयोगी सुझाव भी दें।`;
+      return `आप एक कृषि विशेषज्ञ सहायक हैं। आप किसानों को फसलों, मौसम, बीमारियों, बाजार भाव, और खाद के बारे में सटीक जानकारी देते हैं। अपने जवाब हिंदी में दें और उपयोगी सुझाव भी दें।${locationInfo ? `\nकिसान का स्थान: ${locationInfo}` : ''} कृपया इस स्थान के अनुसार मौसम और फसल की सलाह दें।`;
     }
 
-    return `You are an agricultural expert assistant. You help farmers with accurate information about crops, weather, diseases, market prices, and fertilizers. Provide helpful and practical advice.`;
+    return `You are an agricultural expert assistant. You help farmers with accurate information about crops, weather, diseases, market prices, and fertilizers. Provide helpful and practical advice.${locationInfo} Please provide weather and crop advice relevant to this location.`;
   }
 
   private generateSuggestions(message: string, context: ChatContext): string[] {
@@ -217,40 +239,59 @@ class ChatbotService {
   }
 
   async processMessage(message: string, context: ChatContext): Promise<ChatResponse> {
+    console.log('[ChatbotService] Processing message:', message);
+    console.log('[ChatbotService] Context:', {
+      language: context.language,
+      hasLocation: !!context.location,
+      historyLength: context.history?.length || 0
+    });
+
     try {
       // Try OpenAI first with timeout
       if (this.openaiApiKey) {
+        console.log('[ChatbotService] Attempting OpenAI...');
         try {
           const response = await Promise.race([
             this.callOpenAI(message, context),
             new Promise<never>((_, reject) => setTimeout(() => reject(new Error('OpenAI timeout')), 10000))
           ]);
           if (response) {
+            console.log('[ChatbotService] OpenAI success');
             return response;
           }
         } catch (error) {
+          console.warn('[ChatbotService] OpenAI failed or timed out:', error instanceof Error ? error.message : String(error));
           // Continue to Gemini
         }
+      } else {
+        console.log('[ChatbotService] OpenAI API key missing - skipping');
       }
 
       // Try Gemini as fallback with timeout
       if (this.geminiApiKey) {
+        console.log('[ChatbotService] Attempting Gemini...');
         try {
           const response = await Promise.race([
             this.callGemini(message, context),
             new Promise<never>((_, reject) => setTimeout(() => reject(new Error('Gemini timeout')), 10000))
           ]);
           if (response) {
+            console.log('[ChatbotService] Gemini success');
             return response;
           }
         } catch (error) {
+          console.warn('[ChatbotService] Gemini failed or timed out:', error instanceof Error ? error.message : String(error));
           // Continue to local fallback
         }
+      } else {
+        console.log('[ChatbotService] Gemini API key missing - skipping');
       }
 
       // Local fallback
+      console.log('[ChatbotService] Falling back to local response...');
       return this.getLocalResponse(message, context);
     } catch (error) {
+      console.error('[ChatbotService] Critical error in processMessage:', error);
       return {
         content: this.getErrorMessage(context.language || 'english')
       };

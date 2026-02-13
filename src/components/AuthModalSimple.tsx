@@ -347,12 +347,17 @@ const AuthModalSimple = ({ isOpen, onClose, initialView = 'login' }: AuthModalSi
                     <Input
                       type="text"
                       inputMode="numeric"
+                      autoComplete="one-time-code"
                       maxLength={6}
                       placeholder="000000"
                       value={otp}
-                      onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
+                      onChange={(e) => {
+                        const val = e.target.value.replace(/\D/g, '');
+                        // Handle paste of full 6 digit code or manual typing
+                        setOtp(val.slice(0, 6));
+                      }}
                       disabled={isSubmitting || isLoading}
-                      className="text-center text-lg tracking-widest"
+                      className="text-center text-lg tracking-widest font-mono"
                     />
                   </div>
                   <Button
@@ -371,7 +376,10 @@ const AuthModalSimple = ({ isOpen, onClose, initialView = 'login' }: AuthModalSi
                     type="button"
                     variant="outline"
                     className="w-full"
-                    onClick={() => { setOtpSent(false); setOtp(''); }}
+                    onClick={() => {
+                      setOtp('');
+                      handleSendOTP();
+                    }}
                     disabled={isSubmitting || isLoading}
                   >
                     {language === 'hindi' ? 'नया OTP भेजें' : 'Send new OTP'}

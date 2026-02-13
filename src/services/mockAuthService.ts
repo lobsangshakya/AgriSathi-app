@@ -232,7 +232,8 @@ class MockAuthService {
 
 
       // Log OTP for development
-      console.log(`[DEV] OTP for ${phone}: ${otp}`);
+      // Log OTP for development
+      console.log(`[MockAuthService] Generated OTP for ${phone}: ${otp}`);
 
       if (smsResult.success) {
         return {
@@ -268,6 +269,9 @@ class MockAuthService {
 
       const { otp: storedOtp, expiresAt } = JSON.parse(otpData);
 
+      // Diagnostic logging
+      console.log(`[MockAuthService] Verifying OTP for ${phone}: received=${otp}, stored=${storedOtp}`);
+
       if (new Date() > new Date(expiresAt)) {
         localStorage.removeItem(`otp_${phone}`);
         return {
@@ -279,11 +283,10 @@ class MockAuthService {
       if (storedOtp !== otp) {
         return {
           success: false,
-          error: 'Invalid OTP',
+          error: `Invalid OTP (Received: ${otp})`,
         };
       }
 
-      localStorage.removeItem(`otp_${phone}`);
       return {
         success: true,
         error: null,
@@ -310,6 +313,9 @@ class MockAuthService {
           error: otpVerification.error,
         };
       }
+
+      // If we reach here, OTP is valid. Only now remove it.
+      localStorage.removeItem(`otp_${phone}`);
 
       // Check if user already exists
       const existingUser = this.users.find(u => u.phone === phone);
@@ -372,6 +378,9 @@ class MockAuthService {
           error: otpVerification.error,
         };
       }
+
+      // If we reach here, OTP is valid. Only now remove it.
+      localStorage.removeItem(`otp_${phone}`);
 
       // Find user by phone
       const user = this.users.find(u => u.phone === phone);

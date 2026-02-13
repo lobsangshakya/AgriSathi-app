@@ -452,7 +452,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
       newAchievements.push({
         title: 'Beginner Farmer',
         points: 100,
-        icon: '🌱'
+        icon: ''
       });
     }
     
@@ -460,7 +460,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
       newAchievements.push({
         title: 'Community Contributor',
         points: 500,
-        icon: '🏆'
+        icon: ''
       });
     }
     
@@ -468,7 +468,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
       newAchievements.push({
         title: 'Expert Farmer',
         points: 1000,
-        icon: '👨‍🌾'
+        icon: ''
       });
     }
 

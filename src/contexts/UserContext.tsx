@@ -51,6 +51,14 @@ interface UserContextType {
   updateStats: (type: 'post' | 'answer' | 'question') => void;
   updateUserProfile: (updates: Partial<User>) => Promise<boolean>;
   refreshUser: () => Promise<void>;
+  locationData: {
+    latitude: number;
+    longitude: number;
+    address?: string;
+    isManual: boolean;
+  } | null;
+  detectLocation: () => Promise<boolean>;
+  setManualLocation: (lat: number, lon: number, address: string) => void;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -71,6 +79,14 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const { language, t } = useLanguage();
+
+  // Location State
+  const [locationData, setLocationData] = useState<{
+    latitude: number;
+    longitude: number;
+    address?: string;
+    isManual: boolean;
+  } | null>(null);
 
   // Convert UnifiedUserProfile to User format
   const convertToUser = (profile: UnifiedUserProfile): User => {
@@ -97,7 +113,75 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     };
   };
 
-  // Initialize user on mount
+  // Helper to normalize phone numbers for consistently
+  const normalizePhone = (rawPhone: string): string => {
+    const digits = rawPhone.replace(/\D/g, '');
+    const tenDigits = digits.length >= 10 ? digits.slice(-10) : digits;
+    return tenDigits.length === 10 ? '+91' + tenDigits : '+' + digits;
+  };
+
+  const detectLocation = async (): Promise<boolean> => {
+    if (!navigator.geolocation) {
+      toast({
+        title: t('common.error') || 'Error',
+        description: 'Geolocation is not supported by your browser',
+        variant: 'destructive',
+      });
+      return false;
+    }
+
+    try {
+      return new Promise((resolve) => {
+        navigator.geolocation.getCurrentPosition(
+          async (position) => {
+            const { latitude, longitude } = position.coords;
+
+            // Basic reverse geocoding (mock for now, or use weatherService if available)
+            // In a real app, we'd call a geocoding API here
+            const newLocation = {
+              latitude,
+              longitude,
+              isManual: false
+            };
+
+            setLocationData(newLocation);
+            localStorage.setItem('agrisathi_location', JSON.stringify(newLocation));
+
+            toast({
+              title: t('location.detected') || 'Location Detected',
+              description: t('location.usingCurrent') || 'Using your current location',
+            });
+            resolve(true);
+          },
+          (error) => {
+            // Silently handle - location is optional
+            resolve(false);
+          },
+          { timeout: 10000, enableHighAccuracy: true }
+        );
+      });
+    } catch (error) {
+      return false;
+    }
+  };
+
+  const setManualLocation = (lat: number, lon: number, address: string) => {
+    const newLocation = {
+      latitude: lat,
+      longitude: lon,
+      address,
+      isManual: true
+    };
+    setLocationData(newLocation);
+    localStorage.setItem('agrisathi_location', JSON.stringify(newLocation));
+
+    toast({
+      title: t('location.updated') || 'Location Updated',
+      description: `${t('location.setto') || 'Set to'}: ${address}`,
+    });
+  };
+
+  // Initialize user and location on mount
   useEffect(() => {
     const initializeUser = async () => {
       try {
@@ -106,8 +190,17 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
           // In authWrapper, getCurrentUser returns the unified profile directly
           setUser(convertToUser(currentUser));
         }
+
+        // Load saved location from localStorage
+        const savedLocation = localStorage.getItem('agrisathi_location');
+        if (savedLocation) {
+          setLocationData(JSON.parse(savedLocation));
+        } else {
+          // Auto-detect if no saved location
+          detectLocation();
+        }
       } catch (error) {
-        console.error('User initialization failed:', error);
+        // Silently handle initialization errors
       } finally {
         setIsLoading(false);
       }
@@ -202,7 +295,8 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
   const signInWithPhone = async (phone: string, otp: string): Promise<boolean> => {
     try {
       setIsLoading(true);
-      const result = await authWrapper.signInWithPhone(phone, otp);
+      const normalizedPhone = normalizePhone(phone);
+      const result = await authWrapper.signInWithPhone(normalizedPhone, otp);
 
       if (result.user) {
         setUser(convertToUser(result.user));
@@ -236,7 +330,8 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
   const signUpWithPhone = async (phone: string, name: string, otp: string): Promise<boolean> => {
     try {
       setIsLoading(true);
-      const result = await authWrapper.signUpWithPhone(phone, otp, { name, phone });
+      const normalizedPhone = normalizePhone(phone);
+      const result = await authWrapper.signUpWithPhone(normalizedPhone, otp, { name, phone: normalizedPhone });
 
       if (result.user) {
         setUser(convertToUser(result.user));
@@ -269,7 +364,8 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
 
   const sendOTP = async (phone: string): Promise<boolean> => {
     try {
-      const result = await authWrapper.sendOTP(phone);
+      const normalizedPhone = normalizePhone(phone);
+      const result = await authWrapper.sendOTP(normalizedPhone);
 
       if (result.success) {
         toast({
@@ -299,9 +395,13 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     try {
       const result = await authWrapper.signOut();
 
-      if (!result.error) {
-        setUser(null);
+      // Always clear local state and storage on logout attempt
+      setUser(null);
+      setLocationData(null);
+      localStorage.removeItem('agrisathi_mock_auth');
+      localStorage.removeItem('agrisathi_location');
 
+      if (!result.error) {
         toast({
           title: t('auth.logoutSuccess') || 'Logged Out',
           description: t('auth.logoutMessage') || 'You have been logged out successfully',
@@ -314,6 +414,12 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         });
       }
     } catch (error) {
+      // Even on error, force clear local state
+      setUser(null);
+      setLocationData(null);
+      localStorage.removeItem('agrisathi_mock_auth');
+      localStorage.removeItem('agrisathi_location');
+
       toast({
         title: t('auth.error') || 'Error',
         description: t('auth.logoutError') || 'Logout failed. Please try again.',
@@ -410,6 +516,9 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     updateStats,
     updateUserProfile,
     refreshUser,
+    locationData,
+    detectLocation,
+    setManualLocation
   };
 
   return <UserContext.Provider value={value}>{children}</UserContext.Provider>;

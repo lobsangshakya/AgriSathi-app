@@ -83,14 +83,14 @@ class WorkingChatbot {
   private responses = {
     greetings: {
       hindi: [
-        '🌾 नमस्ते! मैं आपका कृषि सहायक हूं। मैं आपकी फसलों, मौसम, बाजार और खेती से जुड़े सभी सवालों का जवाब दे सकता हूं।',
-        '🙏 आपका स्वागत है किसान भाई! मैं आपकी मदद करने के लिए यहां हूं।',
-        '🌱 कृषि से जुड़े किसी भी सवाल पर मुझे पूछें। मैं हमेशा आपकी सेवा में तत्पर हूं।'
+        'नमस्ते! मैं आपका कृषि सहायक हूं। मैं आपकी फसलों, मौसम, बाजार और खेती से जुड़े सभी सवालों का जवाब दे सकता हूं।',
+        'आपका स्वागत है किसान भाई! मैं आपकी मदद करने के लिए यहां हूं।',
+        'कृषि से जुड़े किसी भी सवाल पर मुझे पूछें। मैं हमेशा आपकी सेवा में तत्पर हूं।'
       ],
       english: [
-        '🌾 Hello! I am your farming assistant. I can help you with crops, weather, market, and all farming-related questions.',
-        '🙏 Welcome farmer! I am here to assist you with all your farming needs.',
-        '🌱 Ask me anything related to agriculture. I am always ready to help you.'
+        'Hello! I am your farming assistant. I can help you with crops, weather, market, and all farming-related questions.',
+        'Welcome farmer! I am here to assist you with all your farming needs.',
+        'Ask me anything related to agriculture. I am always ready to help you.'
       ]
     },
     help: {
@@ -229,9 +229,9 @@ class WorkingChatbot {
       rainChance: 20
     };
 
-    const response = language === 'hindi' 
-      ? `🌤️ आज का मौसम खेती के लिए अनुकूल है:\n\n🌡️ तापमान: ${weatherData.temperature}°C\n💧 नमी: ${weatherData.humidity}%\n🌬️ हवा: ${weatherData.windSpeed} किमी/घंटा\n☔ बारिश की संभावना: ${weatherData.rainChance}%\n\n🌱 कृषि सलाह:\n• ${weatherData.temperature > 30 ? 'अधिक सिंचाई की जरूरत है' : 'सामान्य सिंचाई करें'}\n• ${weatherData.humidity > 70 ? 'बीमारी का ध्यान रखें' : 'बीमारी रोकथाम करें'}\n• शाम को सिंचाई करना सबसे अच्छा है`
-      : `🌤️ Today's weather is favorable for farming:\n\n🌡️ Temperature: ${weatherData.temperature}°C\n💧 Humidity: ${weatherData.humidity}%\n🌬️ Wind: ${weatherData.windSpeed} km/h\n☔ Rain chance: ${weatherData.rainChance}%\n\n🌱 Farming advice:\n• ${weatherData.temperature > 30 ? 'Increase irrigation' : 'Normal irrigation'}\n• ${weatherData.humidity > 70 ? 'Watch for diseases' : 'Disease prevention'}\n• Evening irrigation is best`;
+    const response = language === 'hindi'
+      ? `आज का मौसम खेती के लिए अनुकूल है:\n\nतापमान: ${weatherData.temperature}°C\nनमी: ${weatherData.humidity}%\nहवा: ${weatherData.windSpeed} किमी/घंटा\nबारिश की संभावना: ${weatherData.rainChance}%\n\nकृषि सलाह:\n• ${weatherData.temperature > 30 ? 'अधिक सिंचाई की जरूरत है' : 'सामान्य सिंचाई करें'}\n• ${weatherData.humidity > 70 ? 'बीमारी का ध्यान रखें' : 'बीमारी रोकथाम करें'}\n• शाम को सिंचाई करना सबसे अच्छा है`
+      : `Today's weather is favorable for farming:\n\nTemperature: ${weatherData.temperature}°C\nHumidity: ${weatherData.humidity}%\nWind: ${weatherData.windSpeed} km/h\nRain chance: ${weatherData.rainChance}%\n\nFarming advice:\n• ${weatherData.temperature > 30 ? 'Increase irrigation' : 'Normal irrigation'}\n• ${weatherData.humidity > 70 ? 'Watch for diseases' : 'Disease prevention'}\n• Evening irrigation is best`;
 
     return {
       content: response,
@@ -245,12 +245,12 @@ class WorkingChatbot {
     const marketInfo = crops.map(crop => {
       const cropKey = crop === 'टमाटर' ? 'tomato' : crop === 'गेहूं' ? 'wheat' : crop === 'धान' ? 'rice' : 'potato';
       const data = this.knowledgeBase.market[cropKey as keyof typeof this.knowledgeBase.market];
-      return `${crop}: ₹${data.price}/${data.unit} (${data.trend === 'up' ? '📈' : data.trend === 'down' ? '📉' : '➡️'})`;
+      return `${crop}: ₹${data.price}/${data.unit} (${data.trend === 'up' ? 'Up' : data.trend === 'down' ? 'Down' : 'Steady'})`;
     }).join('\n');
 
     const response = language === 'hindi'
-      ? `💰 आज का बाजार भाव:\n\n${marketInfo}\n\n📍 सबसे अच्छी कीमतें:\n• टमाटर: मंडी में ₹45/किग्रा\n• गेहूं: एपीएमसी में ₹2250/क्विंटल\n• धान: मंडी में ₹2600/क्विंटल\n\n💡 सलाह: कीमतें अच्छी हैं, बेचने का सही समय है।`
-      : `💰 Today's market prices:\n\n${marketInfo}\n\n📍 Best prices:\n• Tomato: ₹45/kg at Mandi\n• Wheat: ₹2250/quintal at APMC\n• Rice: ₹2600/quintal at Mandi\n\n💡 Advice: Prices are good, it's a good time to sell.`;
+      ? `आज का बाजार भाव:\n\n${marketInfo}\n\nसबसे अच्छी कीमतें:\n• टमाटर: मंडी में ₹45/किग्रा\n• गेहूं: एपीएमसी में ₹2250/क्विंटल\n• धान: मंडी में ₹2600/क्विंटल\n\nसलाह: कीमतें अच्छी हैं, बेचने का सही समय है।`
+      : `Today's market prices:\n\n${marketInfo}\n\nBest prices:\n• Tomato: ₹45/kg at Mandi\n• Wheat: ₹2250/quintal at APMC\n• Rice: ₹2600/quintal at Mandi\n\nAdvice: Prices are good, it's a good time to sell.`;
 
     return {
       content: response,
@@ -261,8 +261,8 @@ class WorkingChatbot {
 
   private handleDiseaseQuery(message: string, language: string): ChatbotResponse {
     const response = language === 'hindi'
-      ? `🌱 फसल बीमारी की पहचान:\n\n🔍 सामान्य लक्षण:\n• पत्तियों पर धब्बे या पीले निशान\n• पौधे का विकास धीमा\n• फल यर्गलिक या छोटे\n• पत्तियां मुड़ना या गिरना\n\n🛡️ तुरंत उपाय:\n• प्रभावित पौधों को अलग करें\n• जैविक कीटनाशक का उपयोग करें\n• उचित सिंचाई करें\n• विशेषज्ञ से संपर्क करें\n\n📸 फोटो भेजकर मुझे बीमारी की पहचान करने दें।`
-      : `🌱 Crop disease identification:\n\n🔍 Common symptoms:\n• Spots or yellow marks on leaves\n• Stunted plant growth\n• Misshapen or small fruits\n• Wilting or falling leaves\n\n🛡️ Immediate actions:\n• Remove affected plants\n• Use organic pesticides\n• Ensure proper irrigation\n• Contact an expert\n\n📸 Send me a photo for disease identification.`;
+      ? `फसल बीमारी की पहचान:\n\nसामान्य लक्षण:\n• पत्तियों पर धब्बे या पीले निशान\n• पौधे का विकास धीमा\n• फल यर्गलिक या छोटे\n• पत्तियां मुड़ना या गिरना\n\nतुरंत उपाय:\n• प्रभावित पौधों को अलग करें\n• जैविक कीटनाशक का उपयोग करें\n• उचित सिंचाई करें\n• विशेषज्ञ से संपर्क करें\n\nफोटो भेजकर मुझे बीमारी की पहचान करने दें।`
+      : `Crop disease identification:\n\nCommon symptoms:\n• Spots or yellow marks on leaves\n• Stunted plant growth\n• Misshapen or small fruits\n• Wilting or falling leaves\n\nImmediate actions:\n• Remove affected plants\n• Use organic pesticides\n• Ensure proper irrigation\n• Contact an expert\n\nSend me a photo for disease identification.`;
 
     return {
       content: response,
@@ -273,8 +273,8 @@ class WorkingChatbot {
 
   private handleFertilizerQuery(message: string, language: string): ChatbotResponse {
     const response = language === 'hindi'
-      ? `🌾 खाद और उर्वरक सुझाव:\n\n🥬 जैविक खाद:\n• गोबर: सभी फसलों के लिए अच्छा\n• वर्मीकम्पोस्ट: पोषक तत्व से भरपूर\n• हरा खाद: जमीन को स्वस्थ रखें\n\n🧪 रासायनिक खाद:\n• यूरिया: पत्तियों के लिए\n• डीएपी: जड़ और फल के लिए\n• पोटाश: फूल और फल के लिए\n\n⏰ उपयोग:\n• बुआई से पहले: जमीन तैयार\n• बुआी के समय: बुवाई खाद\n• विकास के समय: यूरिया\n• फूल/फल के समय: पोटाश`
-      : `🌾 Fertilizer recommendations:\n\n🥬 Organic fertilizers:\n• Cow dung: Good for all crops\n• Vermicompost: Rich in nutrients\n• Green manure: Keep soil healthy\n\n🧪 Chemical fertilizers:\n• Urea: For leaves\n• DAP: For roots and fruits\n• Potash: For flowers and fruits\n\n⏰ Application:\n• Before sowing: Soil preparation\n• At sowing: Basal fertilizer\n• During growth: Urea\n• Flowering/fruiting: Potash`;
+      ? `खाद और उर्वरक सुझाव:\n\nजैविक खाद:\n• गोबर: सभी फसलों के लिए अच्छा\n• वर्मीकम्पोस्ट: पोषक तत्व से भरपूर\n• हरा खाद: जमीन को स्वस्थ रखें\n\nरासायनिक खाद:\n• यूरिया: पत्तियों के लिए\n• डीएपी: जड़ और फल के लिए\n• पोटाश: फूल और फल के लिए\n\nउपयोग:\n• बुआई से पहले: जमीन तैयार\n• बुआी के समय: बुवाई खाद\n• विकास के समय: यूरिया\n• फूल/फल के समय: पोटाश`
+      : `Fertilizer recommendations:\n\nOrganic fertilizers:\n• Cow dung: Good for all crops\n• Vermicompost: Rich in nutrients\n• Green manure: Keep soil healthy\n\nChemical fertilizers:\n• Urea: For leaves\n• DAP: For roots and fruits\n• Potash: For flowers and fruits\n\nApplication:\n• Before sowing: Soil preparation\n• At sowing: Basal fertilizer\n• During growth: Urea\n• Flowering/fruiting: Potash`;
 
     return {
       content: response,
@@ -285,8 +285,8 @@ class WorkingChatbot {
 
   private handlePestQuery(message: string, language: string): ChatbotResponse {
     const response = language === 'hindi'
-      ? `🐛 कीट प्रबंधन:\n\n🌿 जैविक उपाय:\n• नीम का तेल: सभी कीटों के लिए\n• लहसुन का स्प्रे: कवक और मक्खियों के लिए\n• तुलसी का पत्ता: मच्छरों को दूर करें\n• गाय का मूत्र: कीटों को भगाता है\n\n🧪 रासायनिक उपाय:\n• कार्बारिल: सामान्य कीटनाशक\n• पाइरिथ्रम: फसल सुरक्षित\n• मालाथियन: मच्छर नियंत्रण\n• क्लोरोपाइरीफॉस: बड़े कीटों के लिए\n\n⚠️ सावधान:\n• सुबह स्प्रे करें\n• सुरक्षा उपकरण पहनें\n• फसल की जांच करें\n• निर्देशिकाओं का पालन करें`
-      : `🐛 Pest control:\n\n🌿 Organic methods:\n• Neem oil: For all pests\n• Garlic spray: For aphids and mites\n• Tulsi leaves: Repels mosquitoes\n• Cow dung: Natural repellent\n\n🧪 Chemical methods:\n• Carbaryl: General insecticide\n• Pyrethrum: Crop safe\n• Malathion: Mosquito control\n• Chlorpyrifos: For large pests\n\n⚠️ Precautions:\n• Spray in evening\n• Wear protective equipment\n• Check crops regularly\n• Follow label instructions`;
+      ? `कीट प्रबंधन:\n\nजैविक उपाय:\n• नीम का तेल: सभी कीटों के लिए\n• लहसुन का स्प्रे: कवक और मक्खियों के लिए\n• तुलसी का पत्ता: मच्छरों को दूर करें\n• गाय का मूत्र: कीटों को भगाता है\n\nरासायनिक उपाय:\n• कार्बारिल: सामान्य कीटनाशक\n• पाइरिथ्रम: फसल सुरक्षित\n• मालाथियन: मच्छर नियंत्रण\n• क्लोरोपाइरीफॉस: बड़े कीटों के लिए\n\nसावधान:\n• सुबह स्प्रे करें\n• सुरक्षा उपकरण पहनें\n• फसल की जांच करें\n• निर्देशिकाओं का पालन करें`
+      : `Pest control:\n\nOrganic methods:\n• Neem oil: For all pests\n• Garlic spray: For aphids and mites\n• Tulsi leaves: Repels mosquitoes\n• Cow dung: Natural repellent\n\nChemical methods:\n• Carbaryl: General insecticide\n• Pyrethrum: Crop safe\n• Malathion: Mosquito control\n• Chlorpyrifos: For large pests\n\nPrecautions:\n• Spray in evening\n• Wear protective equipment\n• Check crops regularly\n• Follow label instructions`;
 
     return {
       content: response,
@@ -297,8 +297,8 @@ class WorkingChatbot {
 
   private handleIrrigationQuery(message: string, language: string): ChatbotResponse {
     const response = language === 'hindi'
-      ? `💧 सिंचाई मार्गदर्शन:\n\n⏰ समय:\n• सुबह: 6-8 बजे (कम वाष्पन)\n• शाम: 4-6 बजे (अच्छा अवशोषण)\n• रात: सिंचाई से बचें\n\n🌾 फसल अनुसार:\n• धान: खेत में 2-3 इंच पानी\n• गेहूं: 10-15 दिन के अंतराल पर\n• टमाटर: नमी बनाए रखें\n• सब्जियां: नियमित सिंचाई\n\n🔧 तरीके:\n• ड्रिप सिंचाई: पानी बचाना\n• स्प्रिंकलर: समान वितरण\n• फवारा: बड़े क्षेत्रों के लिए\n• ट्यूबवेल: भूमिजल से पानी`
-      : `💧 Irrigation guidelines:\n\n⏰ Timing:\n• Morning: 6-8 AM (less evaporation)\n• Evening: 4-6 PM (good absorption)\n• Night: Avoid irrigation\n\n🌾 Crop-wise:\n• Rice: 2-3 inches water in field\n• Wheat: 10-15 days interval\n• Tomato: Keep moisture consistent\n• Vegetables: Regular irrigation\n\n🔧 Methods:\n• Drip irrigation: Water saving\n• Sprinkler: Even distribution\n• Flood irrigation: Large fields\n• Tube well: Ground water`;
+      ? `सिंचाई मार्गदर्शन:\n\nसमय:\n• सुबह: 6-8 बजे (कम वाष्पन)\n• शाम: 4-6 बजे (अच्छा अवशोषण)\n• रात: सिंचाई से बचें\n\nफसल अनुसार:\n• धान: खेत में 2-3 इंच पानी\n• गेहूं: 10-15 दिन के अंतराल पर\n• टमाटर: नमी बनाए रखें\n• सब्जियां: नियमित सिंचाई\n\nतरीके:\n• ड्रिप सिंचाई: पानी बचाना\n• स्प्रिंकलर: समान वितरण\n• फवारा: बड़े क्षेत्रों के लिए\n• ट्यूबवेल: भूमिजल से पानी`
+      : `Irrigation guidelines:\n\nTiming:\n• Morning: 6-8 AM (less evaporation)\n• Evening: 4-6 PM (good absorption)\n• Night: Avoid irrigation\n\nCrop-wise:\n• Rice: 2-3 inches water in field\n• Wheat: 10-15 days interval\n• Tomato: Keep moisture consistent\n• Vegetables: Regular irrigation\n\nMethods:\n• Drip irrigation: Water saving\n• Sprinkler: Even distribution\n• Flood irrigation: Large fields\n• Tube well: Ground water`;
 
     return {
       content: response,
@@ -314,8 +314,8 @@ class WorkingChatbot {
 
   private getSuggestions(language: string): string[] {
     return language === 'hindi'
-      ? ['🌾 फसल जांच करें', '🌤️ मौसम जानें', '💰 बाजार भाव देखें', '🌱 खाद सुझाव पाएं']
-      : ['🌾 Check crop health', '🌤️ Check weather', '💰 Check market prices', '🌱 Get fertilizer advice'];
+      ? ['फसल जांच करें', 'मौसम जानें', 'बाजार भाव देखें', 'खाद सुझाव पाएं']
+      : ['Check crop health', 'Check weather', 'Check market prices', 'Get fertilizer advice'];
   }
 }
 

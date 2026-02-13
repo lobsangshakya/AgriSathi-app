@@ -152,8 +152,9 @@ export class RealApiService {
     }
 
     const data = await response.json();
-    
+
     return {
+      location: data.name,
       temperature: data.main.temp,
       humidity: data.main.humidity,
       windSpeed: data.wind.speed,
@@ -191,12 +192,12 @@ export class RealApiService {
     }
 
     const data = await response.json();
-    
+
     // Process the response to extract disease information
     const suggestions = data.suggestions || [];
     const healthAssessment = suggestions[0]?.health_assessment || {};
     const diseases = healthAssessment.diseases || [];
-    
+
     if (diseases.length === 0) {
       return {
         disease: "कोई रोग नहीं पाया गया (No disease detected)",
@@ -210,7 +211,7 @@ export class RealApiService {
     }
 
     const primaryDisease = diseases[0];
-    
+
     return {
       disease: primaryDisease.name,
       confidence: Math.round(primaryDisease.probability * 100),
@@ -243,9 +244,9 @@ export class RealApiService {
     if (lowerMessage.includes('मौसम') || lowerMessage.includes('weather')) {
       try {
         const weather = await this.getWeatherData(28.6139, 77.2090); // Default to Delhi
-        const weatherResponse = language === 'hindi' 
-          ? `🌤️ आज का मौसम कृषि के लिए ${weather.temperature > 25 ? 'अनुकूल' : 'ठंडा'} है:\n\n🌡️ तापमान: ${weather.temperature}°C\n💧 आर्द्रता: ${weather.humidity}%\n🌬️ हवा: ${weather.windSpeed} km/h\n☔ स्थिति: ${weather.description}\n\n🌱 सुझाव: ${weather.temperature > 30 ? 'फसलों की सिंचाई बढ़ाएं' : 'सामान्य सिंचाई जारी रखें'}`
-          : `🌤️ Today's weather is ${weather.temperature > 25 ? 'favorable' : 'cool'} for agriculture:\n\n🌡️ Temperature: ${weather.temperature}°C\n💧 Humidity: ${weather.humidity}%\n🌬️ Wind: ${weather.windSpeed} km/h\n☔ Condition: ${weather.description}\n\n🌱 Suggestion: ${weather.temperature > 30 ? 'Increase crop irrigation' : 'Continue normal irrigation'}`;
+        const weatherResponse = language === 'hindi'
+          ? ` आज का मौसम कृषि के लिए ${weather.temperature > 25 ? 'अनुकूल' : 'ठंडा'} है:\n\n तापमान: ${weather.temperature}°C\n आर्द्रता: ${weather.humidity}%\n हवा: ${weather.windSpeed} km/h\n स्थिति: ${weather.description}\n\n सुझाव: ${weather.temperature > 30 ? 'फसलों की सिंचाई बढ़ाएं' : 'सामान्य सिंचाई जारी रखें'}`
+          : ` Today's weather is ${weather.temperature > 25 ? 'favorable' : 'cool'} for agriculture:\n\n Temperature: ${weather.temperature}°C\n Humidity: ${weather.humidity}%\n Wind: ${weather.windSpeed} km/h\n Condition: ${weather.description}\n\n Suggestion: ${weather.temperature > 30 ? 'Increase crop irrigation' : 'Continue normal irrigation'}`;
 
         return {
           id: Date.now().toString(),
@@ -264,8 +265,8 @@ export class RealApiService {
       if (lowerMessage.includes(cropKey) || lowerMessage.includes(cropData.hindi.name.toLowerCase())) {
         const crop = cropData[language as keyof typeof cropData];
         const response = language === 'hindi'
-          ? `🌾 ${crop.name} की खेती के लिए विस्तृत गाइड:\n\n📅 बुआई का समय: ${crop.sowingTime}\n🌱 मिट्टी: ${crop.soil}\n💧 सिंचाई: ${crop.irrigation}\n🌿 खाद: ${crop.fertilizer}\n🦗 कीट नियंत्रण: ${crop.pestControl}\n💰 उपज: ${crop.yield}\n⚠️ सावधानी: ${crop.precautions}`
-          : `🌾 Complete Guide for ${crop.name} Farming:\n\n📅 Sowing Time: ${crop.sowingTime}\n🌱 Soil: ${crop.soil}\n💧 Irrigation: ${crop.irrigation}\n🌿 Fertilizer: ${crop.fertilizer}\n🦗 Pest Control: ${crop.pestControl}\n💰 Yield: ${crop.yield}\n⚠️ Precautions: ${crop.precautions}`;
+          ? ` ${crop.name} की खेती के लिए विस्तृत गाइड:\n\n बुआई का समय: ${crop.sowingTime}\n मिट्टी: ${crop.soil}\n सिंचाई: ${crop.irrigation}\n खाद: ${crop.fertilizer}\n कीट नियंत्रण: ${crop.pestControl}\n उपज: ${crop.yield}\n सावधानी: ${crop.precautions}`
+          : ` Complete Guide for ${crop.name} Farming:\n\n Sowing Time: ${crop.sowingTime}\n Soil: ${crop.soil}\n Irrigation: ${crop.irrigation}\n Fertilizer: ${crop.fertilizer}\n Pest Control: ${crop.pestControl}\n Yield: ${crop.yield}\n Precautions: ${crop.precautions}`;
 
         return {
           id: Date.now().toString(),
@@ -281,10 +282,10 @@ export class RealApiService {
     if (lowerMessage.includes('खाद') || lowerMessage.includes('fertilizer')) {
       const npk = agriculturalKnowledge.fertilizers.npk;
       const organic = agriculturalKnowledge.fertilizers.organic;
-      
+
       const response = language === 'hindi'
-        ? `🌿 फसल के अनुसार खाद की मात्रा:\n\n🌾 धान: ${npk.rice}\n🌾 गेहूं: ${npk.wheat}\n🌽 मक्का: ${npk.maize}\n🫘 सोयाबीन: ${npk.soybean}\n🍅 टमाटर: ${npk.tomato}\n\n🌱 जैविक खाद:\n${organic.cowDung}\n${organic.vermicompost}\n${organic.neemCake}\n\n💡 सुझाव: खाद बुआई के समय और टॉप ड्रेसिंग में दें`
-        : `🌿 Fertilizer quantity by crop:\n\n🌾 Rice: ${npk.rice}\n🌾 Wheat: ${npk.wheat}\n🌽 Maize: ${npk.maize}\n🫘 Soybean: ${npk.soybean}\n🍅 Tomato: ${npk.tomato}\n\n🌱 Organic Fertilizers:\nCow Dung: 10-15 tons/hectare\nVermicompost: 5-7 tons/hectare\nNeem Cake: 250-500 kg/hectare\n\n💡 Tip: Apply fertilizer at sowing time and top dressing`;
+        ? ` फसल के अनुसार खाद की मात्रा:\n\n धान: ${npk.rice}\n गेहूं: ${npk.wheat}\n मक्का: ${npk.maize}\n सोयाबीन: ${npk.soybean}\n टमाटर: ${npk.tomato}\n\n जैविक खाद:\n${organic.cowDung}\n${organic.vermicompost}\n${organic.neemCake}\n\n सुझाव: खाद बुआई के समय और टॉप ड्रेसिंग में दें`
+        : ` Fertilizer quantity by crop:\n\n Rice: ${npk.rice}\n Wheat: ${npk.wheat}\n Maize: ${npk.maize}\n Soybean: ${npk.soybean}\n Tomato: ${npk.tomato}\n\n Organic Fertilizers:\nCow Dung: 10-15 tons/hectare\nVermicompost: 5-7 tons/hectare\nNeem Cake: 250-500 kg/hectare\n\n Tip: Apply fertilizer at sowing time and top dressing`;
 
       return {
         id: Date.now().toString(),
@@ -299,10 +300,10 @@ export class RealApiService {
     if (lowerMessage.includes('कीट') || lowerMessage.includes('pest')) {
       const natural = agriculturalKnowledge.pestControl.natural;
       const chemical = agriculturalKnowledge.pestControl.chemical;
-      
+
       const response = language === 'hindi'
-        ? `🦗 कीट नियंत्रण के तरीके:\n\n🌿 प्राकृतिक तरीके:\n${natural.neemOil}\n${natural.cowUrine}\n${natural.garlicChili}\n\n🧪 रासायनिक तरीके:\n${chemical.imidacloprid}\n${chemical.chlorpyrifos}\n${chemical.carbofuran}\n\n⚠️ सावधानी: रासायनिक कीटनाशक का कम उपयोग करें`
-        : `🦗 Pest control methods:\n\n🌿 Natural methods:\n${natural.neemOil}\n${natural.cowUrine}\n${natural.garlicChili}\n\n🧪 Chemical methods:\n${chemical.imidacloprid}\n${chemical.chlorpyrifos}\n${chemical.carbofuran}\n\n⚠️ Caution: Use chemical pesticides sparingly`;
+        ? ` कीट नियंत्रण के तरीके:\n\n प्राकृतिक तरीके:\n${natural.neemOil}\n${natural.cowUrine}\n${natural.garlicChili}\n\n रासायनिक तरीके:\n${chemical.imidacloprid}\n${chemical.chlorpyrifos}\n${chemical.carbofuran}\n\n सावधानी: रासायनिक कीटनाशक का कम उपयोग करें`
+        : ` Pest control methods:\n\n Natural methods:\n${natural.neemOil}\n${natural.cowUrine}\n${natural.garlicChili}\n\n Chemical methods:\n${chemical.imidacloprid}\n${chemical.chlorpyrifos}\n${chemical.carbofuran}\n\n Caution: Use chemical pesticides sparingly`;
 
       return {
         id: Date.now().toString(),
@@ -315,8 +316,8 @@ export class RealApiService {
 
     // Default response with real agricultural information
     const defaultResponse = language === 'hindi'
-        ? `🌾 नमस्ते! मैं AgriSaathi AI हूं। आपकी खेती संबंधी किसी भी समस्या में मदद कर सकता हूं।\n\n💡 आप इन विषयों पर पूछ सकते हैं:\n• फसल (टमाटर, गेहूं, धान, मक्का)\n• मौसम और जलवायु\n• खाद और पोषण\n• कीट और रोग नियंत्रण\n• सिंचाई तरीके\n• जैविक खेती\n• बाजार भाव\n• सरकारी योजनाएं\n\n📸 तस्वीर भेजकर रोग की पहचान भी कर सकते हैं!`
-              : `🌾 Hello! I'm AgriSaathi AI. I can help you with any farming-related problems.\n\n💡 You can ask about:\n• Crops (tomato, wheat, rice, maize)\n• Weather and climate\n• Fertilizers and nutrition\n• Pest and disease control\n• Irrigation methods\n• Organic farming\n• Market rates\n• Government schemes\n\n📸 You can also send photos to identify diseases!`;
+      ? `नमस्ते! मैं AgriSaathi AI हूं। आपकी खेती संबंधी किसी भी समस्या में मदद कर सकता हूं।\n\nआप इन विषयों पर पूछ सकते हैं:\n• फसल (टमाटर, गेहूं, धान, मक्का)\n• मौसम और जलवायु\n• खाद और पोषण\n• कीट और रोग नियंत्रण\n• सिंचाई तरीके\n• जैविक खेती\n• बाजार भाव\n• सरकारी योजनाएं\n\nतस्वीर भेजकर रोग की पहचान भी कर सकते हैं!`
+      : `Hello! I'm AgriSaathi AI. I can help you with any farming-related problems.\n\nYou can ask about:\n• Crops (tomato, wheat, rice, maize)\n• Weather and climate\n• Fertilizers and nutrition\n• Pest and disease control\n• Irrigation methods\n• Organic farming\n• Market rates\n• Government schemes\n\nYou can also send photos to identify diseases!`;
 
     return {
       id: Date.now().toString(),
@@ -330,7 +331,7 @@ export class RealApiService {
   // Real crop recommendations based on soil and season
   async getCropRecommendations(soilType: string, season: string, location: string): Promise<CropRecommendation[]> {
     const recommendations = [];
-    
+
     if (season === 'rabi' || season === 'winter') {
       recommendations.push({
         crop: "गेहूं (Wheat)",
@@ -340,7 +341,7 @@ export class RealApiService {
         careInstructions: ["नियमित सिंचाई", "खाद का उपयोग", "कीट नियंत्रण"]
       });
     }
-    
+
     if (season === 'kharif' || season === 'monsoon') {
       recommendations.push({
         crop: "धान (Rice)",
@@ -350,12 +351,12 @@ export class RealApiService {
         careInstructions: ["लगातार सिंचाई", "जल प्रबंधन", "कीट नियंत्रण"]
       });
     }
-    
+
     return recommendations;
   }
 
   // Community Posts API - Mock implementation for now
-  async getCommunityPosts(language: string = 'hindi'): Promise<any[]> {
+  async getCommunityPosts(language: string = 'hindi', location?: string): Promise<any[]> {
     // Return bilingual mock community posts
     const bilingualPosts = [
       {
@@ -417,7 +418,7 @@ export class RealApiService {
       timestamp: new Date(),
       category: postData.category
     };
-    
+
     return {
       success: true,
       post: newPost,

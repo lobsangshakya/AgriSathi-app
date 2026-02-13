@@ -17,7 +17,7 @@ const translations = {
     'header.agrisathi': 'AgriSaathi',
     'header.language.hindi': 'हिं',
     'header.language.english': 'EN',
-    
+
     // Navigation
     'nav.home': 'होम',
     'nav.scan': 'स्कैन',
@@ -25,14 +25,14 @@ const translations = {
     'nav.chat': 'चैट',
     'nav.wallet': 'वॉलेट',
     'nav.profile': 'प्रोफाइल',
-    
+
     // Dashboard
     'dashboard.welcome': 'स्वागत है, किसान भाई!',
     'dashboard.subtitle': 'आधुनिक तकनीक के साथ बेहतर खेती',
     'dashboard.quickActions': 'त्वरित कार्य',
     'dashboard.weather': 'आज का मौसम',
     'dashboard.cropRecommendations': 'फसल सुझाव',
-    
+
     // Quick Actions
     'quickActions.scanCrop': 'फसल स्कैन करें',
     'quickActions.scanDescription': 'बीमारी की पहचान',
@@ -44,14 +44,14 @@ const translations = {
     'quickActions.weatherDescription': 'आज का पूर्वानुमान',
     'quickActions.agriCreds': 'AgriCreds',
     'quickActions.earnMore': 'समुदाय में योगदान करके और अधिक कमाएं!',
-    
+
     // Weather
     'weather.today': 'आज का मौसम',
     'weather.humidity': 'नमी',
     'weather.wind': 'हवा',
     'weather.uvIndex': 'UV Index',
     'weather.rainChance': 'बारिश की संभावना',
-    
+
     // Crop Recommendations
     'crops.recommendations': 'फसल सुझाव',
     'crops.season': 'सीजन',
@@ -64,7 +64,7 @@ const translations = {
     'crops.marketRate': 'बाजार दर',
     'crops.viewDetails': 'विस्तार देखें',
     'crops.alerts': 'चेतावनी',
-    
+
     // Crops
     'crops.tomato': 'टमाटर',
     'crops.wheat': 'गेहूं',
@@ -80,9 +80,9 @@ const translations = {
     'crops.sowing.oct_nov': 'अक्टूबर-नवंबर',
     'crops.sowing.nov_dec': 'नवंबर-दिसंबर',
     // Alerts
-    'alerts.tomato_pest': '🐛 टमाटर में कीट प्रकोप की चेतावनी - तुरंत उपचार करें',
-    'alerts.irrigation_needed': '💧 सिंचाई की जरूरत - मिट्टी की नमी कम है',
-    
+    'alerts.tomato_pest': 'टमाटर में कीट प्रकोप की चेतावनी - तुरंत उपचार करें',
+    'alerts.irrigation_needed': 'सिंचाई की जरूरत - मिट्टी की नमी कम है',
+
     // Disease Detection
     'disease.title': 'फसल स्कैन करें',
     'disease.uploadPhoto': 'फसल की फोटो अपलोड करें',
@@ -118,7 +118,7 @@ const translations = {
     'disease.recentAnalyses': 'हाल के विश्लेषण',
     'disease.dragDropText': 'यहां छवि खींचें और छोड़ें, या ब्राउज़ करने के लिए क्लिक करें',
     'disease.browseFiles': 'फ़ाइलें ब्राउज़ करें',
-    
+
     // Chat
     'chat.title': 'AI चैट सहायक',
     'chat.expertBanner': 'विशेषज्ञ सलाह चाहिए?',
@@ -145,7 +145,7 @@ const translations = {
     'chat.usingMockData': 'मॉक डेटा का उपयोग',
     'chat.apiError': 'API त्रुटि',
     'chat.error': 'जवाब प्राप्त करने में विफल',
-    
+
     // Community
     'community.title': 'समुदाय मंच',
     'community.searchPosts': 'पोस्ट खोजें...',
@@ -160,13 +160,13 @@ const translations = {
     'community.tips': 'टिप्स',
     'community.experience': 'अनुभव',
     'community.market': 'बाजार',
-    
+
     // Community categories
     'community.category.problem': 'समस्या',
     'community.category.tips': 'टिप्स',
     'community.category.experience': 'अनुभव',
     'community.category.market': 'बाजार',
-    
+
     // Additional Community translations
     'community.allCategories': 'सभी श्रेणियां',
     'community.loadingPosts': 'पोस्ट लोड हो रही हैं...',
@@ -174,7 +174,7 @@ const translations = {
     'community.categoryNoPosts': 'श्रेणी में कोई पोस्ट नहीं मिली',
     'community.posting': 'पोस्ट हो रही है...',
     'common.refresh': 'रिफ्रेश',
-    
+
     // Voice recognition translations
     'voice.listening': 'सुन रहा हूं...',
     'voice.speakNow': 'अपना सवाल बोलें',
@@ -185,7 +185,7 @@ const translations = {
     'voice.startFailed': 'आवाज पहचान शुरू नहीं हो सकी',
     'voice.noInput': 'कोई इनपुट नहीं',
     'voice.inputReceived': 'आवाज इनपुट प्राप्त हुआ',
-    
+
     // Profile
     'profile.title': 'मेरी प्रोफाइल',
     'profile.farmingInfo': 'खेती की जानकारी',
@@ -199,7 +199,7 @@ const translations = {
     'profile.helpfulAnswers': 'सहायक उत्तर',
     'profile.questionsAsked': 'प्रश्न पूछे',
     'profile.creditsEarned': 'Credits कमाए',
-    
+
     // Wallet
     'wallet.title': 'वॉलेट',
     'wallet.connect': 'वॉलेट कनेक्ट करें',
@@ -268,7 +268,7 @@ const translations = {
     'profile.credits': 'क्रेडिट',
     'profile.noAchievements': 'अभी तक कोई उपलब्धि नहीं',
     'profile.keepParticipating': 'उपलब्धियां कमाने के लिए भाग लेते रहें!',
-    
+
     // Expert Consultation
     'expert.title': 'विशेषज्ञ परामर्श',
     'expert.availableExperts': 'उपलब्ध विशेषज्ञ',
@@ -289,7 +289,7 @@ const translations = {
     'expert.typeMessage': 'अपना संदेश लिखें...',
     'expert.loginRequired': 'लॉगिन आवश्यक',
     'expert.pleaseLogin': 'विशेषज्ञों से बात करने के लिए कृपया लॉगिन करें',
-    
+
     // Expert Chat Navigation
     'expertChat.title': 'विशेषज्ञ चैट परामर्श',
     'expertChat.description': 'कृषि विशेषज्ञों से चैट करें',
@@ -299,7 +299,7 @@ const translations = {
     'expertChat.redirectingToCredits': 'AgriCreds पर पुनर्निर्देशित कर रहा है...',
     'expertChat.expertInfo': 'विशेषज्ञ जानकारी',
     'expertChat.costInfo': 'लागत जानकारी',
-    
+
     // Common
     'common.now': 'अभी',
     'common.view': 'देखें',
@@ -321,7 +321,7 @@ const translations = {
     'header.agrisathi': 'AgriSaathi',
     'header.language.hindi': 'हिं',
     'header.language.english': 'EN',
-    
+
     // Navigation
     'nav.home': 'Home',
     'nav.scan': 'Scan',
@@ -329,14 +329,14 @@ const translations = {
     'nav.chat': 'Chat',
     'nav.wallet': 'Wallet',
     'nav.profile': 'Profile',
-    
+
     // Dashboard
     'dashboard.welcome': 'Welcome, Farmer Brother!',
     'dashboard.subtitle': 'Better farming with modern technology',
     'dashboard.quickActions': 'Quick Actions',
     'dashboard.weather': "Today's Weather",
     'dashboard.cropRecommendations': 'Crop Recommendations',
-    
+
     // Quick Actions
     'quickActions.scanCrop': 'Scan Crop',
     'quickActions.scanDescription': 'Disease Detection',
@@ -348,14 +348,14 @@ const translations = {
     'quickActions.weatherDescription': "Today's forecast",
     'quickActions.agriCreds': 'AgriCreds',
     'quickActions.earnMore': 'Earn more by contributing to the community!',
-    
+
     // Weather
     'weather.today': "Today's Weather",
     'weather.humidity': 'Humidity',
     'weather.wind': 'Wind',
     'weather.uvIndex': 'UV Index',
     'weather.rainChance': 'Rain Chance',
-    
+
     // Crop Recommendations
     'crops.recommendations': 'Crop Recommendations',
     'crops.season': 'Season',
@@ -368,7 +368,7 @@ const translations = {
     'crops.marketRate': 'Market Rate',
     'crops.viewDetails': 'View Details',
     'crops.alerts': 'Alerts',
-    
+
     // Crops
     'crops.tomato': 'Tomato',
     'crops.wheat': 'Wheat',
@@ -383,9 +383,9 @@ const translations = {
     'crops.sowing.oct_nov': 'October-November',
     'crops.sowing.nov_dec': 'November-December',
     // Alerts
-    'alerts.tomato_pest': '🐛 Pest alert in tomato - treat immediately',
-    'alerts.irrigation_needed': '💧 Irrigation needed - soil moisture is low',
-    
+    'alerts.tomato_pest': 'Pest alert in tomato - treat immediately',
+    'alerts.irrigation_needed': 'Irrigation needed - soil moisture is low',
+
     // Disease Detection
     'disease.title': 'Scan Crop',
     'disease.uploadPhoto': 'Upload Crop Photo',
@@ -421,7 +421,7 @@ const translations = {
     'disease.recentAnalyses': 'Recent analyses',
     'disease.dragDropText': 'Drag and drop an image here, or click to browse',
     'disease.browseFiles': 'Browse Files',
-    
+
     // Chat
     'chat.title': 'AI Chat Assistant',
     'chat.expertBanner': 'Need expert advice?',
@@ -448,7 +448,7 @@ const translations = {
     'chat.usingMockData': 'Using mock data',
     'chat.apiError': 'API Error',
     'chat.error': 'Failed to get response',
-    
+
     // Community
     'community.title': 'Community Forum',
     'community.searchPosts': 'Search posts...',
@@ -463,13 +463,13 @@ const translations = {
     'community.tips': 'Tips',
     'community.experience': 'Experience',
     'community.market': 'Market',
-    
+
     // Community categories
     'community.category.problem': 'Problem',
     'community.category.tips': 'Tips',
     'community.category.experience': 'Experience',
     'community.category.market': 'Market',
-    
+
     // Additional Community translations
     'community.allCategories': 'All Categories',
     'community.loadingPosts': 'Loading posts...',
@@ -477,7 +477,7 @@ const translations = {
     'community.categoryNoPosts': 'category has no posts',
     'community.posting': 'Posting...',
     'common.refresh': 'Refresh',
-    
+
     // Voice recognition translations
     'voice.listening': 'Listening...',
     'voice.speakNow': 'Speak your question',
@@ -488,7 +488,7 @@ const translations = {
     'voice.startFailed': 'Failed to start voice recognition',
     'voice.noInput': 'No Input',
     'voice.inputReceived': 'Voice Input Received',
-    
+
     // Profile
     'profile.title': 'My Profile',
     'profile.farmingInfo': 'Farming Information',
@@ -502,7 +502,7 @@ const translations = {
     'profile.helpfulAnswers': 'Helpful Answers',
     'profile.questionsAsked': 'Questions Asked',
     'profile.creditsEarned': 'Credits Earned',
-    
+
     // Wallet
     'wallet.title': 'Wallet',
     'wallet.connect': 'Connect Wallet',
@@ -571,7 +571,7 @@ const translations = {
     'profile.credits': 'Credits',
     'profile.noAchievements': 'No achievements yet',
     'profile.keepParticipating': 'Keep participating to earn achievements!',
-    
+
     // Expert Consultation
     'expert.title': 'Expert Consultation',
     'expert.availableExperts': 'Available Experts',
@@ -592,7 +592,7 @@ const translations = {
     'expert.typeMessage': 'Type your message...',
     'expert.loginRequired': 'Login Required',
     'expert.pleaseLogin': 'Please login to chat with experts',
-    
+
     // Expert Chat Navigation
     'expertChat.title': 'Expert Chat Consultation',
     'expertChat.description': 'Chat with agricultural experts',
@@ -602,7 +602,7 @@ const translations = {
     'expertChat.redirectingToCredits': 'Redirecting to AgriCreds...',
     'expertChat.expertInfo': 'Expert Information',
     'expertChat.costInfo': 'Cost Information',
-    
+
     // Common
     'common.now': 'Now',
     'common.view': 'View',

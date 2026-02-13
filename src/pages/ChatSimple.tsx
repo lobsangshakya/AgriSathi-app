@@ -25,7 +25,7 @@ import { cn } from "@/utils/utils";
 
 const ChatSimple = () => {
   const { language } = useLanguage();
-  const { user } = useUser();
+  const { user, locationData } = useUser();
   const [messages, setMessages] = useState<any[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [isTyping, setIsTyping] = useState(false);
@@ -52,18 +52,19 @@ const ChatSimple = () => {
 
     // Welcome message
     if (messages.length === 0) {
+      console.log('[ChatSimple] Initializing welcome message');
       const welcomeMessage = {
         id: 'welcome',
         content: language === 'hindi'
-          ? '🌾 नमस्ते किसान भाई! मैं आपका कृषि सहायक हूं। अपना सवाल पूछें।'
-          : '🌾 Hello! I am your farming assistant. Ask your question.',
+          ? ' नमस्ते किसान भाई! मैं आपका कृषि सहायक हूं। अपना सवाल पूछें।'
+          : ' Hello! I am your farming assistant. Ask your question.',
         sender: 'bot',
         timestamp: new Date(),
         type: 'text'
       };
       setMessages([welcomeMessage]);
     }
-  }, []);
+  }, [language, messages.length]); // Fixed dependencies
 
   const initializeSpeechRecognition = () => {
     if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
@@ -118,10 +119,14 @@ const ChatSimple = () => {
     })) as { role: 'user' | 'assistant', content: string }[];
 
     try {
+      console.log('[ChatSimple] Sending message to service:', newMessage);
       const response = await chatbotService.processMessage(newMessage, {
         language,
-        history
+        history,
+        location: locationData ? { latitude: locationData.latitude, longitude: locationData.longitude } : undefined
       });
+
+      console.log('[ChatSimple] Received response:', response.content.substring(0, 50) + '...');
 
       const botMessage = {
         id: (Date.now() + 1).toString(),
@@ -133,6 +138,7 @@ const ChatSimple = () => {
 
       setMessages(prev => [...prev, botMessage]);
     } catch (error) {
+      console.error('[ChatSimple] Error in handleSendMessage:', error);
       const errorMessage = {
         id: (Date.now() + 1).toString(),
         content: language === 'hindi'
@@ -284,8 +290,8 @@ const ChatSimple = () => {
                 const imageMessage = {
                   id: Date.now().toString(),
                   content: language === 'hindi'
-                    ? '📸 फसल की फोटो भेजी गई।'
-                    : '📸 Crop photo sent.',
+                    ? ' फसल की फोटो भेजी गई।'
+                    : ' Crop photo sent.',
                   sender: 'user',
                   timestamp: new Date(),
                   type: 'image'
@@ -351,8 +357,8 @@ const ChatSimple = () => {
 
             <div className="mt-2 text-xs text-gray-500 text-center">
               {language === 'hindi'
-                ? '💡 टिप: फसल की फोटो भेजकर बीमारी की पहचान कर सकते हैं'
-                : '💡 Tip: Send crop photos for disease detection'
+                ? ' टिप: फसल की फोटो भेजकर बीमारी की पहचान कर सकते हैं'
+                : ' Tip: Send crop photos for disease detection'
               }
             </div>
           </div>

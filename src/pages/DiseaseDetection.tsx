@@ -392,7 +392,7 @@ const DiseaseDetection = () => {
                 onClick={() => setShowCamera(false)}
                 className="p-2"
               >
-                ✕
+                
               </Button>
             </div>
             <div className="max-h-96 overflow-hidden rounded-lg">

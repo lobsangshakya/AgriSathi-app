@@ -318,7 +318,7 @@ const DiseaseDetectionSimple = () => {
                   <ul className="space-y-1">
                     {analysisResult.treatment.map((treatment, index) => (
                       <li key={index} className="text-sm text-gray-600 flex items-start gap-2">
-                        <span className="text-green-500 mt-1">✓</span>
+                        <span className="text-green-500 mt-1"></span>
                         {treatment}
                       </li>
                     ))}
