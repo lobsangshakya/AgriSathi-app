@@ -3,6 +3,8 @@
  * Handles real weather data with geolocation and OpenWeather API
  */
 
+import { env } from '@/lib/env';
+
 export interface WeatherData {
   location: string;
   temperature: number;
@@ -36,9 +38,9 @@ class WeatherService {
   private isDevelopment: boolean;
 
   constructor() {
-    this.apiKey = import.meta.env.VITE_OPENWEATHER_API_KEY || '';
+    this.apiKey = env.VITE_OPENWEATHER_API_KEY || '';
     this.baseUrl = 'https://api.openweathermap.org/data/2.5';
-    this.isDevelopment = import.meta.env.VITE_APP_ENV === 'development';
+    this.isDevelopment = env.VITE_APP_ENV === 'development';
 
     if (!this.apiKey) {
       // OpenWeather API key not found. Using mock data.
@@ -62,7 +64,7 @@ class WeatherService {
       navigator.geolocation.getCurrentPosition(
         (position) => {
           const { latitude, longitude } = position.coords;
-          
+
           // Reverse geocoding to get city name
           this.reverseGeocode(latitude, longitude)
             .then(location => resolve(location))
@@ -79,7 +81,7 @@ class WeatherService {
         (error) => {
           // Handle geolocation errors
           let fallbackLocation: LocationData;
-          
+
           switch (error.code) {
             case error.PERMISSION_DENIED:
               fallbackLocation = {
@@ -113,7 +115,7 @@ class WeatherService {
                 country: 'India'
               };
           }
-          
+
           resolve(fallbackLocation);
         },
         {
@@ -131,13 +133,13 @@ class WeatherService {
       const response = await fetch(
         `${this.baseUrl}/reverse?lat=${lat}&lon=${lon}&limit=1&appid=${this.apiKey}`
       );
-      
+
       if (!response.ok) {
         throw new Error('Geocoding failed');
       }
-      
+
       const data = await response.json();
-      
+
       if (data && data.length > 0) {
         return {
           latitude: lat,
@@ -146,7 +148,7 @@ class WeatherService {
           country: data[0].country || 'Unknown'
         };
       }
-      
+
       throw new Error('No location data found');
     } catch (error) {
       throw new Error('Reverse geocoding failed');
@@ -161,7 +163,7 @@ class WeatherService {
 
     try {
       let location = { lat, lon };
-      
+
       // If no coordinates provided, get current location
       if (!lat || !lon) {
         const currentLocation = await this.getCurrentLocation();
@@ -180,7 +182,7 @@ class WeatherService {
       }
 
       const data = await response.json();
-      
+
       // Get 5-day forecast
       const forecast = await this.getForecast(location.lat, location.lon);
 
@@ -216,17 +218,17 @@ class WeatherService {
       }
 
       const data = await response.json();
-      
+
       // Process forecast data (get one forecast per day)
       const dailyForecasts: ForecastDay[] = [];
       const processedDates = new Set();
-      
+
       for (const item of data.list) {
         const date = new Date(item.dt * 1000).toDateString();
-        
+
         if (!processedDates.has(date)) {
           processedDates.add(date);
-          
+
           dailyForecasts.push({
             date: new Date(item.dt * 1000).toLocaleDateString(),
             high: Math.round(item.main.temp_max),
@@ -236,7 +238,7 @@ class WeatherService {
             precipitation: item.pop ? Math.round(item.pop * 100) : 0
           });
         }
-        
+
         if (dailyForecasts.length >= 5) break;
       }
 
@@ -311,7 +313,7 @@ class WeatherService {
   // Get farming advice based on weather
   getFarmingAdvice(weather: WeatherData): string[] {
     const advice: string[] = [];
-    
+
     // Temperature-based advice
     if (weather.temperature > 35) {
       advice.push('🌡️ High temperature: Increase irrigation frequency and provide shade to sensitive crops');

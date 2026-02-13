@@ -3,6 +3,8 @@
  * Integrates with OpenAI and Gemini APIs with local fallback
  */
 
+import { env } from '@/lib/env';
+
 export interface ChatContext {
   language: 'hindi' | 'english';
   lastMessage?: string;
@@ -28,8 +30,8 @@ class ChatbotService {
   private geminiApiKey: string | null = null;
 
   constructor() {
-    this.openaiApiKey = import.meta.env.VITE_OPENAI_API_KEY || null;
-    this.geminiApiKey = import.meta.env.VITE_GEMINI_API_KEY || null;
+    this.openaiApiKey = env.VITE_OPENAI_API_KEY || null;
+    this.geminiApiKey = env.VITE_GEMINI_API_KEY || null;
   }
 
   private getLocalResponse(message: string, context: ChatContext): ChatResponse {
@@ -38,72 +40,72 @@ class ChatbotService {
 
     // Greeting responses
     if (this.isGreeting(lowerMessage)) {
-        return {
-            content: this.getGreetingResponse(language),
-            suggestions: [
-              language === 'hindi' ? 'आज का मौसम कैसा है?' : 'What is weather today?',
-              language === 'hindi' ? 'फसल की बीमारी कैसे पहचानें?' : 'How to identify crop diseases?',
-              language === 'hindi' ? 'गेहूं का भाव क्या है?' : 'What is the price of wheat?'
-            ]
-          };
+      return {
+        content: this.getGreetingResponse(language),
+        suggestions: [
+          language === 'hindi' ? 'आज का मौसम कैसा है?' : 'What is weather today?',
+          language === 'hindi' ? 'फसल की बीमारी कैसे पहचानें?' : 'How to identify crop diseases?',
+          language === 'hindi' ? 'गेहूं का भाव क्या है?' : 'What is the price of wheat?'
+        ]
+      };
     }
 
     // Weather queries
     if (this.isWeatherQuery(lowerMessage)) {
       return {
-            content: this.getWeatherResponse(language),
-            suggestions: [
-              language === 'hindi' ? 'बारिश कब होगी?' : 'When will it rain?',
-              language === 'hindi' ? 'तापमान कितना है?' : 'What is the temperature?'
-            ]
-          };
+        content: this.getWeatherResponse(language),
+        suggestions: [
+          language === 'hindi' ? 'बारिश कब होगी?' : 'When will it rain?',
+          language === 'hindi' ? 'तापमान कितना है?' : 'What is the temperature?'
+        ]
+      };
     }
 
     // Disease queries
     if (this.isDiseaseQuery(lowerMessage)) {
       return {
-            content: this.getDiseaseResponse(language),
-            suggestions: [
-              language === 'hindi' ? 'टमाटर की बीमारी' : 'Tomato diseases',
-              language === 'hindi' ? 'धान की बीमारी' : 'Rice diseases',
-              language === 'hindi' ? 'कीटनाशक कौन सा उपयोग करें?' : 'Which pesticide to use?'
-            ]
-          };
+        content: this.getDiseaseResponse(language),
+        suggestions: [
+          language === 'hindi' ? 'टमाटर की बीमारी' : 'Tomato diseases',
+          language === 'hindi' ? 'धान की बीमारी' : 'Rice diseases',
+          language === 'hindi' ? 'कीटनाशक कौन सा उपयोग करें?' : 'Which pesticide to use?'
+        ]
+      };
     }
 
     // Market queries
     if (this.isMarketQuery(lowerMessage)) {
       return {
-            content: this.getMarketResponse(language),
-            suggestions: [
-              language === 'hindi' ? 'गेहूं का भाव' : 'Wheat price',
-              language === 'hindi' ? 'चावल का भाव' : 'Rice price',
-              language === 'hindi' ? 'सब्जियों का भाव' : 'Vegetable prices'
-            ]
-          };
+        content: this.getMarketResponse(language),
+        suggestions: [
+          language === 'hindi' ? 'गेहूं का भाव' : 'Wheat price',
+          language === 'hindi' ? 'चावल का भाव' : 'Rice price',
+          language === 'hindi' ? 'सब्जियों का भाव' : 'Vegetable prices'
+        ]
+      };
     }
 
     // Fertilizer queries
     if (this.isFertilizerQuery(lowerMessage)) {
       return {
-            content: this.getFertilizerResponse(language),
-            suggestions: [
-              language === 'hindi' ? 'यूरिया का उपयोग' : 'Urea usage',
-              language === 'hindi' ? 'DAP कब लगाएं?' : 'When to apply DAP?',
-              language === 'hindi' ? 'जैविक खाद' : 'Organic fertilizer'
-            ]
-          };
+        content: this.getFertilizerResponse(language),
+        suggestions: [
+          language === 'hindi' ? 'यूरिया का उपयोग' : 'Urea usage',
+          language === 'hindi' ? 'DAP कब लगाएं?' : 'When to apply DAP?',
+          language === 'hindi' ? 'जैविक खाद' : 'Organic fertilizer'
+        ]
+      };
     }
 
     // Default response
     return {
-            content: this.getDefaultResponse(language),
-            suggestions: [
-              language === 'hindi' ? 'फसल संरक्षण' : 'Crop protection',
-              language === 'hindi' ? 'सिंचाई युक्तियाँ' : 'Irrigation tips',
-              language === 'hindi' ? 'बीज चयन' : 'Seed selection'
-            ]
-          };
+      content: this.getDefaultResponse(language),
+      suggestions: [
+        language === 'hindi' ? 'फसल संरक्षण' : 'Crop protection',
+        language === 'hindi' ? 'सिंचाई युक्तियाँ' : 'Irrigation tips',
+        language === 'hindi' ? 'बीज चयन' : 'Seed selection'
+      ]
+    };
   }
 
   private isGreeting(message: string): boolean {
@@ -132,7 +134,7 @@ class ChatbotService {
   }
 
   private getGreetingResponse(language: string): string {
-    return language === 'hindi' 
+    return language === 'hindi'
       ? '🌾 नमस्ते किसान भाई! मैं आपका कृषि सहायक हूं। मैं आपको फसलों, मौसम, बीमारियों, बाजार भाव और खाद के बारे में जानकारी दे सकता हूं। अपना सवाल पूछें।'
       : '🌾 Hello! I am your farming assistant. I can help you with information about crops, weather, diseases, market prices, and fertilizers. Ask your question.';
   }
@@ -175,11 +177,11 @@ class ChatbotService {
 
   private buildSystemPrompt(context: ChatContext): string {
     const language = context.language || 'english';
-    
+
     if (language === 'hindi') {
       return `आप एक कृषि विशेषज्ञ सहायक हैं। आप किसानों को फसलों, मौसम, बीमारियों, बाजार भाव, और खाद के बारे में सटीक जानकारी देते हैं। अपने जवाब हिंदी में दें और उपयोगी सुझाव भी दें।`;
     }
-    
+
     return `You are an agricultural expert assistant. You help farmers with accurate information about crops, weather, diseases, market prices, and fertilizers. Provide helpful and practical advice.`;
   }
 
@@ -216,7 +218,7 @@ class ChatbotService {
         try {
           const response = await Promise.race([
             this.callOpenAI(message, context),
-            new Promise<never>((_, reject) => setTimeout(() => reject(new Error('OpenAI timeout')), 10000)
+            new Promise<never>((_, reject) => setTimeout(() => reject(new Error('OpenAI timeout')), 10000))
           ]);
           if (response) {
             return response;
@@ -231,7 +233,7 @@ class ChatbotService {
         try {
           const response = await Promise.race([
             this.callGemini(message, context),
-            new Promise<never>((_, reject) => setTimeout(() => reject(new Error('Gemini timeout')), 10000)
+            new Promise<never>((_, reject) => setTimeout(() => reject(new Error('Gemini timeout')), 10000))
           ]);
           if (response) {
             return response;
@@ -361,12 +363,12 @@ class ChatbotService {
   addToHistory(sessionId: string, message: ChatMessage): void {
     const history = this.conversationHistory.get(sessionId) || [];
     history.push(message);
-    
+
     // Keep only last 20 messages
     if (history.length > 20) {
       history.splice(0, history.length - 20);
     }
-    
+
     this.conversationHistory.set(sessionId, history);
   }
 }
