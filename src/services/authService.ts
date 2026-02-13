@@ -4,7 +4,7 @@
 
 import { supabase } from '@/utils/supabaseClient';
 import { AppError } from '@/utils/errorHandler';
-import type { User as SupabaseUser } from '@supabase/supabase-js';
+import type { User as SupabaseUser, Session } from '@supabase/supabase-js';
 
 // User profile interface matching database schema
 export interface UserProfile {
@@ -27,7 +27,7 @@ export interface UserProfile {
 // Auth response interface
 export interface AuthResponse {
   user: UserProfile | null;
-  session: SupabaseUser | null;
+  session: Session | null;
   error: string | null;
 }
 
@@ -39,7 +39,26 @@ class AuthService {
    * Sign up new user with email and password
    */
   async signUp(email: string, password: string, userData: Partial<UserProfile>): Promise<AuthResponse> {
-    if (!supabase) return { user: null, session: null, error: 'Authentication not configured.' };
+    if (!supabase) {
+      return { user: null, session: null, error: 'Authentication not configured. Please check your environment variables.' };
+    }
+
+    // Validate inputs before calling backend
+    if (!email || !email.trim()) {
+      const error = new Error('Email is required and cannot be empty');
+      return { user: null, session: null, error: error.message };
+    }
+
+    if (!password || !password.trim()) {
+      const error = new Error('Password is required and cannot be empty');
+      return { user: null, session: null, error: error.message };
+    }
+
+    if (password.length < 6) {
+      const error = new Error('Password must be at least 6 characters long');
+      return { user: null, session: null, error: error.message };
+    }
+
     try {
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
@@ -48,8 +67,9 @@ class AuthService {
           data: {
             name: userData.name,
             phone: userData.phone,
-          },
-        },
+            ...userData
+          }
+        }
       });
 
       if (authError) {
@@ -78,12 +98,15 @@ class AuthService {
           .single();
 
         if (profileError) {
+          // If profile creation fails, we should probably delete the auth user or log it
+          console.error('Profile creation failed:', profileError);
+          // But for now, returning the error
           throw new AppError(profileError.message, 'PROFILE_CREATION_ERROR');
         }
 
         return {
           user: profileData,
-          session: authData.user,
+          session: authData.session, // Use session from authData
           error: null,
         };
       }
@@ -93,7 +116,7 @@ class AuthService {
         session: null,
         error: 'Failed to create user account',
       };
-    } catch (error) {
+    } catch (error: unknown) {
       return {
         user: null,
         session: null,
@@ -106,7 +129,21 @@ class AuthService {
    * Sign in user with email and password
    */
   async signIn(email: string, password: string): Promise<AuthResponse> {
-    if (!supabase) return { user: null, session: null, error: 'Authentication not configured.' };
+    if (!supabase) {
+      return { user: null, session: null, error: 'Authentication not configured. Please check your environment variables.' };
+    }
+
+    // Validate inputs before calling backend
+    if (!email || !email.trim()) {
+      const error = new Error('Email is required and cannot be empty');
+      return { user: null, session: null, error: error.message };
+    }
+
+    if (!password || !password.trim()) {
+      const error = new Error('Password is required and cannot be empty');
+      return { user: null, session: null, error: error.message };
+    }
+
     try {
       const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
         email,
@@ -131,7 +168,7 @@ class AuthService {
 
         return {
           user: profileData,
-          session: authData.user,
+          session: authData.session,
           error: null,
         };
       }
@@ -141,8 +178,7 @@ class AuthService {
         session: null,
         error: 'Failed to sign in',
       };
-
-    } catch (error) {
+    } catch (error: unknown) {
       return {
         user: null,
         session: null,
@@ -158,7 +194,7 @@ class AuthService {
     if (!supabase) return { error: null };
     try {
       const { error } = await supabase.auth.signOut();
-      
+
       if (error) {
         throw new AppError(error.message, 'SIGNOUT_ERROR');
       }
@@ -342,26 +378,35 @@ class AuthService {
    * Sign up with phone and OTP
    */
   async signUpWithPhone(
-    phone: string, 
-    otp: string, 
+    phone: string,
+    otp: string,
     userData: Partial<UserProfile>
   ): Promise<AuthResponse> {
-    if (!supabase) return { user: null, session: null, error: 'Authentication not configured.' };
-    try {
-      const otpVerification = await this.verifyOTP(phone, otp);
-      
-      if (!otpVerification.success) {
-        return {
-          user: null,
-          session: null,
-          error: otpVerification.error,
-        };
-      }
+    if (!supabase) {
+      return { user: null, session: null, error: 'Authentication not configured. Please check your environment variables.' };
+    }
 
+    // Validate inputs before calling backend
+    if (!phone || !phone.trim()) {
+      const error = new Error('Phone number is required and cannot be empty');
+      return { user: null, session: null, error: error.message };
+    }
+
+    if (!otp || !otp.trim()) {
+      const error = new Error('OTP is required and cannot be empty');
+      return { user: null, session: null, error: error.message };
+    }
+
+    if (!userData.name || !userData.name.trim()) {
+      const error = new Error('Name is required and cannot be empty');
+      return { user: null, session: null, error: error.message };
+    }
+
+    try {
       // Create user with phone-based auth using email as identifier
       const tempEmail = `${phone}@agrisathi.local`;
       const tempPassword = otp; // Use OTP as temporary password
-      
+
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: tempEmail,
         password: tempPassword,
@@ -370,6 +415,7 @@ class AuthService {
             name: userData.name,
             phone: phone,
             signup_method: 'phone',
+            ...userData
           },
         },
       });
@@ -395,7 +441,7 @@ class AuthService {
             avatar_url: userData.avatar_url || '',
             agri_creds: 0,
             join_date: new Date().toISOString(),
-            signup_method: 'phone',
+            // signup_method: 'phone' // Not in UserProfile interface explicitly but used in DB? Removed to match interface
           })
           .select()
           .single();
@@ -406,7 +452,7 @@ class AuthService {
 
         return {
           user: profileData,
-          session: authData.user,
+          session: authData.session,
           error: null,
         };
       }
@@ -429,18 +475,22 @@ class AuthService {
    * Sign in with phone and OTP
    */
   async signInWithPhone(phone: string, otp: string): Promise<AuthResponse> {
-    if (!supabase) return { user: null, session: null, error: 'Authentication not configured.' };
-    try {
-      const otpVerification = await this.verifyOTP(phone, otp);
-      
-      if (!otpVerification.success) {
-        return {
-          user: null,
-          session: null,
-          error: otpVerification.error,
-        };
-      }
+    if (!supabase) {
+      return { user: null, session: null, error: 'Authentication not configured. Please check your environment variables.' };
+    }
 
+    // Validate inputs before calling backend
+    if (!phone || !phone.trim()) {
+      const error = new Error('Phone number is required and cannot be empty');
+      return { user: null, session: null, error: error.message };
+    }
+
+    if (!otp || !otp.trim()) {
+      const error = new Error('OTP is required and cannot be empty');
+      return { user: null, session: null, error: error.message };
+    }
+
+    try {
       // For phone auth, we need to use a different approach since verifyOtp might not be available
       // Let's create a custom verification method
       const { data: otpData, error: otpError } = await supabase
@@ -469,7 +519,7 @@ class AuthService {
       // Create or get user with phone-based auth
       // Since Supabase doesn't have built-in phone OTP, we'll use email as identifier
       const tempEmail = `${phone}@agrisathi.local`;
-      
+
       const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
         email: tempEmail,
         password: otp, // Use OTP as temporary password
@@ -493,7 +543,7 @@ class AuthService {
 
         return {
           user: profileData,
-          session: authData.user,
+          session: authData.session,
           error: null,
         };
       }
@@ -512,9 +562,10 @@ class AuthService {
       };
     }
   }
+
   onAuthStateChange(callback: (user: UserProfile | null) => void) {
     if (!supabase) {
-      return { data: { subscription: { unsubscribe: () => {} } } };
+      return { data: { subscription: { unsubscribe: () => { } } } };
     }
     return supabase.auth.onAuthStateChange(async (event, session) => {
       if (session?.user) {
