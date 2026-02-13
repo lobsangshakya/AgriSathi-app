@@ -9,12 +9,12 @@ import { useUser } from "@/contexts/UserContext";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { 
-  Send, 
-  Bot, 
-  User, 
-  Mic, 
-  MicOff, 
+import {
+  Send,
+  Bot,
+  User,
+  Mic,
+  MicOff,
   Camera,
   MessageSquare
 } from "lucide-react";
@@ -49,12 +49,12 @@ const ChatSimple = () => {
 
   useEffect(() => {
     initializeSpeechRecognition();
-    
+
     // Welcome message
     if (messages.length === 0) {
       const welcomeMessage = {
         id: 'welcome',
-        content: language === 'hindi' 
+        content: language === 'hindi'
           ? '🌾 नमस्ते किसान भाई! मैं आपका कृषि सहायक हूं। अपना सवाल पूछें।'
           : '🌾 Hello! I am your farming assistant. Ask your question.',
         sender: 'bot',
@@ -83,8 +83,8 @@ const ChatSimple = () => {
         setIsListening(false);
         toast({
           title: language === 'hindi' ? 'आवाज़ समस्या' : 'Voice Issue',
-          description: language === 'hindi' 
-            ? 'फिर से कोशिश करें' 
+          description: language === 'hindi'
+            ? 'फिर से कोशिश करें'
             : 'Please try again',
           variant: 'destructive',
         });
@@ -111,9 +111,18 @@ const ChatSimple = () => {
     setNewMessage('');
     setIsTyping(true);
 
+    // Format history for the chatbot service
+    const history = messages.map(msg => ({
+      role: msg.sender === 'user' ? 'user' : 'assistant',
+      content: msg.content
+    })) as { role: 'user' | 'assistant', content: string }[];
+
     try {
-      const response = await chatbotService.processMessage(newMessage, { language });
-      
+      const response = await chatbotService.processMessage(newMessage, {
+        language,
+        history
+      });
+
       const botMessage = {
         id: (Date.now() + 1).toString(),
         content: response.content,
@@ -126,8 +135,8 @@ const ChatSimple = () => {
     } catch (error) {
       const errorMessage = {
         id: (Date.now() + 1).toString(),
-        content: language === 'hindi' 
-          ? 'क्षमा करें, समस्या हुई। फिर से कोशिश करें।' 
+        content: language === 'hindi'
+          ? 'क्षमा करें, समस्या हुई। फिर से कोशिश करें।'
           : 'Sorry, there was a problem. Please try again.',
         sender: 'bot',
         timestamp: new Date(),
@@ -143,8 +152,8 @@ const ChatSimple = () => {
     if (!recognitionRef.current) {
       toast({
         title: language === 'hindi' ? 'आवाज़ उपलब्ध नहीं' : 'Voice Not Available',
-        description: language === 'hindi' 
-          ? 'आपके ब्राउज़र में आवाज़ सुविधा नहीं है' 
+        description: language === 'hindi'
+          ? 'आपके ब्राउज़र में आवाज़ सुविधा नहीं है'
           : 'Voice feature is not available in your browser',
         variant: 'destructive',
       });
@@ -248,7 +257,7 @@ const ChatSimple = () => {
               </div>
             </div>
           ))}
-          
+
           {isTyping && (
             <div className="flex justify-start">
               <div className="bg-white border border-gray-200 rounded-2xl px-4 py-3">
@@ -274,8 +283,8 @@ const ChatSimple = () => {
               onImageCapture={(imageData: string) => {
                 const imageMessage = {
                   id: Date.now().toString(),
-                  content: language === 'hindi' 
-                    ? '📸 फसल की फोटो भेजी गई।' 
+                  content: language === 'hindi'
+                    ? '📸 फसल की फोटो भेजी गई।'
                     : '📸 Crop photo sent.',
                   sender: 'user',
                   timestamp: new Date(),
@@ -306,8 +315,8 @@ const ChatSimple = () => {
                 <Input
                   value={newMessage}
                   onChange={(e) => setNewMessage(e.target.value)}
-                  placeholder={language === 'hindi' 
-                    ? 'अपना सवाल यहाँ लिखें...' 
+                  placeholder={language === 'hindi'
+                    ? 'अपना सवाल यहाँ लिखें...'
                     : 'Type your question here...'
                   }
                   className="pr-12"
@@ -341,8 +350,8 @@ const ChatSimple = () => {
             </div>
 
             <div className="mt-2 text-xs text-gray-500 text-center">
-              {language === 'hindi' 
-                ? '💡 टिप: फसल की फोटो भेजकर बीमारी की पहचान कर सकते हैं' 
+              {language === 'hindi'
+                ? '💡 टिप: फसल की फोटो भेजकर बीमारी की पहचान कर सकते हैं'
                 : '💡 Tip: Send crop photos for disease detection'
               }
             </div>
