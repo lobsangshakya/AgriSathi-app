@@ -4,9 +4,10 @@
  */
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { authService, UserProfile } from '@/services/authService';
+import { authWrapper, UnifiedUserProfile } from '@/services/authServiceWrapper';
 import { toast } from '@/hooks/use-toast';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { env } from '@/lib/env';
 
 export interface Achievement {
   title: string;
@@ -71,8 +72,8 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
   const [isLoading, setIsLoading] = useState(true);
   const { language, t } = useLanguage();
 
-  // Convert UserProfile to User format
-  const convertToUser = (profile: UserProfile): User => {
+  // Convert UnifiedUserProfile to User format
+  const convertToUser = (profile: UnifiedUserProfile): User => {
     return {
       id: profile.id,
       name: profile.name,
@@ -83,7 +84,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
       landSize: profile.landSize || 'Not specified',
       experience: profile.experience || 'Not specified',
       agriCreds: 100, // Default credits
-      joinDate: new Date(profile.created_at).toLocaleDateString(),
+      joinDate: new Date(profile.joinDate).toLocaleDateString(),
       language: profile.language,
       crops: profile.crops,
       stats: {
@@ -100,15 +101,13 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
   useEffect(() => {
     const initializeUser = async () => {
       try {
-        const currentUser = await authService.getCurrentUser();
+        const currentUser = await authWrapper.getCurrentUser();
         if (currentUser) {
-          const profile = await authService.getUserProfile(currentUser.id);
-          if (profile) {
-            setUser(convertToUser(profile));
-          }
+          // In authWrapper, getCurrentUser returns the unified profile directly
+          setUser(convertToUser(currentUser));
         }
       } catch (error) {
-        // Silently handle initialization errors
+        console.error('User initialization failed:', error);
       } finally {
         setIsLoading(false);
       }
@@ -117,12 +116,10 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     initializeUser();
 
     // Listen to auth state changes
-    const { data: { subscription } } = authService.onAuthStateChange(async (authUser) => {
+    const { data: { subscription } } = authWrapper.onAuthStateChange(async (authUser) => {
       if (authUser) {
-        const profile = await authService.getUserProfile(authUser.id);
-        if (profile) {
-          setUser(convertToUser(profile));
-        }
+        // authWrapper returns the profile directly
+        setUser(convertToUser(authUser));
       } else {
         setUser(null);
       }
@@ -137,16 +134,16 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
       setIsLoading(true);
-      const result = await authService.signIn(email, password);
-      
-      if (result.success && result.user && result.profile) {
-        setUser(convertToUser(result.profile));
-        
+      const result = await authWrapper.signIn(email, password);
+
+      if (result.user) {
+        setUser(convertToUser(result.user));
+
         toast({
           title: t('auth.loginSuccess') || 'Login Successful',
-          description: t('auth.welcomeBack') || `Welcome back, ${result.profile.name}!`,
+          description: t('auth.welcomeBack') || `Welcome back, ${result.user.name}!`,
         });
-        
+
         return true;
       } else {
         toast({
@@ -171,16 +168,16 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
   const signUp = async (email: string, password: string, userData: Partial<User>): Promise<boolean> => {
     try {
       setIsLoading(true);
-      const result = await authService.signUp(email, password, userData);
-      
-      if (result.success && result.user && result.profile) {
-        setUser(convertToUser(result.profile));
-        
+      const result = await authWrapper.signUp(email, password, userData);
+
+      if (result.user) {
+        setUser(convertToUser(result.user));
+
         toast({
           title: t('auth.signupSuccess') || 'Account Created',
-          description: t('auth.welcome') || `Welcome to AgriSathi, ${result.profile.name}!`,
+          description: t('auth.welcome') || `Welcome to AgriSathi, ${result.user.name}!`,
         });
-        
+
         return true;
       } else {
         toast({
@@ -205,16 +202,16 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
   const signInWithPhone = async (phone: string, otp: string): Promise<boolean> => {
     try {
       setIsLoading(true);
-      const result = await authService.verifyPhoneOTP(phone, otp);
-      
-      if (result.success && result.user && result.profile) {
-        setUser(convertToUser(result.profile));
-        
+      const result = await authWrapper.signInWithPhone(phone, otp);
+
+      if (result.user) {
+        setUser(convertToUser(result.user));
+
         toast({
           title: t('auth.loginSuccess') || 'Login Successful',
-          description: t('auth.welcomeBack') || `Welcome back, ${result.profile.name}!`,
+          description: t('auth.welcomeBack') || `Welcome back, ${result.user.name}!`,
         });
-        
+
         return true;
       } else {
         toast({
@@ -237,18 +234,47 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
   };
 
   const signUpWithPhone = async (phone: string, name: string, otp: string): Promise<boolean> => {
-    // For phone signup, we use the same OTP verification flow
-    return signInWithPhone(phone, otp);
+    try {
+      setIsLoading(true);
+      const result = await authWrapper.signUpWithPhone(phone, otp, { name, phone });
+
+      if (result.user) {
+        setUser(convertToUser(result.user));
+
+        toast({
+          title: t('auth.signupSuccess') || 'Account Created',
+          description: t('auth.welcome') || `Welcome to AgriSathi, ${result.user.name}!`,
+        });
+
+        return true;
+      } else {
+        toast({
+          title: t('auth.signupFailed') || 'Sign Up Failed',
+          description: result.error || 'Failed to create account',
+          variant: 'destructive',
+        });
+        return false;
+      }
+    } catch (error) {
+      toast({
+        title: t('auth.error') || 'Error',
+        description: t('auth.signupError') || 'Sign up failed. Please try again.',
+        variant: 'destructive',
+      });
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const sendOTP = async (phone: string): Promise<boolean> => {
     try {
-      const result = await authService.signInWithPhone(phone);
-      
+      const result = await authWrapper.sendOTP(phone);
+
       if (result.success) {
         toast({
           title: t('auth.otpSent') || 'OTP Sent',
-          description: result.message || 'OTP has been sent to your phone number',
+          description: 'OTP has been sent to your phone number' + (env.DEV ? ' (Check console for code)' : ''),
         });
         return true;
       } else {
@@ -271,11 +297,11 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
 
   const logout = async (): Promise<void> => {
     try {
-      const result = await authService.signOut();
-      
-      if (result.success) {
+      const result = await authWrapper.signOut();
+
+      if (!result.error) {
         setUser(null);
-        
+
         toast({
           title: t('auth.logoutSuccess') || 'Logged Out',
           description: t('auth.logoutMessage') || 'You have been logged out successfully',
@@ -302,7 +328,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         ...prev,
         agriCreds: prev.agriCreds + amount,
       } : null);
-      
+
       toast({
         title: t('credits.earned') || 'Credits Earned',
         description: `${amount} credits earned: ${reason}`,
@@ -328,18 +354,18 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
 
   const updateUserProfile = async (updates: Partial<User>): Promise<boolean> => {
     if (!user) return false;
-    
+
     try {
-      const result = await authService.updateProfile(user.id, updates);
-      
-      if (result.success && result.profile) {
-        setUser(convertToUser(result.profile));
-        
+      const result = await authWrapper.updateProfile(updates);
+
+      if (result.user) {
+        setUser(convertToUser(result.user));
+
         toast({
           title: t('profile.updated') || 'Profile Updated',
           description: t('profile.updateSuccess') || 'Your profile has been updated successfully',
         });
-        
+
         return true;
       } else {
         toast({
@@ -361,12 +387,9 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
 
   const refreshUser = async (): Promise<void> => {
     try {
-      const currentUser = await authService.getCurrentUser();
+      const currentUser = await authWrapper.getCurrentUser();
       if (currentUser) {
-        const profile = await authService.getUserProfile(currentUser.id);
-        if (profile) {
-          setUser(convertToUser(profile));
-        }
+        setUser(convertToUser(currentUser));
       }
     } catch (error) {
       // Silently handle refresh errors

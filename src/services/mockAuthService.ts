@@ -184,7 +184,7 @@ class MockAuthService {
 
       const { user, session } = JSON.parse(sessionData);
       const userIndex = this.users.findIndex(u => u.id === user.id);
-      
+
       if (userIndex === -1) {
         return {
           user: null,
@@ -220,7 +220,7 @@ class MockAuthService {
     try {
       // Generate 6-digit OTP
       const otp = Math.floor(100000 + Math.random() * 900000).toString();
-      
+
       // Store OTP in localStorage for verification
       localStorage.setItem(`otp_${phone}`, JSON.stringify({
         otp,
@@ -229,7 +229,11 @@ class MockAuthService {
 
       // Send OTP via SMS service
       const smsResult = await smsService.sendOTP(phone, otp);
-      
+
+
+      // Log OTP for development
+      console.log(`[DEV] OTP for ${phone}: ${otp}`);
+
       if (smsResult.success) {
         return {
           success: true,
@@ -263,7 +267,7 @@ class MockAuthService {
       }
 
       const { otp: storedOtp, expiresAt } = JSON.parse(otpData);
-      
+
       if (new Date() > new Date(expiresAt)) {
         localStorage.removeItem(`otp_${phone}`);
         return {

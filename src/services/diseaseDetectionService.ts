@@ -3,6 +3,8 @@
  * Handles real plant disease detection using Plant.id API
  */
 
+import { env } from '@/lib/env';
+
 export interface DiseaseDetectionResult {
   disease: string;
   scientificName: string;
@@ -29,9 +31,10 @@ class DiseaseDetectionService {
   private isDevelopment: boolean;
 
   constructor() {
-    this.plantApiKey = import.meta.env.VITE_PLANT_ID_API_KEY || '';
+    this.plantApiKey = env.VITE_PLANT_ID_API_KEY || '';
+    // Hugging Face key not in env schema, checking if it's used elsewhere or if I should add it to schema. 
     this.huggingFaceApiKey = import.meta.env.VITE_HUGGINGFACE_API_KEY || '';
-    this.isDevelopment = import.meta.env.VITE_APP_ENV === 'development';
+    this.isDevelopment = env.VITE_APP_ENV === 'development';
 
     if (!this.plantApiKey && !this.huggingFaceApiKey) {
       // No disease detection API keys found. Using mock data.
@@ -84,7 +87,7 @@ class DiseaseDetectionService {
     try {
       const formData = new FormData();
       formData.append('images', imageFile);
-      
+
       // Add additional parameters for better results
       formData.append('organs', 'leaf'); // Focus on leaf diseases
       formData.append('diseases', 'true'); // Enable disease detection
@@ -106,7 +109,7 @@ class DiseaseDetectionService {
 
       if (data.suggestions && data.suggestions.length > 0) {
         const topSuggestion = data.suggestions[0];
-        
+
         return {
           success: true,
           result: {
@@ -163,7 +166,7 @@ class DiseaseDetectionService {
 
       if (data && data.length > 0) {
         const topPrediction = data[0];
-        
+
         return {
           success: true,
           result: {

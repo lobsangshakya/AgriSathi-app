@@ -10,14 +10,14 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
-import { 
-  X, 
-  Mail, 
-  Phone, 
-  User, 
-  Lock, 
-  Eye, 
-  EyeOff, 
+import {
+  X,
+  Mail,
+  Phone,
+  User,
+  Lock,
+  Eye,
+  EyeOff,
   Loader2
 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
@@ -121,12 +121,10 @@ const AuthModalSimple = ({ isOpen, onClose, initialView = 'login' }: AuthModalSi
       const success = await sendOTP(phoneWithCode);
       if (success) {
         setOtpSent(true);
-        toast({
-          title: language === 'hindi' ? 'OTP भेजा गया' : 'OTP Sent',
-          description: language === 'hindi' ? 'अपना OTP दर्ज करें' : 'Enter the OTP you received',
-        });
+        // Toast handled by UserContext
       }
     } catch {
+      // Error handling is also partially done in UserContext but good to keep fallback UI error state or catch unexpected
       toast({
         title: language === 'hindi' ? 'गलती' : 'Error',
         description: language === 'hindi' ? 'OTP भेजने में समस्या' : 'Failed to send OTP',
@@ -239,7 +237,7 @@ const AuthModalSimple = ({ isOpen, onClose, initialView = 'login' }: AuthModalSi
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b">
           <h2 className="text-xl font-bold text-gray-900">
-            {isSignUp 
+            {isSignUp
               ? (language === 'hindi' ? 'खाता बनाएं' : 'Sign Up')
               : (language === 'hindi' ? 'लॉगिन करें' : 'Login')
             }
@@ -256,8 +254,8 @@ const AuthModalSimple = ({ isOpen, onClose, initialView = 'login' }: AuthModalSi
               onClick={() => switchAuthMethod('email')}
               className={cn(
                 "flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors",
-                authMethod === 'email' 
-                  ? 'bg-white text-gray-900 shadow-sm' 
+                authMethod === 'email'
+                  ? 'bg-white text-gray-900 shadow-sm'
                   : 'text-gray-600 hover:text-gray-900'
               )}
             >
@@ -268,8 +266,8 @@ const AuthModalSimple = ({ isOpen, onClose, initialView = 'login' }: AuthModalSi
               onClick={() => switchAuthMethod('phone')}
               className={cn(
                 "flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors",
-                authMethod === 'phone' 
-                  ? 'bg-white text-gray-900 shadow-sm' 
+                authMethod === 'phone'
+                  ? 'bg-white text-gray-900 shadow-sm'
                   : 'text-gray-600 hover:text-gray-900'
               )}
             >
@@ -382,135 +380,135 @@ const AuthModalSimple = ({ isOpen, onClose, initialView = 'login' }: AuthModalSi
               )}
             </>
           ) : (
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {isSignUp && (
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {isSignUp && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    {language === 'hindi' ? 'पूरा नाम' : 'Full Name'}
+                  </label>
+                  <div className="relative">
+                    <User className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                    <Input
+                      type="text"
+                      placeholder={language === 'hindi' ? 'अपना नाम दर्ज करें' : 'Enter your name'}
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      className="pl-10"
+                      disabled={isSubmitting || isLoading}
+                    />
+                  </div>
+                </div>
+              )}
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  {language === 'hindi' ? 'पूरा नाम' : 'Full Name'}
+                  {language === 'hindi' ? 'ईमेल पता' : 'Email Address'}
                 </label>
                 <div className="relative">
-                  <User className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                  <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                   <Input
-                    type="text"
-                    placeholder={language === 'hindi' ? 'अपना नाम दर्ज करें' : 'Enter your name'}
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
+                    type="email"
+                    placeholder={language === 'hindi' ? 'अपना ईमेल दर्ज करें' : 'Enter your email'}
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                     className="pl-10"
                     disabled={isSubmitting || isLoading}
                   />
                 </div>
               </div>
-            )}
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                {language === 'hindi' ? 'ईमेल पता' : 'Email Address'}
-              </label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                <Input
-                  type="email"
-                  placeholder={language === 'hindi' ? 'अपना ईमेल दर्ज करें' : 'Enter your email'}
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="pl-10"
-                  disabled={isSubmitting || isLoading}
-                />
-              </div>
-            </div>
+              {isSignUp && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    {language === 'hindi' ? 'फोन नंबर' : 'Phone Number'}
+                  </label>
+                  <Input
+                    type="tel"
+                    placeholder={language === 'hindi' ? '+91 98765 43210' : '+91 9876543210'}
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    disabled={isSubmitting || isLoading}
+                  />
+                </div>
+              )}
 
-            {isSignUp && (
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  {language === 'hindi' ? 'फोन नंबर' : 'Phone Number'}
-                </label>
-                <Input
-                  type="tel"
-                  placeholder={language === 'hindi' ? '+91 98765 43210' : '+91 9876543210'}
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  disabled={isSubmitting || isLoading}
-                />
-              </div>
-            )}
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                {language === 'hindi' ? 'पासवर्ड' : 'Password'}
-              </label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                <Input
-                  type={showPassword ? 'text' : 'password'}
-                  placeholder={language === 'hindi' ? 'अपना पासवर्ड दर्ज करें' : 'Enter your password'}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="pl-10 pr-10"
-                  disabled={isSubmitting || isLoading}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-3 text-gray-400 hover:text-gray-600"
-                  disabled={isSubmitting || isLoading}
-                >
-                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </button>
-              </div>
-            </div>
-
-            {isSignUp && (
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  {language === 'hindi' ? 'पासवर्ड की पुष्टि करें' : 'Confirm Password'}
+                  {language === 'hindi' ? 'पासवर्ड' : 'Password'}
                 </label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                   <Input
-                    type={showConfirmPassword ? 'text' : 'password'}
-                    placeholder={language === 'hindi' ? 'पासवर्ड फिर से दर्ज करें' : 'Re-enter your password'}
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    type={showPassword ? 'text' : 'password'}
+                    placeholder={language === 'hindi' ? 'अपना पासवर्ड दर्ज करें' : 'Enter your password'}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
                     className="pl-10 pr-10"
                     disabled={isSubmitting || isLoading}
                   />
                   <button
                     type="button"
-                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-3 top-3 text-gray-400 hover:text-gray-600"
                     disabled={isSubmitting || isLoading}
                   >
-                    {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
                 </div>
               </div>
-            )}
 
-            <Button
-              type="submit"
-              className="w-full py-3 bg-green-600 hover:bg-green-700"
-              disabled={isSubmitting || isLoading}
-            >
-              {isSubmitting || isLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  {isSignUp
-                    ? (language === 'hindi' ? 'खाता बनाया जा रहा है...' : 'Creating account...')
-                    : (language === 'hindi' ? 'लॉगिन हो रहा है...' : 'Signing in...')}
-                </>
-              ) : (
-                isSignUp
-                  ? (language === 'hindi' ? 'खाता बनाएं' : 'Create Account')
-                  : (language === 'hindi' ? 'लॉगिन करें' : 'Sign In')
+              {isSignUp && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    {language === 'hindi' ? 'पासवर्ड की पुष्टि करें' : 'Confirm Password'}
+                  </label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                    <Input
+                      type={showConfirmPassword ? 'text' : 'password'}
+                      placeholder={language === 'hindi' ? 'पासवर्ड फिर से दर्ज करें' : 'Re-enter your password'}
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      className="pl-10 pr-10"
+                      disabled={isSubmitting || isLoading}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      className="absolute right-3 top-3 text-gray-400 hover:text-gray-600"
+                      disabled={isSubmitting || isLoading}
+                    >
+                      {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </button>
+                  </div>
+                </div>
               )}
-            </Button>
-          </form>
+
+              <Button
+                type="submit"
+                className="w-full py-3 bg-green-600 hover:bg-green-700"
+                disabled={isSubmitting || isLoading}
+              >
+                {isSubmitting || isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    {isSignUp
+                      ? (language === 'hindi' ? 'खाता बनाया जा रहा है...' : 'Creating account...')
+                      : (language === 'hindi' ? 'लॉगिन हो रहा है...' : 'Signing in...')}
+                  </>
+                ) : (
+                  isSignUp
+                    ? (language === 'hindi' ? 'खाता बनाएं' : 'Create Account')
+                    : (language === 'hindi' ? 'लॉगिन करें' : 'Sign In')
+                )}
+              </Button>
+            </form>
           )}
 
           {/* Toggle Login/Signup */}
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-600">
-              {isSignUp 
+              {isSignUp
                 ? (language === 'hindi' ? 'पहले से ही खाता है?' : 'Already have an account?')
                 : (language === 'hindi' ? 'खाता नहीं है?' : "Don't have an account?")
               }
@@ -519,7 +517,7 @@ const AuthModalSimple = ({ isOpen, onClose, initialView = 'login' }: AuthModalSi
                 onClick={switchView}
                 className="ml-1 text-blue-600 hover:text-blue-700 font-medium"
               >
-                {isSignUp 
+                {isSignUp
                   ? (language === 'hindi' ? 'लॉगिन करें' : 'Sign In')
                   : (language === 'hindi' ? 'खाता बनाएं' : 'Sign Up')
                 }
