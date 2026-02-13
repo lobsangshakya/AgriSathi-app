@@ -256,38 +256,38 @@ const mockChatResponses = {
     "गेहूं": "गेहूं की खेती के लिए विस्तृत गाइड:\n\nबुआई का समय: नवंबर-दिसंबर\nमिट्टी: दोमट से भारी दोमट\nसिंचाई: 3-4 बार (बुआई, टिलरिंग, फूल आने पर)\nखाद: यूरिया 120kg/हेक्टेयर\nकीट नियंत्रण: इमिडाक्लोप्रिड का छिड़काव\nउपज: 40-50 क्विंटल/हेक्टेयर\nसावधानी: बीज उपचार करें, फसल चक्र अपनाएं",
     "धान": "धान की खेती के लिए विस्तृत गाइड:\n\nबुआई का समय: जून-जुलाई (खरीफ)\nमिट्टी: चिकनी दोमट\nसिंचाई: लगातार पानी की आवश्यकता\nखाद: NPK 120:60:60 kg/ha\nकीट नियंत्रण: कार्बोफ्यूरान का उपयोग\nउपज: 25-30 क्विंटल/हेक्टेयर\nसावधानी: नर्सरी में बीज उपचार, जल प्रबंधन",
     "मक्का": "मक्का की खेती के लिए विस्तृत गाइड:\n\nबुआई का समय: जून-जुलाई या फरवरी-मार्च\nमिट्टी: दोमट मिट्टी\nसिंचाई: हल्की और नियमित\nखाद: NPK 150:75:75 kg/ha\nकीट नियंत्रण: क्लोरपायरीफॉस का छिड़काव\nउपज: 35-40 क्विंटल/हेक्टेयर\nसावधानी: बीज उपचार, कीट नियंत्रण",
-    
+
     // Weather and Climate
     "मौसम": "आज का मौसम कृषि के लिए अनुकूल है:\n\nतापमान: 25-30°C\nआर्द्रता: 65-75%\nहवा: 8-12 km/h\nबारिश: हल्की बारिश की संभावना\nसुझाव: फसलों की सिंचाई कम करें और कीट नियंत्रण के लिए तैयार रहें",
-    
+
     // Fertilizers and Nutrients
     "खाद": "फसल के अनुसार खाद की मात्रा:\n\nधान: NPK 120:60:60 kg/ha\nगेहूं: NPK 120:60:40 kg/ha\nमक्का: NPK 150:75:75 kg/ha\nसोयाबीन: NPK 20:80:40 kg/ha\nटमाटर: NPK 120:60:60 kg/ha\n\nजैविक खाद:\nगोबर की खाद: 10-15 टन/हेक्टेयर\nवर्मीकम्पोस्ट: 5-7 टन/हेक्टेयर\nनीम खली: 250-500 kg/हेक्टेयर\n\nसुझाव: खाद बुआई के समय और टॉप ड्रेसिंग में दें",
-    
+
     // Pest Control
     "कीट": "कीट नियंत्रण के प्राकृतिक तरीके:\n\nनीम तेल: 2ml/लीटर पानी में मिलाकर छिड़काव\nगोमूत्र: 10% घोल बनाकर छिड़काव\nलहसुन-मिर्च का घोल: प्राकृतिक कीटनाशक\nमेहंदी का पत्ता: कीट प्रतिरोधक\n\nसावधानी: रासायनिक कीटनाशक का कम उपयोग करें",
-    
+
     // Disease Management
     "रोग": "फसल रोग प्रबंधन:\n\nपत्ती का धब्बा: कॉपर ऑक्सीक्लोराइड का छिड़काव\nजड़ सड़न: जल निकासी में सुधार\nपाउडरी मिल्ड्यू: सल्फर का छिड़काव\nब्लास्ट रोग: ट्रायसाइक्लाजोल का उपयोग\n\nसुझाव: रोग प्रतिरोधी किस्में बोएं",
-    
+
     // Irrigation
     "सिंचाई": "सिंचाई के तरीके:\n\nफ्लड इरिगेशन: पारंपरिक तरीका\nड्रिप इरिगेशन: 40-60% पानी की बचत\nस्प्रिंकलर: समान पानी का वितरण\nफरो इरिगेशन: पंक्ति फसलों के लिए\n\nलाभ: ड्रिप इरिगेशन से पानी और खाद की बचत",
-    
+
     // Organic Farming
     "जैविक": "जैविक खेती के लाभ:\n\nजैविक खाद: गोबर, वर्मीकम्पोस्ट\nनीम खली: प्राकृतिक कीटनाशक\nजीवामृत: मिट्टी की उर्वरता बढ़ाता है\nबीजामृत: बीज उपचार के लिए\n\nलाभ: कम लागत, अधिक लाभ, स्वस्थ फसल",
-    
+
     // Market Prices
     "बाजार": "आज के बाजार भाव:\n\nगेहूं: ₹2,200-2,400/क्विंटल\nधान: ₹1,800-2,000/क्विंटल\nमक्का: ₹1,500-1,700/क्विंटल\nटमाटर: ₹40-60/किलो\nसोयाबीन: ₹3,500-3,800/क्विंटल\n\nसुझाव: MSP पर बेचने से अधिक लाभ",
-    
+
     // Seed Treatment
     "बीज": "बीज उपचार के तरीके:\n\nबीजामृत: जैविक बीज उपचार\nट्राइकोडर्मा: फंगल रोग से बचाव\nबाविस्टिन: रासायनिक बीज उपचार\nगर्म पानी: 50°C पर 30 मिनट\n\nसुझाव: बीज उपचार से 20-30% अधिक उपज",
-    
+
     // Soil Health
     "मिट्टी": "मिट्टी की जांच और सुधार:\n\npH मान: 6.5-7.5 उपयुक्त\nजैविक कार्बन: 0.5% से अधिक होना चाहिए\nजीवाणु: मिट्टी में लाभदायक जीवाणु\nजल धारण क्षमता: बढ़ाने के लिए जैविक खाद\n\nसुझाव: हर 3 साल में मिट्टी की जांच कराएं",
-    
+
     // Government Schemes
     "योजना": "किसानों के लिए सरकारी योजनाएं:\n\nPM-KISAN: ₹6,000/वर्ष\nPMFBY: फसल बीमा योजना\nPMKSY: सिंचाई योजना\nPMFME: खाद्य प्रसंस्करण\n\nजानकारी: कृषि विभाग से संपर्क करें",
-    
-        "default": "नमस्ते! मैं AgriSaathi AI हूं। आपकी खेती संबंधी किसी भी समस्या में मदद कर सकता हूं।\n\nआप इन विषयों पर पूछ सकते हैं:\n• फसल (टमाटर, गेहूं, धान, मक्का)\n• मौसम और जलवायु\n• खाद और पोषण\n• कीट और रोग नियंत्रण\n• सिंचाई तरीके\n• जैविक खेती\n• बाजार भाव\n• सरकारी योजनाएं\n\nतस्वीर भेजकर रोग की पहचान भी कर सकते हैं!"
+
+    "default": "नमस्ते! मैं AgriSaathi AI हूं। आपकी खेती संबंधी किसी भी समस्या में मदद कर सकता हूं।\n\nआप इन विषयों पर पूछ सकते हैं:\n• फसल (टमाटर, गेहूं, धान, मक्का)\n• मौसम और जलवायु\n• खाद और पोषण\n• कीट और रोग नियंत्रण\n• सिंचाई तरीके\n• जैविक खेती\n• बाजार भाव\n• सरकारी योजनाएं\n\nतस्वीर भेजकर रोग की पहचान भी कर सकते हैं!"
   },
   english: {
     // Crops
@@ -295,45 +295,45 @@ const mockChatResponses = {
     "wheat": "Wheat Farming Guide:\n\nSowing Time: November-December\nSoil: Loamy to heavy loamy\nIrrigation: 3-4 times (sowing, tillering, flowering)\nFertilizer: Urea 120kg/hectare\nPest Control: Spray imidacloprid\nYield: 4000-5000 kilograms/hectare\nPrecautions: Treat seeds, follow crop rotation",
     "rice": "Rice Farming Information:\n\nSowing: June-July (Kharif)\nSoil: Clay loam\nIrrigation: Continuous water requirement\nFertilizer: NPK 120:60:60 kg/ha\nPest Control: Use carbofuran\nYield: 2500-3000 kilograms/hectare\nPrecautions: Seed treatment in nursery, water management",
     "maize": "Maize Farming Tips:\n\nSowing: June-July or February-March\nSoil: Loamy soil\nIrrigation: Light and regular\nFertilizer: NPK 150:75:75 kg/ha\nPest Control: Spray chlorpyrifos\nYield: 3500-4000 kilograms/hectare\nPrecautions: Seed treatment, pest control",
-    
+
     // Weather and Climate
     "weather": "Today's weather is favorable for agriculture:\n\nTemperature: 25-30°C\nHumidity: 65-75%\nWind: 8-12 km/h\nRain: Light rain expected\nSuggestion: Reduce crop irrigation and be prepared for pest control",
-    
+
     // Fertilizers and Nutrients
     "fertilizer": "Fertilizer quantity by crop:\n\nRice: NPK 120:60:60 kg/ha\nWheat: NPK 120:60:40 kg/ha\nMaize: NPK 150:75:75 kg/ha\nSoybean: NPK 20:80:40 kg/ha\nTomato: NPK 120:60:60 kg/ha\n\nOrganic Fertilizers:\nCow Dung: 10-15 tons/hectare\nVermicompost: 5-7 tons/hectare\nNeem Cake: 250-500 kg/hectare\n\nTip: Apply fertilizer at sowing time and top dressing",
-    
+
     // Pest Control
     "pest": "Natural pest control methods:\n\nNeem oil: Mix 2ml/liter water and spray\nCow urine: Make 10% solution and spray\nGarlic-chili solution: Natural pesticide\nHenna leaves: Pest repellent\n\nCaution: Use chemical pesticides sparingly",
-    
+
     // Disease Management
     "disease": "Crop disease management:\n\nLeaf spot: Spray copper oxychloride\nRoot rot: Improve drainage\nPowdery mildew: Spray sulfur\nBlast disease: Use tricyclazole\n\nTip: Plant disease-resistant varieties",
-    
+
     // Irrigation
     "irrigation": "Irrigation methods:\n\nFlood irrigation: Traditional method\nDrip irrigation: 40-60% water saving\nSprinkler: Uniform water distribution\nFurrow irrigation: For row crops\n\nBenefit: Drip irrigation saves water and fertilizer",
-    
+
     // Organic Farming
     "organic": "Benefits of organic farming:\n\nOrganic manure: Cow dung, vermicompost\nNeem cake: Natural pesticide\nJeevamrit: Increases soil fertility\nBeejamrit: For seed treatment\n\nBenefit: Low cost, high profit, healthy crop",
-    
+
     // Market Prices
     "market": "Today's market rates:\n\nWheat: ₹22-24/kilogram\nRice: ₹18-20/kilogram\nMaize: ₹15-17/kilogram\nTomato: ₹40-60/kilogram\nSoybean: ₹35-38/kilogram\n\nTip: Selling at MSP gives more profit",
-    
+
     // Seed Treatment
     "seed": "Seed treatment methods:\n\nBeejamrit: Organic seed treatment\nTrichoderma: Protection from fungal diseases\nBavistin: Chemical seed treatment\nHot water: 30 minutes at 50°C\n\nTip: Seed treatment increases yield by 20-30%",
-    
+
     // Soil Health
     "soil": "Soil testing and improvement:\n\npH value: 6.5-7.5 suitable\nOrganic carbon: Should be more than 0.5%\nBacteria: Beneficial bacteria in soil\nWater holding capacity: Increase with organic manure\n\nTip: Get soil tested every 3 years",
-    
+
     // Government Schemes
     "scheme": "Government schemes for farmers:\n\nPM-KISAN: ₹6,000/year\nPMFBY: Crop insurance scheme\nPMKSY: Irrigation scheme\nPMFME: Food processing\n\nInformation: Contact agriculture department",
-    
-            "default": "Hello! I'm AgriSaathi AI. I can help you with any farming-related problems.\n\nYou can ask about:\n• Crops (tomato, wheat, rice, maize)\n• Weather and climate\n• Fertilizers and nutrition\n• Pest and disease control\n• Irrigation methods\n• Organic farming\n• Market rates\n• Government schemes\n\nYou can also send photos to identify diseases!"
+
+    "default": "Hello! I'm AgriSaathi AI. I can help you with any farming-related problems.\n\nYou can ask about:\n• Crops (tomato, wheat, rice, maize)\n• Weather and climate\n• Fertilizers and nutrition\n• Pest and disease control\n• Irrigation methods\n• Organic farming\n• Market rates\n• Government schemes\n\nYou can also send photos to identify diseases!"
   }
 };
 
 export class MockApiService {
   async analyzeDisease(imageData: string, cropType?: string): Promise<DiseaseAnalysisResult> {
     await delay(2000 + Math.random() * 1000); // 2-3 seconds
-    
+
     // Simulate different responses based on crop type
     const cropIndex = cropType ? cropType.length % mockDiseases.length : Math.floor(Math.random() * mockDiseases.length);
     return mockDiseases[cropIndex];
@@ -341,14 +341,14 @@ export class MockApiService {
 
   async sendChatMessage(message: string, context?: any): Promise<ChatMessage> {
     await delay(1000 + Math.random() * 2000); // 1-3 seconds
-    
+
     const language = context?.language || 'hindi';
     const responses = mockChatResponses[language as keyof typeof mockChatResponses];
-    
+
     // Enhanced keyword matching with multiple patterns
     let response = responses.default;
     const lowerMessage = message.toLowerCase();
-    
+
     // Crop-related keywords (both Hindi and English)
     if (lowerMessage.includes('टमाटर') || lowerMessage.includes('tomato')) {
       response = language === 'hindi' ? (responses as any).टमाटर : (responses as any).tomato;
@@ -401,7 +401,7 @@ export class MockApiService {
     }
     // Greetings and general questions
     else if (lowerMessage.includes('नमस्ते') || lowerMessage.includes('hello') || lowerMessage.includes('hi') || lowerMessage.includes('कैसे हो')) {
-      response = language === 'hindi' 
+      response = language === 'hindi'
         ? "नमस्ते! मैं AgriSaathi AI हूं। आपकी खेती संबंधी किसी भी समस्या में मदद कर सकता हूं। क्या आप कोई विशेष फसल या समस्या के बारे में जानना चाहते हैं?"
         : "Hello! I'm AgriSaathi AI. I can help you with any farming-related problems. Is there a specific crop or issue you'd like to know about?";
     }
@@ -411,7 +411,7 @@ export class MockApiService {
         ? "ज़रूर! मैं आपकी मदद कर सकता हूं। आप इन विषयों पर पूछ सकते हैं:\n\nफसल (टमाटर, गेहूं, धान, मक्का)\nमौसम और जलवायु\nखाद और पोषण\nकीट और रोग नियंत्रण\nसिंचाई तरीके\nजैविक खेती\nबाजार भाव\nसरकारी योजनाएं\n\nतस्वीर भेजकर रोग की पहचान भी कर सकते हैं!"
         : "Of course! I can help you. You can ask about:\n\nCrops (tomato, wheat, rice, maize)\nWeather and climate\nFertilizers and nutrition\nPest and disease control\nIrrigation methods\nOrganic farming\nMarket rates\nGovernment schemes\n\nYou can also send photos to identify diseases!";
     }
-    
+
     return {
       id: Date.now().toString(),
       sender: 'bot',
@@ -423,13 +423,21 @@ export class MockApiService {
 
   async getWeatherData(latitude: number, longitude: number): Promise<WeatherData> {
     await delay(500);
-    
+
+    // Mock location name based on coordinates (simplified)
+    const locationName = (latitude > 20 && latitude < 30 && longitude > 70 && longitude < 80)
+      ? "North India Region"
+      : (latitude > 10 && latitude < 20)
+        ? "South India Region"
+        : `Location (${latitude.toFixed(2)}, ${longitude.toFixed(2)})`;
+
     return {
-      temperature: 28 + Math.random() * 8,
+      location: locationName,
+      temperature: 28 + Math.random() * 8, // Vary temp slightly
       humidity: 60 + Math.random() * 30,
       windSpeed: 5 + Math.random() * 15,
-      description: "Partly cloudy with light rain",
-      icon: "cloud-rain",
+      description: "Partly cloudy",
+      icon: "02d",
       forecast: [
         { date: "2024-01-15", temp: 26, description: "Sunny" },
         { date: "2024-01-16", temp: 24, description: "Cloudy" },
@@ -440,7 +448,7 @@ export class MockApiService {
 
   async getCropRecommendations(soilType: string, season: string, location: string): Promise<CropRecommendation[]> {
     await delay(1000);
-    
+
     return [
       {
         crop: "गेहूं (Wheat)",
@@ -461,7 +469,7 @@ export class MockApiService {
 
   async getAvailableExperts(): Promise<any[]> {
     await delay(500);
-    
+
     return [
       {
         id: "1",
@@ -487,14 +495,15 @@ export class MockApiService {
   }
 
   // Community API Methods
-  async getCommunityPosts(language: string = 'hindi'): Promise<CommunityPost[]> {
+  async getCommunityPosts(language: string = 'hindi', location?: string): Promise<CommunityPost[]> {
     await delay(800);
+    // In a real app, we would filter by location here
     return getCommunityPostsByLanguage(language);
   }
 
   async createPost(postData: CreatePostRequest): Promise<PostResponse> {
     await delay(1500);
-    
+
     const newPost: CommunityPost = {
       id: Date.now().toString(),
       author: postData.language === 'hindi' ? "आप" : "You",
@@ -505,7 +514,7 @@ export class MockApiService {
       timestamp: new Date(),
       category: postData.category
     };
-    
+
     return {
       success: true,
       post: newPost,
@@ -520,7 +529,7 @@ export class MockApiService {
 
   async getMarketPrices(crop?: string): Promise<any[]> {
     await delay(500);
-    
+
     return [
       { crop: "गेहूं", price: "₹2,200-2,400", unit: "क्विंटल" },
       { crop: "धान", price: "₹1,800-2,000", unit: "क्विंटल" },
@@ -531,7 +540,7 @@ export class MockApiService {
 
   async analyzeSoil(imageData: string): Promise<any> {
     await delay(2000);
-    
+
     return {
       pH: 6.8,
       nitrogen: "Medium",

@@ -1,237 +1,158 @@
-# AgriSathi – Smart Agricultural Assistance System
+AgriSathi – Smart Agricultural Assistance System
 
-A comprehensive mobile-friendly web application built with React, TypeScript, and Tailwind CSS to support farmers with AI-powered disease detection, multilingual chatbot assistance, and real-time agricultural insights.
+AgriSathi is a mobile-friendly web application built with React, TypeScript, and Tailwind CSS, designed to empower farmers with AI-powered tools, multilingual assistance, and real-time agricultural insights.
 
-## Features
+Features
+Core Features
 
-### Core Features
-- **AI-Powered Chatbot**: Natural language processing chatbot supporting Hindi and English languages
-- **Disease Detection**: Plant disease identification via camera upload with AI analysis
-- **Weather Information**: Real-time weather data and forecasts
-- **Crop Recommendations**: Personalized crop suggestions based on conditions
-- **Community Forum**: Farmer community interaction and knowledge sharing
-- **Expert Consultation**: Connect with agricultural experts
-- **Wallet & Credits**: Digital wallet system for agricultural services
-- **Multilingual Support**: Full Hindi and English language support
+AI Chatbot: Ask questions in Hindi or English. Voice input and image support included.
 
-### Technical Features
-- **Responsive Design**: Mobile-first design that works on all devices
-- **Offline Capability**: Core features work without internet connection
-- **Real-time Updates**: Live data synchronization
-- **Secure Authentication**: User authentication and data protection
-- **Modern UI/UX**: Beautiful, intuitive interface using shadcn/ui components
+Disease Detection: Upload or capture plant leaves for AI-powered analysis.
 
-## Getting Started
+Weather Information: Real-time forecasts.
 
-### Prerequisites
-- Node.js (v18 or higher)
-- npm or yarn package manager
+Crop Recommendations: Personalized suggestions.
 
-### Installation
+Multilingual Support: Full support for Hindi and English.
 
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/your-username/AgriSathi-app.git
-   cd AgriSathi-app
-   ```
+Technical Highlights
 
-2. **Install dependencies**
-   ```bash
-   npm install
-   ```
+Responsive design, mobile-first.
 
-3. **Set up environment variables**
-   ```bash
-   cp .env.example .env
-   ```
-   
-   Edit the `.env` file with your API keys:
-   ```env
-   # Optional: Real API Keys (for production)
-   VITE_OPENWEATHER_API_KEY=your_openweather_api_key
-   VITE_PLANT_ID_API_KEY=your_plantid_api_key
-   VITE_AGRICULTURE_API_KEY=your_agriculture_api_key
-   
-   # API Endpoints (optional)
-   VITE_API_BASE_URL=https://api.agrisathi.com
-   VITE_AI_SERVICE_URL=https://ai.agrisathi.com
-   ```
+Offline capability for core features.
 
-4. **Start the development server**
-   ```bash
-   npm run dev
-   ```
+Real-time data updates.
 
-5. **Open your browser**
-   Navigate to `http://localhost:5173` (or the URL shown in your terminal)
+Secure authentication (email/phone OTP).
 
-## Available Scripts
+Clean, farmer-focused UI/UX using shadcn/ui components.
 
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm run build:dev` - Build for development mode
-- `npm run preview` - Preview production build
-- `npm run lint` - Run ESLint for code quality checks
+Authentication
 
-## Project Structure
+Post-login redirect now goes to / (dashboard).
 
-```
-AgriSathi-app/
-├── public/                 # Static assets
-├── src/
-│   ├── components/         # Reusable UI components
-│   │   ├── ui/            # shadcn/ui components
-│   │   ├── CameraScanner.tsx
-│   │   ├── CropRecommendations.tsx
-│   │   ├── Header.tsx
-│   │   ├── Layout.tsx
-│   │   ├── QuickActions.tsx
-│   │   └── WeatherCard.tsx
-│   ├── contexts/          # React contexts
-│   │   ├── LanguageContext.tsx
-│   │   ├── UserContext.tsx
-│   │   └── WalletContext.tsx
-│   ├── hooks/             # Custom React hooks
-│   ├── lib/               # Utilities and API services
-│   │   ├── api.ts         # API configuration and types
-│   │   ├── mockApi.ts     # Mock API for development
-│   │   └── realApi.ts     # Real API implementation
-│   ├── pages/             # Page components
-│   │   ├── Dashboard.tsx
-│   │   ├── Chat.tsx
-│   │   ├── Community.tsx
-│   │   ├── DiseaseDetection.tsx
-│   │   ├── ExpertConsultation.tsx
-│   │   ├── Profile.tsx
-│   │   ├── Wallet.tsx
-│   │   └── AgriCredits.tsx
-│   ├── types/             # TypeScript type definitions
-│   └── assets/            # Static assets
-├── .env.example           # Environment variables template
-├── package.json           # Project dependencies
-├── tailwind.config.ts     # Tailwind CSS configuration
-└── vite.config.ts         # Vite build configuration
-```
+Phone OTP flow: enter phone (and name for signup) → send OTP → verify → sign in/create account.
 
-## Technology Stack
+Uses sendOTP, signInWithPhone, signUpWithPhone from UserContext (mock + Supabase).
 
-- **Frontend**: React 18, TypeScript, Vite
-- **Styling**: Tailwind CSS, shadcn/ui components
-- **State Management**: React Context API
-- **Routing**: React Router DOM
-- **Forms**: React Hook Form with Zod validation
-- **HTTP Client**: TanStack Query (React Query)
-- **Build Tool**: Vite
-- **Code Quality**: ESLint, TypeScript
+Success/error toasts bilingual (English/Hindi).
 
-## API Integration
+Logout clears session and redirects to /.
 
-The app supports both mock and real API integration:
+Chatbot
 
-### Mock API (Development)
-- Full functionality without external API keys
-- Simulated responses for all features
-- Perfect for development and testing
+Placeholder: "अपना सवाल यहाँ लिखें..." / "Type your question here...".
 
-### Real API (Production)
-- OpenWeather API for weather data
-- Plant.id API for disease detection
-- Custom agricultural APIs for crop recommendations
-- Real-time chatbot responses
+Added prompt line: "हिंदी या अंग्रेज़ी में पूछें" / "Ask in Hindi or English".
 
-## Usage Guide
+Send button uses primary green (bg-green-600).
 
-### 1. Authentication
-- Open the app and create an account or login
-- The app supports both English and Hindi languages
+WorkingChatbot and API integration unchanged.
 
-### 2. Dashboard
-- View weather information and forecasts
-- Access quick actions for common tasks
-- See personalized crop recommendations
+Disease Detection / Scanner
 
-### 3. AI Chatbot
-- Ask questions about farming in Hindi or English
-- Get advice on crops, diseases, fertilizers, and more
-- Use voice input for hands-free interaction
-- Send images for disease identification
+Flow unchanged: upload or camera → Start Analysis → result (disease, confidence, treatment) in selected language.
 
-### 4. Disease Detection
-- Take or upload photos of plant leaves
-- Get AI-powered disease analysis
-- Receive treatment recommendations
+Bilingual copy and toasts maintained.
 
-### 5. Community
-- Share experiences with other farmers
-- Ask questions and get answers
-- Learn from agricultural experts
+UI/UX
 
-### 6. Expert Consultation
-- Book sessions with agricultural experts
-- Get personalized advice
-- Video and text chat support
+Dashboard: header (logo, user, time, Logout) + two actions (Farming Assistant, Crop Scanner). Quick Info and Account Status removed.
 
-## Environment Variables
+Bottom navigation: Home, Crop Scanner, Chat only. Tips bar and Quick Access removed.
 
-Create a `.env` file in the root directory:
+Layout & login screen background: bg-gray-50.
 
-```env
-# Development (Optional)
-VITE_DEV_MODE=true
+Colors: green for main actions, blue for scanner, gray for text.
 
-# Production API Keys
-VITE_OPENWEATHER_API_KEY=your_key_here
-VITE_PLANT_ID_API_KEY=your_key_here
-VITE_AGRICULTURE_API_KEY=your_key_here
+Font: Inter; base 16px for mobile.
 
-# Custom Endpoints
-VITE_API_BASE_URL=https://your-api.com
-VITE_AI_SERVICE_URL=https://your-ai-service.com
-```
+Code
 
-## Deployment
+Debug console.log removed or wrapped with import.meta.env.DEV.
 
-### Build for Production
-```bash
-npm run build
-```
+console.error retained.
 
-### Deploy to Vercel
-1. Connect your repository to Vercel
-2. Set environment variables in Vercel dashboard
-3. Deploy automatically on push to main branch
+Unused variables and imports cleaned.
 
-### Deploy to Netlify
-1. Build the project: `npm run build`
-2. Upload the `dist` folder to Netlify
-3. Set environment variables in Netlify dashboard
+Deployment
 
-## Contributing
+npm run build completes successfully.
 
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature-name`
-3. Make your changes and commit: `git commit -m 'Add feature'`
-4. Push to the branch: `git push origin feature-name`
-5. Submit a pull request
+npm run dev runs without errors.
 
-## License
+Vercel/Netlify configuration unchanged; environment variables functional.
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+CHANGES_SUMMARY.md created for deployment/handover.
 
-## Support
+All main features (login/email/phone OTP, logout, Chatbot, Scanner) are wired end-to-end with the simplified, farmer-focused UI and ready for production deployment.
 
-For support and questions:
-- Create an issue in the GitHub repository
-- Email: support@agrisathi.com
-- Check the [Wiki](https://github.com/your-username/AgriSathi-app/wiki) for detailed documentation
+Getting Started
+Prerequisites
 
-## Acknowledgments
+Node.js v18+
 
-- Farmers and agricultural experts who contributed to the knowledge base
-- Open source community for the amazing tools and libraries
-- shadcn/ui for the beautiful component library
-- Agricultural research organizations for crop and disease data
+npm or yarn
 
----
+Installation
+git clone https://github.com/your-username/AgriSathi-app.git
+cd AgriSathi-app
+npm install
+cp .env.example .env
 
-**AgriSathi** - Empowering farmers with technology
+Configure .env
+VITE_OPENWEATHER_API_KEY=your_key
+VITE_PLANT_ID_API_KEY=your_key
+VITE_AGRICULTURE_API_KEY=your_key
+VITE_API_BASE_URL=https://api.agrisathi.com
+VITE_AI_SERVICE_URL=https://ai.agrisathi.com
+
+Run Locally
+npm run dev
+
+
+Open http://localhost:5173
+
+Scripts
+
+npm run dev – Start development server
+
+npm run build – Build for production
+
+npm run preview – Preview production build
+
+npm run lint – Run ESLint
+
+Project Structure
+src/
+├─ components/      # UI components (shadcn/ui)
+├─ contexts/        # React contexts (User, Wallet, Language)
+├─ hooks/           # Custom hooks
+├─ lib/             # API services (mock & real)
+├─ pages/           # Pages: Dashboard, Chat, Scanner, etc.
+├─ types/           # TypeScript definitions
+└─ assets/          # Static assets
+
+Deployment
+
+Build with npm run build
+
+Deploy to Vercel or Netlify
+
+Configure environment variables
+
+Fully mobile-friendly and production-ready
+
+Contributing
+
+Fork → create branch → commit → push → pull request
+
+Support
+
+Email: lobsangshakya5@gmail.com
+
+Refer to Wiki for documentation
+
+License
+
+MIT License

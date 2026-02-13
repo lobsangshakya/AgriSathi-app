@@ -184,8 +184,8 @@ export const measurePerformance = (name: string, fn: () => void) => {
   fn();
   const end = performance.now();
   
-  if (process.env.NODE_ENV === 'development') {
-    console.log(`${name} took ${end - start} milliseconds`);
+  if (import.meta.env.DEV) {
+    console.info(`${name} took ${end - start} ms`);
   }
   
   return end - start;

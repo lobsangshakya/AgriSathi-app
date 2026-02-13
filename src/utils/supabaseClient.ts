@@ -1,34 +1,31 @@
 /**
  * Supabase Database Client Configuration
- * Provides real-time database and authentication services
+ * Optional: only created when VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY are set.
+ * When not configured, app uses mock auth (no crash).
  */
 
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
-// Supabase configuration from environment variables
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
-const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string | undefined;
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined;
+const PLACEHOLDER_URL = 'https://your-project-id.supabase.co';
 
-// Validate environment variables
-if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-  throw new Error(
-    'Missing Supabase environment variables. Please check your .env file for VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY'
-  );
-}
+const isConfigured =
+  !!SUPABASE_URL &&
+  !!SUPABASE_ANON_KEY &&
+  SUPABASE_URL !== PLACEHOLDER_URL &&
+  !String(SUPABASE_ANON_KEY).includes('your_');
 
-// Create and export Supabase client
-export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-  auth: {
-    autoRefreshToken: true,
-    persistSession: true,
-    detectSessionInUrl: true,
-  },
-  realtime: {
-    params: {
-      eventsPerSecond: 10,
-    },
-  },
-});
+export const supabase: SupabaseClient | null = isConfigured
+  ? createClient(SUPABASE_URL!, SUPABASE_ANON_KEY!, {
+      auth: {
+        autoRefreshToken: true,
+        persistSession: true,
+        detectSessionInUrl: true,
+      },
+      realtime: { params: { eventsPerSecond: 10 } },
+    })
+  : null;
 
 // Database types for TypeScript support
 export type Database = {

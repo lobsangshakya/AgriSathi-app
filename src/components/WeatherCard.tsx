@@ -23,11 +23,11 @@ export const WeatherCard = () => {
   };
 
   const getWeatherIcon = (condition: string) => {
-    if (condition.includes('बादल') || condition.includes('Cloud')) return '☁️';
-    if (condition.includes('बारिश') || condition.includes('Rain')) return '🌧️';
-    if (condition.includes('धूप') || condition.includes('Sun')) return '☀️';
-    if (condition.includes('कोहरा') || condition.includes('Fog')) return '🌫️';
-    return '🌤️';
+    if (condition.includes('बादल') || condition.includes('Cloud')) return '';
+    if (condition.includes('बारिश') || condition.includes('Rain')) return '';
+    if (condition.includes('धूप') || condition.includes('Sun')) return '';
+    if (condition.includes('कोहरा') || condition.includes('Fog')) return '';
+    return '';
   };
 
   const getUVLevel = (uv: number) => {
@@ -132,7 +132,7 @@ export const WeatherCard = () => {
           {weatherData.rainfall > 0 && (
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="text-2xl">🌧️</div>
+                <div className="text-2xl"></div>
                 <div>
                   <p className="text-sm font-medium">{t('weather.rainChance') || 'Rainfall'}</p>
                   <p className="text-xs text-muted-foreground">
@@ -164,7 +164,7 @@ export const WeatherCard = () => {
       {weatherData.rainfall > 0 && (
         <Card className="bg-gradient-to-r from-orange-50 to-red-50 border-orange-200 p-4 animate-slide-up">
           <div className="flex items-center gap-3">
-            <div className="text-2xl">⚠️</div>
+            <div className="text-2xl"></div>
             <div>
               <p className="text-sm font-medium text-orange-800">
                 {t('weather.rainAlert') || 'Rain Alert'}

@@ -7,12 +7,13 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { toast } from "@/hooks/use-toast";
 import { useDebounce } from "@/utils/performance";
 import { handleToastError } from "@/utils/errorHandler";
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
+import { LocationManager } from "./LocationManager";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
   DropdownMenuTrigger,
-  DropdownMenuSeparator 
+  DropdownMenuSeparator
 } from "./ui/dropdown-menu";
 
 interface HeaderProps {
@@ -21,10 +22,10 @@ interface HeaderProps {
   showNotifications?: boolean;
 }
 
-export const Header = ({ 
-  title, 
-  showLanguageToggle = true, 
-  showNotifications = true 
+export const Header = ({
+  title,
+  showLanguageToggle = true,
+  showNotifications = true
 }: HeaderProps) => {
   const { language, setLanguage, t } = useLanguage();
   const navigate = useNavigate();
@@ -38,7 +39,7 @@ export const Header = ({
       timestamp: new Date()
     },
     {
-      id: "2", 
+      id: "2",
       title: language === "hindi" ? "फसल अपडेट" : "Crop Update",
       description: language === "hindi" ? "आपकी फसल की स्थिति अपडेट हुई है" : "Your crop status has been updated",
       read: true,
@@ -51,8 +52,8 @@ export const Header = ({
   };
 
   const markAsRead = (id: string) => {
-    setNotifications(prev => 
-      prev.map(notif => 
+    setNotifications(prev =>
+      prev.map(notif =>
         notif.id === id ? { ...notif, read: true } : notif
       )
     );
@@ -65,12 +66,13 @@ export const Header = ({
       <div className="flex items-center justify-between p-4">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 bg-gradient-to-r from-green-500 to-emerald-600 rounded-lg flex items-center justify-center">
-            <span className="text-white font-bold text-sm">🌾</span>
           </div>
           <h1 className="text-lg font-semibold text-foreground">{title}</h1>
         </div>
-        
+
         <div className="flex items-center gap-2">
+          <LocationManager />
+
           {showLanguageToggle && (
             <Button
               variant="ghost"
@@ -92,8 +94,8 @@ export const Header = ({
                 >
                   <Bell className="h-4 w-4" />
                   {unreadCount > 0 && (
-                    <Badge 
-                      variant="destructive" 
+                    <Badge
+                      variant="destructive"
                       className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs font-bold"
                     >
                       {unreadCount > 9 ? '9+' : unreadCount}

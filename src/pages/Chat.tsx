@@ -571,7 +571,7 @@ ${analysisResult.preventiveMeasures.map(prev => `• ${prev}`).join('\n')}`,
                 onClick={() => setShowCamera(false)}
                 className="p-1"
               >
-                ✕
+                
               </Button>
             </div>
             <div className="max-h-80 overflow-hidden rounded-lg">

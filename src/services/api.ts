@@ -49,6 +49,7 @@ export interface ChatContext {
 }
 
 export interface WeatherData {
+  location: string;
   temperature: number;
   humidity: number;
   windSpeed: number;
@@ -78,6 +79,7 @@ export interface CommunityPost {
   comments: number;
   timestamp: Date;
   category: string;
+  location?: string;
 }
 
 export interface CreatePostRequest {
@@ -85,6 +87,7 @@ export interface CreatePostRequest {
   image?: string;
   category: string;
   language?: string;
+  location?: string;
 }
 
 export interface PostResponse {
@@ -137,7 +140,7 @@ export const getLocation = (): Promise<{ latitude: number; longitude: number }> 
       reject(new Error('Geolocation is not supported'));
       return;
     }
-    
+
     navigator.geolocation.getCurrentPosition(
       (position) => {
         resolve({
@@ -156,13 +159,23 @@ export const getLocation = (): Promise<{ latitude: number; longitude: number }> 
 import { MockApiService, MockAiService } from './mockApi';
 import { RealApiService, RealAiService } from './realApi';
 
-// Check if we're in development mode or if real APIs are available
-const USE_REAL_APIS = !import.meta.env.DEV && (
-  import.meta.env.VITE_OPENWEATHER_API_KEY || 
-  import.meta.env.VITE_PLANT_ID_API_KEY || 
+// Check if we should use real APIs based on environment variables
+const USE_REAL_APIS = import.meta.env.VITE_USE_MOCK_APIS === 'false' && (
+  import.meta.env.VITE_OPENWEATHER_API_KEY ||
+  import.meta.env.VITE_PLANT_ID_API_KEY ||
   import.meta.env.VITE_AGRICULTURE_API_KEY
 );
 
-// Export service instances
+// Export service instances with proper fallback
 export const apiService = USE_REAL_APIS ? new RealApiService() : new MockApiService();
 export const aiService = USE_REAL_APIS ? new RealAiService() : new MockAiService();
+
+// Export configuration for debugging
+export const apiConfig = {
+  useRealApis: USE_REAL_APIS,
+  baseUrl: API_BASE_URL,
+  aiServiceUrl: AI_SERVICE_URL,
+  hasWeatherKey: !!import.meta.env.VITE_OPENWEATHER_API_KEY,
+  hasPlantIdKey: !!import.meta.env.VITE_PLANT_ID_API_KEY,
+  hasAgricultureKey: !!import.meta.env.VITE_AGRICULTURE_API_KEY,
+};
