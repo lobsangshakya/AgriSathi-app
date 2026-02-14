@@ -5,7 +5,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useLanguage } from '@/contexts/LanguageContext';
+import { useLanguage } from '../contexts/LanguageContext';
 import { useUser } from '@/contexts/UserContext';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -20,7 +20,7 @@ import chatbotImg from '@/assets/dashboard_chatbot.png';
 import scannerImg from '@/assets/dashboard_scanner.png';
 
 const DashboardSimple = () => {
-  const { language } = useLanguage();
+  const { t, language } = useLanguage();
   const { user, logout, locationData, detectLocation } = useUser();
   const navigate = useNavigate();
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -82,13 +82,10 @@ const DashboardSimple = () => {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-bold bg-gradient-to-r from-green-600 to-green-800 bg-clip-text text-transparent">
-                {language === 'hindi' ? 'AgriSaathi' : 'AgriSathi'}
+                {t('agriSathi')}
               </h1>
               <p className="text-xs font-medium text-gray-500 mt-0.5">
-                {language === 'hindi'
-                  ? `${user?.name || 'किसान भाई'} | ${currentTime.toLocaleTimeString('hi-IN', { hour: '2-digit', minute: '2-digit' })}`
-                  : `${user?.name || 'Farmer'} | ${currentTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}`
-                }
+                {user?.name || t('farmerName')} | ${currentTime.toLocaleTimeString(language === 'hi' ? 'hi-IN' : 'en-US', { hour: '2-digit', minute: '2-digit' })}
               </p>
             </div>
             <Button
@@ -125,12 +122,12 @@ const DashboardSimple = () => {
               <div className="flex justify-between items-start">
                 <div>
                   <h3 className="font-semibold text-lg opacity-90">
-                    {language === 'hindi' ? 'आज का मौसम' : "Today's Weather"}
+                    {t('todaysWeather')}
                   </h3>
                   <p className="text-sm opacity-75">
-                    {!locationData && (language === 'hindi' ? 'स्थान का पता लगाया जा रहा है...' : 'Detecting location...')}
-                    {locationData && weatherStatus === 'loading' && (language === 'hindi' ? 'लोड हो रहा है...' : 'Loading...')}
-                    {weatherStatus === 'error' && (language === 'hindi' ? 'अनुपलब्ध' : 'Unavailable')}
+                    {!locationData && t('detectingLocation')}
+                    {locationData && weatherStatus === 'loading' && t('loading')}
+                    {weatherStatus === 'error' && t('unavailable')}
                     {weatherStatus === 'ok' && weather?.location}
                   </p>
                 </div>
@@ -172,7 +169,7 @@ const DashboardSimple = () => {
                       className="bg-white/10 border-white/20 text-white hover:bg-white/20 backdrop-blur-sm"
                       onClick={() => detectLocation()}
                     >
-                      {language === 'hindi' ? 'स्थान सक्षम करें' : 'Enable Location'}
+                      {t('enableLocation')}
                     </Button>
                   )}
                 </div>
@@ -196,10 +193,10 @@ const DashboardSimple = () => {
                 <div className="w-9 h-9 bg-green-100 rounded-xl flex items-center justify-center mb-2 text-green-600">
                 </div>
                 <h3 className="font-bold text-gray-900 text-sm leading-tight mb-0.5">
-                  {language === 'hindi' ? 'कृषि सहायक' : 'Farm Assistant'}
+                  {t('aiChatbot')}
                 </h3>
                 <p className="text-xs text-gray-500 leading-snug">
-                  {language === 'hindi' ? 'फसलों के बारे में पूछें' : 'Ask about crops'}
+                  {t('askQuestion')}
                 </p>
               </div>
             </Card>
@@ -218,10 +215,10 @@ const DashboardSimple = () => {
                 <div className="w-9 h-9 bg-blue-100 rounded-xl flex items-center justify-center mb-2 text-blue-600">
                 </div>
                 <h3 className="font-bold text-gray-900 text-sm leading-tight mb-0.5">
-                  {language === 'hindi' ? 'फसल डॉक्टर' : 'Crop Doctor'}
+                  {t('diseaseDetection')}
                 </h3>
                 <p className="text-xs text-gray-500 leading-snug">
-                  {language === 'hindi' ? 'बीमारी पहचानें' : 'Detect diseases'}
+                  {t('scanCrop')}
                 </p>
               </div>
             </Card>
@@ -239,12 +236,10 @@ const DashboardSimple = () => {
                 </div>
                 <div>
                   <h3 className="font-bold text-gray-900 text-base leading-tight mb-0.5">
-                    {language === 'hindi' ? 'किसान समुदाय' : 'Farmer Community'}
+                    {t('farmerCommunity')}
                   </h3>
                   <p className="text-sm text-gray-500 leading-snug">
-                    {language === 'hindi'
-                      ? 'अनुभव साझा करें, सवाल पूछें'
-                      : 'Share experiences, ask questions'}
+                    {t('shareExperiences')}
                   </p>
                 </div>
               </div>
