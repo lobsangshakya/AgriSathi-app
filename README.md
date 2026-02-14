@@ -133,15 +133,24 @@ src/
 ├─ types/           # TypeScript definitions
 └─ assets/          # Static assets
 
-Deployment
+## Deployment
 
-Build with npm run build
+### Render Web Service Settings
 
-Deploy to Vercel or Netlify
+To deploy this app on Render as a static web service:
 
-Configure environment variables
+- **Build Command**: `npm install && npm run build`
+- **Start Command**: `npm run start`
 
-Fully mobile-friendly and production-ready
+The `npm run start` script uses `serve` to efficiently serve the production `dist` folder on the port provided by Render (`$PORT`).
+
+### SPA Routing
+
+A `public/_redirects` file is included to handle SPA routing fallback, ensuring that React Router works correctly on page refreshes and deep links.
+
+```
+/* /index.html 200
+```
 
 Contributing
 

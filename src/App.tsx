@@ -15,20 +15,20 @@ import ServiceConfirmation from "./pages/ServiceConfirmation";
 import NotFound from "./pages/NotFound";
 import { Layout } from "./components/Layout";
 import { BottomNavigationEnhanced } from "./components/BottomNavigationEnhanced";
-import { LanguageProvider } from "./contexts/LanguageContext";
+import { LanguageProvider } from "@/contexts/LanguageContext";
 import { UserProvider, useUser } from "./contexts/UserContext";
 import { WalletProvider } from "./contexts/WalletContext";
 import Auth from "./pages/AuthEnhanced";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { useState, useEffect } from 'react';
 import AuthModalSimple from './components/AuthModalSimple';
-import { useLanguage } from './contexts/LanguageContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const queryClient = new QueryClient();
 
 const AppContent = () => {
   const { isLoggedIn } = useUser();
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authView, setAuthView] = useState<'login' | 'signup'>('login');
 
@@ -51,12 +51,10 @@ const AppContent = () => {
                 className="w-24 h-24 mx-auto rounded-2xl shadow-lg"
               />
               <h1 className="text-3xl font-bold text-gray-900 mt-4">
-                {language === 'hindi' ? 'AgriSaathi' : 'AgriSathi'}
+                {t('agriSathi')}
               </h1>
               <p className="text-gray-600 mt-2">
-                {language === 'hindi' 
-                  ? 'आपका स्मार्ट फार्मिंग सहायक' 
-                  : 'Your Smart Farming Assistant'}
+                {t('smartFarming')}
               </p>
             </div>
             <AuthModalSimple 

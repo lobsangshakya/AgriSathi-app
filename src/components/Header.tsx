@@ -33,22 +33,27 @@ export const Header = ({
   const [notifications, setNotifications] = useState([
     {
       id: "1",
-      title: language === "hindi" ? "नया संदेश" : "New Message",
-      description: language === "hindi" ? "आपके पास एक नया संदेश है" : "You have a new message",
+      title: t('newMessage'),
+      description: t('youHaveNewMessage'),
       read: false,
       timestamp: new Date()
     },
     {
       id: "2",
-      title: language === "hindi" ? "फसल अपडेट" : "Crop Update",
-      description: language === "hindi" ? "आपकी फसल की स्थिति अपडेट हुई है" : "Your crop status has been updated",
+      title: t('cropUpdate'),
+      description: t('cropStatusUpdated'),
       read: true,
       timestamp: new Date(Date.now() - 3600000)
     }
   ]);
 
   const toggleLanguage = () => {
-    setLanguage(language === 'hindi' ? 'english' : 'hindi');
+    setLanguage(language === 'hi' ? 'en' : 'hi');
+  };
+
+  // Get target language text for button
+  const getLanguageButtonText = () => {
+    return language === 'en' ? 'हिंदी' : 'English';
   };
 
   const markAsRead = (id: string) => {
@@ -74,14 +79,24 @@ export const Header = ({
           <LocationManager />
 
           {showLanguageToggle && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={toggleLanguage}
-              className="text-foreground hover:bg-accent rounded-full p-2 h-9 w-9 relative group"
-            >
-              <Globe className="h-4 w-4" />
-            </Button>
+            <div className="flex items-center gap-2">
+              {/* DEV-only debug indicator */}
+              {import.meta.env.DEV && (
+                <span className="text-xs font-mono bg-muted px-2 py-1 rounded">
+                  {language.toUpperCase()}
+                </span>
+              )}
+              
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={toggleLanguage}
+                className="text-foreground hover:bg-accent rounded-md px-3 h-9 relative group font-medium"
+              >
+                <Globe className="h-4 w-4 mr-2" />
+                {getLanguageButtonText()}
+              </Button>
+            </div>
           )}
 
           {showNotifications && (

@@ -6,18 +6,18 @@
 import { Home, Camera, MessageCircle } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Button } from "./ui/button";
-import { useLanguage } from "@/contexts/LanguageContext";
+import { useLanguage } from "../contexts/LanguageContext";
 import { cn } from "@/utils/utils";
 
 export const BottomNavigationEnhanced = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { language } = useLanguage();
+  const { t } = useLanguage();
 
   const navItems = [
-    { icon: Home, label: language === 'hindi' ? 'होम' : 'Home', path: "/", key: "home", color: "bg-green-500" },
-    { icon: Camera, label: language === 'hindi' ? 'फसल जांच' : 'Crop Scanner', path: "/disease-detection", key: "scan", color: "bg-blue-500" },
-    { icon: MessageCircle, label: language === 'hindi' ? 'चैट' : 'Chat', path: "/chat", key: "chat", color: "bg-green-500" },
+    { icon: Home, label: t('home'), path: "/", key: "home", color: "bg-green-500" },
+    { icon: Camera, label: t('scanner'), path: "/disease-detection", key: "scan", color: "bg-blue-500" },
+    { icon: MessageCircle, label: t('chat'), path: "/chat", key: "chat", color: "bg-green-500" },
   ];
 
   const isActive = (path: string) => {

@@ -6,7 +6,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '@/contexts/UserContext';
-import { useLanguage } from '@/contexts/LanguageContext';
+import { useLanguage } from '../contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
@@ -33,7 +33,7 @@ type AuthMethod = 'email' | 'phone';
 
 const AuthModalSimple = ({ isOpen, onClose, initialView = 'login' }: AuthModalSimpleProps) => {
   const { login, signUp, sendOTP, signInWithPhone, signUpWithPhone, isLoading } = useUser();
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
   const navigate = useNavigate();
 
   const [isSignUp, setIsSignUp] = useState(initialView === 'signup');
@@ -72,24 +72,24 @@ const AuthModalSimple = ({ isOpen, onClose, initialView = 'login' }: AuthModalSi
   const validateEmailForm = () => {
     setError(null);
     if (!email.trim()) {
-      setError(language === 'hindi' ? 'ईमेल आवश्यक है' : 'Email is required');
+      setError(language === 'hi' ? 'ईमेल आवश्यक है' : 'Email is required');
       return false;
     }
     if (!password.trim()) {
-      setError(language === 'hindi' ? 'पासवर्ड आवश्यक है' : 'Password is required');
+      setError(language === 'hi' ? 'पासवर्ड आवश्यक है' : 'Password is required');
       return false;
     }
     if (password.length < 6) {
-      setError(language === 'hindi' ? 'पासवर्ड कम से कम 6 अक्षरों का होना चाहिए' : 'Password must be at least 6 characters');
+      setError(language === 'hi' ? 'पासवर्ड कम से कम 6 अक्षरों का होना चाहिए' : 'Password must be at least 6 characters');
       return false;
     }
     if (isSignUp) {
       if (!name.trim()) {
-        setError(language === 'hindi' ? 'नाम आवश्यक है' : 'Name is required');
+        setError(language === 'hi' ? 'नाम आवश्यक है' : 'Name is required');
         return false;
       }
       if (password !== confirmPassword) {
-        setError(language === 'hindi' ? 'पासवर्ड मेल नहीं खाते' : 'Passwords do not match');
+        setError(language === 'hi' ? 'पासवर्ड मेल नहीं खाते' : 'Passwords do not match');
         return false;
       }
     }
@@ -100,11 +100,11 @@ const AuthModalSimple = ({ isOpen, onClose, initialView = 'login' }: AuthModalSi
     setError(null);
     const digits = phone.replace(/\D/g, '');
     if (digits.length < 10) {
-      setError(language === 'hindi' ? 'वैध फोन नंबर दर्ज करें' : 'Enter a valid 10-digit phone number');
+      setError(language === 'hi' ? 'वैध फोन नंबर दर्ज करें' : 'Enter a valid 10-digit phone number');
       return false;
     }
     if (isSignUp && !name.trim()) {
-      setError(language === 'hindi' ? 'नाम आवश्यक है' : 'Name is required');
+      setError(language === 'hi' ? 'नाम आवश्यक है' : 'Name is required');
       return false;
     }
     return true;
@@ -126,8 +126,8 @@ const AuthModalSimple = ({ isOpen, onClose, initialView = 'login' }: AuthModalSi
     } catch {
       // Error handling is also partially done in UserContext but good to keep fallback UI error state or catch unexpected
       toast({
-        title: language === 'hindi' ? 'गलती' : 'Error',
-        description: language === 'hindi' ? 'OTP भेजने में समस्या' : 'Failed to send OTP',
+        title: language === 'hi' ? 'गलती' : 'Error',
+        description: language === 'hi' ? 'OTP भेजने में समस्या' : 'Failed to send OTP',
         variant: 'destructive',
       });
     } finally {
@@ -139,7 +139,7 @@ const AuthModalSimple = ({ isOpen, onClose, initialView = 'login' }: AuthModalSi
     e.preventDefault();
     setError(null);
     if (!otp.trim() || otp.length < 4) {
-      setError(language === 'hindi' ? 'कृपया OTP दर्ज करें' : 'Please enter the OTP');
+      setError(language === 'hi' ? 'कृपया OTP दर्ज करें' : 'Please enter the OTP');
       return;
     }
     setIsSubmitting(true);
@@ -149,24 +149,24 @@ const AuthModalSimple = ({ isOpen, onClose, initialView = 'login' }: AuthModalSi
       const phoneWithCode = tenDigits.length === 10 ? '+91' + tenDigits : '+' + digits;
       let success = false;
       if (isSignUp) {
-        success = await signUpWithPhone(phoneWithCode, name.trim() || (language === 'hindi' ? 'किसान' : 'Farmer'), otp.trim());
+        success = await signUpWithPhone(phoneWithCode, name.trim() || (language === 'hi' ? 'किसान' : 'Farmer'), otp.trim());
       } else {
         success = await signInWithPhone(phoneWithCode, otp.trim());
       }
       if (success) {
         toast({
-          title: language === 'hindi' ? 'सफलता!' : 'Success!',
+          title: language === 'hi' ? 'सफलता!' : 'Success!',
           description: isSignUp
-            ? (language === 'hindi' ? 'खाता बनाया गया' : 'Account created successfully')
-            : (language === 'hindi' ? 'लॉगिन सफल' : 'Login successful'),
+            ? (language === 'hi' ? 'खाता बनाया गया' : 'Account created successfully')
+            : (language === 'hi' ? 'लॉगिन सफल' : 'Login successful'),
         });
         onClose();
         navigate('/');
       }
     } catch {
       toast({
-        title: language === 'hindi' ? 'गलती' : 'Error',
-        description: language === 'hindi' ? 'गलत OTP या समस्या' : 'Invalid OTP or something went wrong',
+        title: language === 'hi' ? 'गलती' : 'Error',
+        description: language === 'hi' ? 'गलत OTP या समस्या' : 'Invalid OTP or something went wrong',
         variant: 'destructive',
       });
     } finally {
@@ -186,29 +186,29 @@ const AuthModalSimple = ({ isOpen, onClose, initialView = 'login' }: AuthModalSi
         success = await signUp(email, password, {
           name,
           phone,
-          location: language === 'hindi' ? 'गाँव: रामपुर, जिला: मेरठ, उत्तर प्रदेश' : 'Village: Rampur, District: Meerut, UP',
-          landSize: language === 'hindi' ? '2.5 एकड़' : '2.5 acres',
-          experience: language === 'hindi' ? '15 साल' : '15 years',
+          location: language === 'hi' ? 'गाँव: रामपुर, जिला: मेरठ, उत्तर प्रदेश' : 'Village: Rampur, District: Meerut, UP',
+          landSize: language === 'hi' ? '2.5 एकड़' : '2.5 acres',
+          experience: language === 'hi' ? '15 साल' : '15 years',
           language: language,
-          crops: language === 'hindi' ? ['गेहूं', 'धान', 'गन्ना', 'सरसों'] : ['Wheat', 'Rice', 'Sugarcane', 'Mustard'],
+          crops: language === 'hi' ? ['गेहूं', 'धान', 'गन्ना', 'सरसों'] : ['Wheat', 'Rice', 'Sugarcane', 'Mustard'],
         });
       } else {
         success = await login(email, password);
       }
       if (success) {
         toast({
-          title: language === 'hindi' ? 'सफलता!' : 'Success!',
+          title: language === 'hi' ? 'सफलता!' : 'Success!',
           description: isSignUp
-            ? (language === 'hindi' ? 'खाता बनाया गया' : 'Account created successfully')
-            : (language === 'hindi' ? 'लॉगिन सफल' : 'Login successful'),
+            ? (language === 'hi' ? 'खाता बनाया गया' : 'Account created successfully')
+            : (language === 'hi' ? 'लॉगिन सफल' : 'Login successful'),
         });
         onClose();
         navigate('/');
       }
     } catch {
       toast({
-        title: language === 'hindi' ? 'गलती' : 'Error',
-        description: language === 'hindi' ? 'कुछ गलत हुआ। फिर कोशिश करें।' : 'Something went wrong. Please try again.',
+        title: language === 'hi' ? 'गलती' : 'Error',
+        description: language === 'hi' ? 'कुछ गलत हुआ। फिर कोशिश करें।' : 'Something went wrong. Please try again.',
         variant: 'destructive',
       });
     } finally {
@@ -238,8 +238,8 @@ const AuthModalSimple = ({ isOpen, onClose, initialView = 'login' }: AuthModalSi
         <div className="flex items-center justify-between p-6 border-b">
           <h2 className="text-xl font-bold text-gray-900">
             {isSignUp
-              ? (language === 'hindi' ? 'खाता बनाएं' : 'Sign Up')
-              : (language === 'hindi' ? 'लॉगिन करें' : 'Login')
+              ? (language === 'hi' ? 'खाता बनाएं' : 'Sign Up')
+              : (language === 'hi' ? 'लॉगिन करें' : 'Login')
             }
           </h2>
           <Button variant="ghost" size="sm" onClick={onClose}>
@@ -260,7 +260,7 @@ const AuthModalSimple = ({ isOpen, onClose, initialView = 'login' }: AuthModalSi
               )}
             >
               <Mail className="w-4 h-4 mr-2" />
-              {language === 'hindi' ? 'ईमेल' : 'Email'}
+              {language === 'hi' ? 'ईमेल' : 'Email'}
             </button>
             <button
               onClick={() => switchAuthMethod('phone')}
@@ -272,7 +272,7 @@ const AuthModalSimple = ({ isOpen, onClose, initialView = 'login' }: AuthModalSi
               )}
             >
               <Phone className="w-4 h-4 mr-2" />
-              {language === 'hindi' ? 'फोन' : 'Phone'}
+              {language === 'hi' ? 'फोन' : 'Phone'}
             </button>
           </div>
         </div>
@@ -295,13 +295,13 @@ const AuthModalSimple = ({ isOpen, onClose, initialView = 'login' }: AuthModalSi
                   {isSignUp && (
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        {language === 'hindi' ? 'पूरा नाम' : 'Full Name'}
+                        {language === 'hi' ? 'पूरा नाम' : 'Full Name'}
                       </label>
                       <div className="relative">
                         <User className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                         <Input
                           type="text"
-                          placeholder={language === 'hindi' ? 'अपना नाम दर्ज करें' : 'Enter your name'}
+                          placeholder={language === 'hi' ? 'अपना नाम दर्ज करें' : 'Enter your name'}
                           value={name}
                           onChange={(e) => setName(e.target.value)}
                           className="pl-10"
@@ -312,13 +312,13 @@ const AuthModalSimple = ({ isOpen, onClose, initialView = 'login' }: AuthModalSi
                   )}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      {language === 'hindi' ? 'फोन नंबर' : 'Phone Number'}
+                      {language === 'hi' ? 'फोन नंबर' : 'Phone Number'}
                     </label>
                     <div className="relative">
                       <Phone className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                       <Input
                         type="tel"
-                        placeholder={language === 'hindi' ? '10 अंकों का नंबर' : '10-digit number'}
+                        placeholder={language === 'hi' ? '10 अंकों का नंबर' : '10-digit number'}
                         value={phone}
                         onChange={(e) => setPhone(e.target.value)}
                         className="pl-10"
@@ -335,14 +335,14 @@ const AuthModalSimple = ({ isOpen, onClose, initialView = 'login' }: AuthModalSi
                     {isSubmitting || isLoading ? (
                       <Loader2 className="mr-2 h-4 w-4 animate-spin inline" />
                     ) : null}
-                    {language === 'hindi' ? 'OTP भेजें' : 'Send OTP'}
+                    {language === 'hi' ? 'OTP भेजें' : 'Send OTP'}
                   </Button>
                 </div>
               ) : (
                 <form onSubmit={handleVerifyOTP} className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      {language === 'hindi' ? 'OTP दर्ज करें' : 'Enter OTP'}
+                      {language === 'hi' ? 'OTP दर्ज करें' : 'Enter OTP'}
                     </label>
                     <Input
                       type="text"
@@ -369,8 +369,8 @@ const AuthModalSimple = ({ isOpen, onClose, initialView = 'login' }: AuthModalSi
                       <Loader2 className="mr-2 h-4 w-4 animate-spin inline" />
                     ) : null}
                     {isSignUp
-                      ? (language === 'hindi' ? 'खाता बनाएं' : 'Create Account')
-                      : (language === 'hindi' ? 'लॉगिन करें' : 'Sign In')}
+                      ? (language === 'hi' ? 'खाता बनाएं' : 'Create Account')
+                      : (language === 'hi' ? 'लॉगिन करें' : 'Sign In')}
                   </Button>
                   <Button
                     type="button"
@@ -382,7 +382,7 @@ const AuthModalSimple = ({ isOpen, onClose, initialView = 'login' }: AuthModalSi
                     }}
                     disabled={isSubmitting || isLoading}
                   >
-                    {language === 'hindi' ? 'नया OTP भेजें' : 'Send new OTP'}
+                    {language === 'hi' ? 'नया OTP भेजें' : 'Send new OTP'}
                   </Button>
                 </form>
               )}
@@ -392,13 +392,13 @@ const AuthModalSimple = ({ isOpen, onClose, initialView = 'login' }: AuthModalSi
               {isSignUp && (
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    {language === 'hindi' ? 'पूरा नाम' : 'Full Name'}
+                    {language === 'hi' ? 'पूरा नाम' : 'Full Name'}
                   </label>
                   <div className="relative">
                     <User className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                     <Input
                       type="text"
-                      placeholder={language === 'hindi' ? 'अपना नाम दर्ज करें' : 'Enter your name'}
+                      placeholder={language === 'hi' ? 'अपना नाम दर्ज करें' : 'Enter your name'}
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                       className="pl-10"
@@ -410,13 +410,13 @@ const AuthModalSimple = ({ isOpen, onClose, initialView = 'login' }: AuthModalSi
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  {language === 'hindi' ? 'ईमेल पता' : 'Email Address'}
+                  {language === 'hi' ? 'ईमेल पता' : 'Email Address'}
                 </label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                   <Input
                     type="email"
-                    placeholder={language === 'hindi' ? 'अपना ईमेल दर्ज करें' : 'Enter your email'}
+                    placeholder={language === 'hi' ? 'अपना ईमेल दर्ज करें' : 'Enter your email'}
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className="pl-10"
@@ -428,11 +428,11 @@ const AuthModalSimple = ({ isOpen, onClose, initialView = 'login' }: AuthModalSi
               {isSignUp && (
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    {language === 'hindi' ? 'फोन नंबर' : 'Phone Number'}
+                    {language === 'hi' ? 'फोन नंबर' : 'Phone Number'}
                   </label>
                   <Input
                     type="tel"
-                    placeholder={language === 'hindi' ? '+91 98765 43210' : '+91 9876543210'}
+                    placeholder={language === 'hi' ? '+91 98765 43210' : '+91 9876543210'}
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     disabled={isSubmitting || isLoading}
@@ -442,13 +442,13 @@ const AuthModalSimple = ({ isOpen, onClose, initialView = 'login' }: AuthModalSi
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  {language === 'hindi' ? 'पासवर्ड' : 'Password'}
+                  {language === 'hi' ? 'पासवर्ड' : 'Password'}
                 </label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                   <Input
                     type={showPassword ? 'text' : 'password'}
-                    placeholder={language === 'hindi' ? 'अपना पासवर्ड दर्ज करें' : 'Enter your password'}
+                    placeholder={language === 'hi' ? 'अपना पासवर्ड दर्ज करें' : 'Enter your password'}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     className="pl-10 pr-10"
@@ -468,13 +468,13 @@ const AuthModalSimple = ({ isOpen, onClose, initialView = 'login' }: AuthModalSi
               {isSignUp && (
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    {language === 'hindi' ? 'पासवर्ड की पुष्टि करें' : 'Confirm Password'}
+                    {language === 'hi' ? 'पासवर्ड की पुष्टि करें' : 'Confirm Password'}
                   </label>
                   <div className="relative">
                     <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                     <Input
                       type={showConfirmPassword ? 'text' : 'password'}
-                      placeholder={language === 'hindi' ? 'पासवर्ड फिर से दर्ज करें' : 'Re-enter your password'}
+                      placeholder={language === 'hi' ? 'पासवर्ड फिर से दर्ज करें' : 'Re-enter your password'}
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       className="pl-10 pr-10"
@@ -501,13 +501,13 @@ const AuthModalSimple = ({ isOpen, onClose, initialView = 'login' }: AuthModalSi
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     {isSignUp
-                      ? (language === 'hindi' ? 'खाता बनाया जा रहा है...' : 'Creating account...')
-                      : (language === 'hindi' ? 'लॉगिन हो रहा है...' : 'Signing in...')}
+                      ? (language === 'hi' ? 'खाता बनाया जा रहा है...' : 'Creating account...')
+                      : (language === 'hi' ? 'लॉगिन हो रहा है...' : 'Signing in...')}
                   </>
                 ) : (
                   isSignUp
-                    ? (language === 'hindi' ? 'खाता बनाएं' : 'Create Account')
-                    : (language === 'hindi' ? 'लॉगिन करें' : 'Sign In')
+                    ? (language === 'hi' ? 'खाता बनाएं' : 'Create Account')
+                    : (language === 'hi' ? 'लॉगिन करें' : 'Sign In')
                 )}
               </Button>
             </form>
@@ -517,8 +517,8 @@ const AuthModalSimple = ({ isOpen, onClose, initialView = 'login' }: AuthModalSi
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-600">
               {isSignUp
-                ? (language === 'hindi' ? 'पहले से ही खाता है?' : 'Already have an account?')
-                : (language === 'hindi' ? 'खाता नहीं है?' : "Don't have an account?")
+                ? (language === 'hi' ? 'पहले से ही खाता है?' : 'Already have an account?')
+                : (language === 'hi' ? 'खाता नहीं है?' : "Don't have an account?")
               }
               <button
                 type="button"
@@ -526,8 +526,8 @@ const AuthModalSimple = ({ isOpen, onClose, initialView = 'login' }: AuthModalSi
                 className="ml-1 text-blue-600 hover:text-blue-700 font-medium"
               >
                 {isSignUp
-                  ? (language === 'hindi' ? 'लॉगिन करें' : 'Sign In')
-                  : (language === 'hindi' ? 'खाता बनाएं' : 'Sign Up')
+                  ? (language === 'hi' ? 'लॉगिन करें' : 'Sign In')
+                  : (language === 'hi' ? 'खाता बनाएं' : 'Sign Up')
                 }
               </button>
             </p>
@@ -538,7 +538,7 @@ const AuthModalSimple = ({ isOpen, onClose, initialView = 'login' }: AuthModalSi
         <div className="p-6 pt-0 border-t">
           <div className="flex items-center justify-center gap-2 text-xs text-gray-500">
             <Lock className="w-3 h-3" />
-            <span>{language === 'hindi' ? 'सुरक्षित और सुरक्षित' : 'Secure & Protected'}</span>
+            <span>{language === 'hi' ? 'सुरक्षित और सुरक्षित' : 'Secure & Protected'}</span>
           </div>
         </div>
       </Card>
