@@ -156,7 +156,6 @@ export const getLocation = (): Promise<{ latitude: number; longitude: number }> 
 };
 
 // Import services
-import { MockApiService, MockAiService } from './mockApi';
 import { RealApiService, RealAiService } from './realApi';
 
 // Check if we should use real APIs based on environment variables
@@ -166,9 +165,9 @@ const USE_REAL_APIS = import.meta.env.VITE_USE_MOCK_APIS === 'false' && (
   import.meta.env.VITE_AGRICULTURE_API_KEY
 );
 
-// Export service instances with proper fallback
-export const apiService = USE_REAL_APIS ? new RealApiService() : new MockApiService();
-export const aiService = USE_REAL_APIS ? new RealAiService() : new MockAiService();
+// Export service instances
+export const apiService = new RealApiService();
+export const aiService = new RealAiService();
 
 // Export configuration for debugging
 export const apiConfig = {

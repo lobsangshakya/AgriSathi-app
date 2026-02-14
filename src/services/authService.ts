@@ -8,6 +8,10 @@ import type { User as SupabaseUser, Session } from '@supabase/supabase-js';
 
 // User profile interface matching database schema
 export interface UserProfile {
+}
+
+// Unified profile interface for compatibility
+export interface UnifiedUserProfile {
   id: string;
   email: string;
   name: string;
