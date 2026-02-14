@@ -4,7 +4,7 @@
  */
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { authWrapper, UnifiedUserProfile } from '@/services/authServiceWrapper';
+import { authService, UnifiedUserProfile } from '@/services/authService';
 import { toast } from '@/hooks/use-toast';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { env } from '@/lib/env';
@@ -185,9 +185,9 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
   useEffect(() => {
     const initializeUser = async () => {
       try {
-        const currentUser = await authWrapper.getCurrentUser();
+        const currentUser = await authService.getCurrentUser();
         if (currentUser) {
-          // In authWrapper, getCurrentUser returns the unified profile directly
+          // In authService, getCurrentUser returns the unified profile directly
           setUser(convertToUser(currentUser));
         }
 
@@ -209,9 +209,9 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     initializeUser();
 
     // Listen to auth state changes
-    const { data: { subscription } } = authWrapper.onAuthStateChange(async (authUser) => {
+    const { data: { subscription } } = authService.onAuthStateChange(async (authUser) => {
       if (authUser) {
-        // authWrapper returns the profile directly
+        // authService returns the profile directly
         setUser(convertToUser(authUser));
       } else {
         setUser(null);
@@ -227,7 +227,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
       setIsLoading(true);
-      const result = await authWrapper.signIn(email, password);
+      const result = await authService.signIn(email, password);
 
       if (result.user) {
         setUser(convertToUser(result.user));
@@ -261,7 +261,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
   const signUp = async (email: string, password: string, userData: Partial<User>): Promise<boolean> => {
     try {
       setIsLoading(true);
-      const result = await authWrapper.signUp(email, password, userData);
+      const result = await authService.signUp(email, password, userData);
 
       if (result.user) {
         setUser(convertToUser(result.user));
@@ -296,7 +296,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     try {
       setIsLoading(true);
       const normalizedPhone = normalizePhone(phone);
-      const result = await authWrapper.signInWithPhone(normalizedPhone, otp);
+      const result = await authService.signInWithPhone(normalizedPhone, otp);
 
       if (result.user) {
         setUser(convertToUser(result.user));
@@ -331,7 +331,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     try {
       setIsLoading(true);
       const normalizedPhone = normalizePhone(phone);
-      const result = await authWrapper.signUpWithPhone(normalizedPhone, otp, { name, phone: normalizedPhone });
+      const result = await authService.signUpWithPhone(normalizedPhone, otp, { name, phone: normalizedPhone });
 
       if (result.user) {
         setUser(convertToUser(result.user));
@@ -365,7 +365,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
   const sendOTP = async (phone: string): Promise<boolean> => {
     try {
       const normalizedPhone = normalizePhone(phone);
-      const result = await authWrapper.sendOTP(normalizedPhone);
+      const result = await authService.sendOTP(normalizedPhone);
 
       if (result.success) {
         toast({
@@ -393,7 +393,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
 
   const logout = async (): Promise<void> => {
     try {
-      const result = await authWrapper.signOut();
+      const result = await authService.signOut();
 
       // Always clear local state and storage on logout attempt
       setUser(null);
@@ -462,7 +462,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     if (!user) return false;
 
     try {
-      const result = await authWrapper.updateProfile(updates);
+      const result = await authService.updateProfile(updates);
 
       if (result.user) {
         setUser(convertToUser(result.user));
@@ -493,7 +493,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
 
   const refreshUser = async (): Promise<void> => {
     try {
-      const currentUser = await authWrapper.getCurrentUser();
+      const currentUser = await authService.getCurrentUser();
       if (currentUser) {
         setUser(convertToUser(currentUser));
       }

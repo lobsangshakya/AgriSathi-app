@@ -8,7 +8,6 @@ import Community from "./pages/Community";
 import Profile from "./pages/Profile";
 import DiseaseDetection from "./pages/DiseaseDetectionSimple";
 import Chat from "./pages/ChatSimple";
-import ExpertConsultation from "./pages/ExpertConsultation";
 import AgriCredits from "./pages/AgriCredits";
 import Wallet from "./pages/Wallet";
 import ServiceConfirmation from "./pages/ServiceConfirmation";
@@ -77,8 +76,7 @@ const AppContent = () => {
           <Route path="/profile" element={<Profile />} />
           <Route path="/disease-detection" element={<DiseaseDetection />} />
           <Route path="/chat" element={<Chat />} />
-          <Route path="/expert-consultation" element={<ExpertConsultation />} />
-          <Route path="/agri-credits" element={<AgriCredits />} />
+                    <Route path="/agri-credits" element={<AgriCredits />} />
           <Route path="/wallet" element={<Wallet />} />
           <Route path="/service-confirmation" element={<ServiceConfirmation />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

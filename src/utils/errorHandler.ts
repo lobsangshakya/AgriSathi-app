@@ -1,4 +1,3 @@
-import { ERROR_MESSAGES } from '@/constants';
 
 // Custom error classes
 export class AppError extends Error {
@@ -13,7 +12,7 @@ export class AppError extends Error {
 }
 
 export class NetworkError extends AppError {
-  constructor(message: string = ERROR_MESSAGES.NETWORK_ERROR) {
+  constructor(message: string = 'Network error occurred') {
     super(message, 'NETWORK_ERROR');
     this.name = 'NetworkError';
   }
@@ -27,14 +26,14 @@ export class ValidationError extends AppError {
 }
 
 export class AuthenticationError extends AppError {
-  constructor(message: string = ERROR_MESSAGES.AUTH_ERROR) {
+  constructor(message: string = 'Authentication failed') {
     super(message, 'AUTH_ERROR', 401);
     this.name = 'AuthenticationError';
   }
 }
 
 export class PermissionError extends AppError {
-  constructor(message: string = ERROR_MESSAGES.PERMISSION_DENIED) {
+  constructor(message: string = 'Permission denied') {
     super(message, 'PERMISSION_DENIED', 403);
     this.name = 'PermissionError';
   }
@@ -65,7 +64,7 @@ export const handleError = (error: unknown): AppError => {
   }
 
   // Unknown error
-  return new AppError(ERROR_MESSAGES.SERVER_ERROR);
+  return new AppError('Server error occurred');
 };
 
 // Toast error handler

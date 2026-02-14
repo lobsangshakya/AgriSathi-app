@@ -1,167 +1,160 @@
-AgriSathi – Smart Agricultural Assistance System
+# AgriSathi
 
-AgriSathi is a mobile-friendly web application built with React, TypeScript, and Tailwind CSS, designed to empower farmers with AI-powered tools, multilingual assistance, and real-time agricultural insights.
+AgriSathi is a mobile-friendly web app built to help farmers with AI-assisted guidance, crop disease detection, and localized support in English and Hindi.
 
-Features
-Core Features
+## Live Demo
 
-AI Chatbot: Ask questions in Hindi or English. Voice input and image support included.
+https://agrisathi-38zh.onrender.com
 
-Disease Detection: Upload or capture plant leaves for AI-powered analysis.
+---
 
-Weather Information: Real-time forecasts.
+## What this app does
 
-Crop Recommendations: Personalized suggestions.
+Core user flows:
 
-Multilingual Support: Full support for Hindi and English.
+- Authentication: Email login + Phone OTP login/signup
+- AI Chatbot: Ask farming questions in English or Hindi
+- Disease Detection: Upload/capture a crop image and get analysis + guidance
+- Language Toggle: Switch the UI between English and Hindi
 
-Technical Highlights
+Farmer-first UI:
 
-Responsive design, mobile-first.
+- Simple dashboard focused on Chatbot and Crop Scanner
+- Clear toasts for success/errors
+- Mobile-first layout
 
-Offline capability for core features.
+---
 
-Real-time data updates.
+## Tech Stack
 
-Secure authentication (email/phone OTP).
+- Frontend: React, TypeScript, Vite
+- UI: Tailwind CSS + shadcn/ui
+- Routing: React Router
+- Data/Auth: Supabase (email + phone OTP)
+- APIs (optional/production):
+  - OpenWeather (weather)
+  - Plant.id (disease detection)
+  - Custom endpoints
 
-Clean, farmer-focused UI/UX using shadcn/ui components.
+---
 
-Authentication
+## Project Structure
 
-Post-login redirect now goes to / (dashboard).
+```
+src/
+  components/   UI components
+  contexts/     User/Auth, Language, Wallet contexts
+  pages/        Dashboard, Chat, Disease Detection
+  services/     API services
+  i18n/         translations
+  lib/          API adapters
+```
 
-Phone OTP flow: enter phone (and name for signup) → send OTP → verify → sign in/create account.
+---
 
-Uses sendOTP, signInWithPhone, signUpWithPhone from UserContext (mock + Supabase).
+## Getting Started
 
-Success/error toasts bilingual (English/Hindi).
+### Prerequisites
 
-Logout clears session and redirects to /.
+- Node.js 18+
 
-Chatbot
+### Install & Run
 
-Placeholder: "अपना सवाल यहाँ लिखें..." / "Type your question here...".
-
-Added prompt line: "हिंदी या अंग्रेज़ी में पूछें" / "Ask in Hindi or English".
-
-Send button uses primary green (bg-green-600).
-
-WorkingChatbot and API integration unchanged.
-
-Disease Detection / Scanner
-
-Flow unchanged: upload or camera → Start Analysis → result (disease, confidence, treatment) in selected language.
-
-Bilingual copy and toasts maintained.
-
-UI/UX
-
-Dashboard: header (logo, user, time, Logout) + two actions (Farming Assistant, Crop Scanner). Quick Info and Account Status removed.
-
-Bottom navigation: Home, Crop Scanner, Chat only. Tips bar and Quick Access removed.
-
-Layout & login screen background: bg-gray-50.
-
-Colors: green for main actions, blue for scanner, gray for text.
-
-Font: Inter; base 16px for mobile.
-
-Code
-
-Debug console.log removed or wrapped with import.meta.env.DEV.
-
-console.error retained.
-
-Unused variables and imports cleaned.
-
-Deployment
-
-npm run build completes successfully.
-
-npm run dev runs without errors.
-
-Vercel/Netlify configuration unchanged; environment variables functional.
-
-CHANGES_SUMMARY.md created for deployment/handover.
-
-All main features (login/email/phone OTP, logout, Chatbot, Scanner) are wired end-to-end with the simplified, farmer-focused UI and ready for production deployment.
-
-Getting Started
-Prerequisites
-
-Node.js v18+
-
-npm or yarn
-
-Installation
-git clone https://github.com/your-username/AgriSathi-app.git
+```bash
+git clone https://github.com/lobsangshakya/AgriSathi-app.git
 cd AgriSathi-app
 npm install
 cp .env.example .env
-
-Configure .env
-VITE_OPENWEATHER_API_KEY=your_key
-VITE_PLANT_ID_API_KEY=your_key
-VITE_AGRICULTURE_API_KEY=your_key
-VITE_API_BASE_URL=https://api.agrisathi.com
-VITE_AI_SERVICE_URL=https://ai.agrisathi.com
-
-Run Locally
 npm run dev
+```
 
+Open in browser:
 
-Open http://localhost:5173
+http://localhost:5173
 
-Scripts
+### Build
 
-npm run dev – Start development server
+```bash
+npm run build
+npm run preview
+```
 
-npm run build – Build for production
+---
 
-npm run preview – Preview production build
+## Environment Variables
 
-npm run lint – Run ESLint
+Create a `.env` file based on `.env.example`.
 
-Project Structure
-src/
-├─ components/      # UI components (shadcn/ui)
-├─ contexts/        # React contexts (User, Wallet, Language)
-├─ hooks/           # Custom hooks
-├─ lib/             # API services (mock & real)
-├─ pages/           # Pages: Dashboard, Chat, Scanner, etc.
-├─ types/           # TypeScript definitions
-└─ assets/          # Static assets
+Typical keys:
+
+```
+VITE_OPENWEATHER_API_KEY=
+VITE_PLANT_ID_API_KEY=
+VITE_AGRICULTURE_API_KEY=
+VITE_API_BASE_URL=
+VITE_AI_SERVICE_URL=
+```
+
+If using Supabase authentication, configure Supabase keys as required.
+
+---
+
+## Authentication
+
+Supported:
+
+- Email sign in / sign up
+- Phone OTP sign in / sign up
+- Logout clears session and returns to dashboard
+
+---
 
 ## Deployment
 
-### Render Web Service Settings
+### Render
 
-To deploy this app on Render as a static web service:
+Recommended settings:
 
-- **Build Command**: `npm install && npm run build`
-- **Start Command**: `npm run start`
+- Build Command: `npm install && npm run build`
+- Publish Directory: `dist`
 
-The `npm run start` script uses `serve` to efficiently serve the production `dist` folder on the port provided by Render (`$PORT`).
+Ensure SPA routing fallback is configured for React Router.
 
-### SPA Routing
+### Vercel / Netlify
 
-A `public/_redirects` file is included to handle SPA routing fallback, ensuring that React Router works correctly on page refreshes and deep links.
+- Build: `npm run build`
+- Output: `dist`
+- Enable SPA fallback
 
-```
-/* /index.html 200
-```
+---
 
-Contributing
+## Security Notes
 
-Fork → create branch → commit → push → pull request
+- Never commit real API keys
+- Use environment variables in production
+- Configure OTP/auth providers correctly
 
-Support
+---
 
-Email: lobsangshakya5@gmail.com
+## Troubleshooting
 
-Refer to Wiki for documentation
+Common issues:
 
-License
+- i18n errors → check `src/i18n/translations.ts` for duplicates or stray commas
+- OTP not sending → verify Supabase settings
+- Weather not loading → check browser location permissions
 
-MIT License
+---
+
+## Contributing
+
+1. Fork the repo
+2. Create a feature branch
+3. Commit changes
+4. Open a pull request
+
+---
+
+## License
+
+MIT
