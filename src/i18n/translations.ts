@@ -85,7 +85,8 @@ export const translations = {
     shareExperiences: "Share experiences & learn from others",
     diseaseDetection: "Crop Doctor",
     scanCrop: "Detect diseases",
-    askQuestion: "Ask about crops"
+    askQuestion: "Ask about crops",
+    smartFarming: "Smart Farming for Every Farmer"
   },
   hi: {
     // Authentication
@@ -159,6 +160,7 @@ export const translations = {
     farmerName: "किसान भाई",
     todaysWeather: "आज का मौसम",
     detectingLocation: "स्थान का पता लगाया जा रहा है...",
+    loading: "लोड हो रहा है...",
     unavailable: "अनुपलब्ध",
     enableLocation: "स्थान सक्षम करें",
     cropScanner: "फसल स्कैनर",
@@ -168,7 +170,8 @@ export const translations = {
     shareExperiences: "अनुभव साझें और दूसरों से सीखें",
     diseaseDetection: "फसल डॉक्टर",
     scanCrop: "बीमारी पहचानें",
-    askQuestion: "फसलों के बारे में पूछें"
+    askQuestion: "फसलों के बारे में पूछें",
+    smartFarming: "हर किसान के लिए स्मार्ट खेती"
   }
 };
 

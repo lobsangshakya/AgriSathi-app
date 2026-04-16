@@ -83,8 +83,8 @@ export default function WalletPage() {
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
     toast({
-      title: language === 'hindi' ? 'कॉपी हो गया' : 'Copied',
-      description: language === 'hindi' 
+      title: language === 'hi' ? 'कॉपी हो गया' : 'Copied',
+      description: language === 'hi' 
         ? 'पता क्लिपबोर्ड पर कॉपी हो गया है'
         : 'Address copied to clipboard',
     });
@@ -95,7 +95,7 @@ export default function WalletPage() {
   };
 
   const formatDate = (date: Date) => {
-    return date.toLocaleDateString(language === 'hindi' ? 'hi-IN' : 'en-US', {
+    return date.toLocaleDateString(language === 'hi' ? 'hi-IN' : 'en-US', {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
@@ -108,8 +108,8 @@ export default function WalletPage() {
     const amount = parseInt(sendAmount);
     if (!amount || amount <= 0) {
       toast({
-        title: language === 'hindi' ? 'अमान्य राशि' : 'Invalid Amount',
-        description: language === 'hindi' 
+        title: language === 'hi' ? 'अमान्य राशि' : 'Invalid Amount',
+        description: language === 'hi' 
           ? 'कृपया एक वैध राशि दर्ज करें'
           : 'Please enter a valid amount',
         variant: "destructive",
@@ -119,8 +119,8 @@ export default function WalletPage() {
 
     if (!sendAddress || sendAddress.length !== 42) {
       toast({
-        title: language === 'hindi' ? 'अमान्य पता' : 'Invalid Address',
-        description: language === 'hindi' 
+        title: language === 'hi' ? 'अमान्य पता' : 'Invalid Address',
+        description: language === 'hi' 
           ? 'कृपया एक वैध Ethereum पता दर्ज करें'
           : 'Please enter a valid Ethereum address',
         variant: "destructive",
@@ -137,8 +137,8 @@ export default function WalletPage() {
     const amount = parseInt(buyAmount);
     if (!amount || amount <= 0) {
       toast({
-        title: language === 'hindi' ? 'अमान्य राशि' : 'Invalid Amount',
-        description: language === 'hindi' 
+        title: language === 'hi' ? 'अमान्य राशि' : 'Invalid Amount',
+        description: language === 'hi' 
           ? 'कृपया एक वैध राशि दर्ज करें'
           : 'Please enter a valid amount',
         variant: "destructive",
@@ -154,8 +154,8 @@ export default function WalletPage() {
     const amount = parseInt(sellAmount);
     if (!amount || amount <= 0) {
       toast({
-        title: language === 'hindi' ? 'अमान्य राशि' : 'Invalid Amount',
-        description: language === 'hindi' 
+        title: language === 'hi' ? 'अमान्य राशि' : 'Invalid Amount',
+        description: language === 'hi' 
           ? 'कृपया एक वैध राशि दर्ज करें'
           : 'Please enter a valid amount',
         variant: "destructive",
@@ -185,13 +185,13 @@ export default function WalletPage() {
   const getTransactionText = (transaction: any) => {
     switch (transaction.type) {
       case 'send':
-        return language === 'hindi' ? 'भेजा गया' : 'Sent';
+        return language === 'hi' ? 'भेजा गया' : 'Sent';
       case 'receive':
-        return language === 'hindi' ? 'प्राप्त किया' : 'Received';
+        return language === 'hi' ? 'प्राप्त किया' : 'Received';
       case 'buy':
-        return language === 'hindi' ? 'खरीदा' : 'Bought';
+        return language === 'hi' ? 'खरीदा' : 'Bought';
       case 'sell':
-        return language === 'hindi' ? 'बेचा' : 'Sold';
+        return language === 'hi' ? 'बेचा' : 'Sold';
       default:
         return transaction.type;
     }
@@ -200,17 +200,17 @@ export default function WalletPage() {
   if (!isConnected) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50">
-        <Header title={language === 'hindi' ? 'वॉलेट' : 'Wallet'} />
+        <Header title={language === 'hi' ? 'वॉलेट' : 'Wallet'} />
         
         <div className="p-4 space-y-6">
           <Card className="text-center">
             <CardContent className="p-8">
               <Wallet className="h-16 w-16 mx-auto mb-4 text-gray-400" />
               <h2 className="text-xl font-semibold mb-2">
-                {language === 'hindi' ? 'वॉलेट कनेक्ट करें' : 'Connect Wallet'}
+                {language === 'hi' ? 'वॉलेट कनेक्ट करें' : 'Connect Wallet'}
               </h2>
               <p className="text-gray-600 mb-6">
-                {language === 'hindi' 
+                {language === 'hi' 
                   ? 'अपने AgriCreds को प्रबंधित करने के लिए MetaMask से कनेक्ट करें'
                   : 'Connect with MetaMask to manage your AgriCreds'
                 }
@@ -224,12 +224,12 @@ export default function WalletPage() {
                 {isConnecting ? (
                   <>
                     <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                    {language === 'hindi' ? 'कनेक्ट हो रहा है...' : 'Connecting...'}
+                    {language === 'hi' ? 'कनेक्ट हो रहा है...' : 'Connecting...'}
                   </>
                 ) : (
                   <>
                     <Wallet className="h-4 w-4 mr-2" />
-                    {language === 'hindi' ? 'MetaMask से कनेक्ट करें' : 'Connect MetaMask'}
+                    {language === 'hi' ? 'MetaMask से कनेक्ट करें' : 'Connect MetaMask'}
                   </>
                 )}
               </Button>
@@ -242,7 +242,7 @@ export default function WalletPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50">
-      <Header title={language === 'hindi' ? 'वॉलेट' : 'Wallet'} />
+      <Header title={language === 'hi' ? 'वॉलेट' : 'Wallet'} />
       
       <div className="p-4 space-y-6">
         {/* Wallet Overview */}
@@ -252,7 +252,7 @@ export default function WalletPage() {
               <div className="flex items-center gap-2">
                 <Wallet className="h-5 w-5" />
                 <span className="font-medium">
-                  {language === 'hindi' ? 'AgriCreds वॉलेट' : 'AgriCreds Wallet'}
+                  {language === 'hi' ? 'AgriCreds वॉलेट' : 'AgriCreds Wallet'}
                 </span>
               </div>
               <Button 
@@ -261,7 +261,7 @@ export default function WalletPage() {
                 onClick={disconnectWallet}
                 className="text-white hover:bg-white/20"
               >
-                {language === 'hindi' ? 'डिस्कनेक्ट' : 'Disconnect'}
+                {language === 'hi' ? 'डिस्कनेक्ट' : 'Disconnect'}
               </Button>
             </div>
             
@@ -279,7 +279,7 @@ export default function WalletPage() {
             <div className="mt-4 p-3 bg-white/10 rounded-lg">
               <div className="flex items-center justify-between">
                 <span className="text-sm opacity-90">
-                  {language === 'hindi' ? 'वॉलेट पता' : 'Wallet Address'}
+                  {language === 'hi' ? 'वॉलेट पता' : 'Wallet Address'}
                 </span>
                 <Button 
                   variant="ghost" 
@@ -319,11 +319,11 @@ export default function WalletPage() {
         {/* Navigation Tabs */}
         <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg">
           {[
-            { key: 'overview', label: language === 'hindi' ? 'अवलोकन' : 'Overview', icon: Wallet },
-            { key: 'send', label: language === 'hindi' ? 'भेजें' : 'Send', icon: Send },
-            { key: 'buy', label: language === 'hindi' ? 'खरीदें' : 'Buy', icon: Download },
-            { key: 'sell', label: language === 'hindi' ? 'बेचें' : 'Sell', icon: Upload },
-            { key: 'history', label: language === 'hindi' ? 'इतिहास' : 'History', icon: History }
+            { key: 'overview', label: language === 'hi' ? 'अवलोकन' : 'Overview', icon: Wallet },
+            { key: 'send', label: language === 'hi' ? 'भेजें' : 'Send', icon: Send },
+            { key: 'buy', label: language === 'hi' ? 'खरीदें' : 'Buy', icon: Download },
+            { key: 'sell', label: language === 'hi' ? 'बेचें' : 'Sell', icon: Upload },
+            { key: 'history', label: language === 'hi' ? 'इतिहास' : 'History', icon: History }
           ].map((tab) => {
             const IconComponent = tab.icon;
             return (
@@ -350,16 +350,16 @@ export default function WalletPage() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <TrendingUp className="h-5 w-5" />
-                    {language === 'hindi' ? 'कीमतें' : 'Prices'}
+                    {language === 'hi' ? 'कीमतें' : 'Prices'}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   <div className="flex justify-between items-center">
-                    <span>{language === 'hindi' ? '1 AgriCred =' : '1 AgriCred ='}</span>
+                    <span>{language === 'hi' ? '1 AgriCred =' : '1 AgriCred ='}</span>
                     <span className="font-semibold">0.001 ETH</span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span>{language === 'hindi' ? '1 AgriCred =' : '1 AgriCred ='}</span>
+                    <span>{language === 'hi' ? '1 AgriCred =' : '1 AgriCred ='}</span>
                     <span className="font-semibold">0.0008 ETH (बिक्री)</span>
                   </div>
                 </CardContent>
@@ -369,13 +369,13 @@ export default function WalletPage() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Shield className="h-5 w-5" />
-                    {language === 'hindi' ? 'सुरक्षा' : 'Security'}
+                    {language === 'hi' ? 'सुरक्षा' : 'Security'}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="flex items-center gap-2 text-sm text-green-600">
                     <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                    {language === 'hindi' ? 'वॉलेट सुरक्षित है' : 'Wallet is secure'}
+                    {language === 'hi' ? 'वॉलेट सुरक्षित है' : 'Wallet is secure'}
                   </div>
                 </CardContent>
               </Card>
@@ -388,13 +388,13 @@ export default function WalletPage() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Send className="h-5 w-5" />
-                  {language === 'hindi' ? 'AgriCreds भेजें' : 'Send AgriCreds'}
+                  {language === 'hi' ? 'AgriCreds भेजें' : 'Send AgriCreds'}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
                   <Label htmlFor="address">
-                    {language === 'hindi' ? 'प्राप्तकर्ता का पता' : 'Recipient Address'}
+                    {language === 'hi' ? 'प्राप्तकर्ता का पता' : 'Recipient Address'}
                   </Label>
                   <Input
                     id="address"
@@ -405,7 +405,7 @@ export default function WalletPage() {
                 </div>
                 <div>
                   <Label htmlFor="amount">
-                    {language === 'hindi' ? 'राशि' : 'Amount'}
+                    {language === 'hi' ? 'राशि' : 'Amount'}
                   </Label>
                   <Input
                     id="amount"
@@ -423,12 +423,12 @@ export default function WalletPage() {
                   {isTransacting ? (
                     <>
                       <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                      {language === 'hindi' ? 'भेज रहा है...' : 'Sending...'}
+                      {language === 'hi' ? 'भेज रहा है...' : 'Sending...'}
                     </>
                   ) : (
                     <>
                       <Send className="h-4 w-4 mr-2" />
-                      {language === 'hindi' ? 'भेजें' : 'Send'}
+                      {language === 'hi' ? 'भेजें' : 'Send'}
                     </>
                   )}
                 </Button>
@@ -442,13 +442,13 @@ export default function WalletPage() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Download className="h-5 w-5" />
-                  {language === 'hindi' ? 'AgriCreds खरीदें' : 'Buy AgriCreds'}
+                  {language === 'hi' ? 'AgriCreds खरीदें' : 'Buy AgriCreds'}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
                   <Label htmlFor="buyAmount">
-                    {language === 'hindi' ? 'AgriCreds की संख्या' : 'Number of AgriCreds'}
+                    {language === 'hi' ? 'AgriCreds की संख्या' : 'Number of AgriCreds'}
                   </Label>
                   <Input
                     id="buyAmount"
@@ -461,7 +461,7 @@ export default function WalletPage() {
                 {buyAmount && (
                   <div className="p-3 bg-blue-50 rounded-lg">
                     <div className="text-sm text-blue-700">
-                      {language === 'hindi' ? 'आवश्यक ETH:' : 'ETH Required:'} {(parseInt(buyAmount) * 0.001).toFixed(4)} ETH
+                      {language === 'hi' ? 'आवश्यक ETH:' : 'ETH Required:'} {(parseInt(buyAmount) * 0.001).toFixed(4)} ETH
                     </div>
                   </div>
                 )}
@@ -473,12 +473,12 @@ export default function WalletPage() {
                   {isTransacting ? (
                     <>
                       <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                      {language === 'hindi' ? 'खरीद रहा है...' : 'Buying...'}
+                      {language === 'hi' ? 'खरीद रहा है...' : 'Buying...'}
                     </>
                   ) : (
                     <>
                       <Download className="h-4 w-4 mr-2" />
-                      {language === 'hindi' ? 'खरीदें' : 'Buy'}
+                      {language === 'hi' ? 'खरीदें' : 'Buy'}
                     </>
                   )}
                 </Button>
@@ -492,13 +492,13 @@ export default function WalletPage() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Upload className="h-5 w-5" />
-                  {language === 'hindi' ? 'AgriCreds बेचें' : 'Sell AgriCreds'}
+                  {language === 'hi' ? 'AgriCreds बेचें' : 'Sell AgriCreds'}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
                   <Label htmlFor="sellAmount">
-                    {language === 'hindi' ? 'AgriCreds की संख्या' : 'Number of AgriCreds'}
+                    {language === 'hi' ? 'AgriCreds की संख्या' : 'Number of AgriCreds'}
                   </Label>
                   <Input
                     id="sellAmount"
@@ -511,7 +511,7 @@ export default function WalletPage() {
                 {sellAmount && (
                   <div className="p-3 bg-orange-50 rounded-lg">
                     <div className="text-sm text-orange-700">
-                      {language === 'hindi' ? 'प्राप्त ETH:' : 'ETH Received:'} {(parseInt(sellAmount) * 0.0008).toFixed(4)} ETH
+                      {language === 'hi' ? 'प्राप्त ETH:' : 'ETH Received:'} {(parseInt(sellAmount) * 0.0008).toFixed(4)} ETH
                     </div>
                   </div>
                 )}
@@ -523,12 +523,12 @@ export default function WalletPage() {
                   {isTransacting ? (
                     <>
                       <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                      {language === 'hindi' ? 'बेच रहा है...' : 'Selling...'}
+                      {language === 'hi' ? 'बेच रहा है...' : 'Selling...'}
                     </>
                   ) : (
                     <>
                       <Upload className="h-4 w-4 mr-2" />
-                      {language === 'hindi' ? 'बेचें' : 'Sell'}
+                      {language === 'hi' ? 'बेचें' : 'Sell'}
                     </>
                   )}
                 </Button>
@@ -542,7 +542,7 @@ export default function WalletPage() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <History className="h-5 w-5" />
-                  {language === 'hindi' ? 'लेन-देन इतिहास' : 'Transaction History'}
+                  {language === 'hi' ? 'लेन-देन इतिहास' : 'Transaction History'}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -585,7 +585,7 @@ export default function WalletPage() {
             className="h-12"
           >
             <Coins className="h-4 w-4 mr-2" />
-            {language === 'hindi' ? 'AgriCredits' : 'AgriCredits'}
+            {language === 'hi' ? 'AgriCredits' : 'AgriCredits'}
           </Button>
           <Button 
             variant="outline" 
@@ -593,7 +593,7 @@ export default function WalletPage() {
             className="h-12"
           >
             <Settings className="h-4 w-4 mr-2" />
-            {language === 'hindi' ? 'प्रोफाइल' : 'Profile'}
+            {language === 'hi' ? 'प्रोफाइल' : 'Profile'}
           </Button>
         </div>
       </div>
