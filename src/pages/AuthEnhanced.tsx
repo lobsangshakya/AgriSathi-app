@@ -63,28 +63,28 @@ const AuthEnhanced = ({ onAuth }: { onAuth: () => void }) => {
     setError(null);
 
     if (!email.trim()) {
-      setError(language === 'hindi' ? 'ईमेल आवश्यक है' : 'Email is required');
+      setError(language === 'hi' ? 'ईमेल आवश्यक है' : 'Email is required');
       return false;
     }
 
     if (!password.trim()) {
-      setError(language === 'hindi' ? 'पासवर्ड आवश्यक है' : 'Password is required');
+      setError(language === 'hi' ? 'पासवर्ड आवश्यक है' : 'Password is required');
       return false;
     }
 
     if (password.length < 6) {
-      setError(language === 'hindi' ? 'पासवर्ड कम से कम 6 अक्षरों का होना चाहिए' : 'Password must be at least 6 characters');
+      setError(language === 'hi' ? 'पासवर्ड कम से कम 6 अक्षरों का होना चाहिए' : 'Password must be at least 6 characters');
       return false;
     }
 
     if (isSignUp) {
       if (!name.trim()) {
-        setError(language === 'hindi' ? 'नाम आवश्यक है' : 'Name is required');
+        setError(language === 'hi' ? 'नाम आवश्यक है' : 'Name is required');
         return false;
       }
 
       if (password !== confirmPassword) {
-        setError(language === 'hindi' ? 'पासवर्ड मेल नहीं खाते' : 'Passwords do not match');
+        setError(language === 'hi' ? 'पासवर्ड मेल नहीं खाते' : 'Passwords do not match');
         return false;
       }
     }
@@ -96,22 +96,22 @@ const AuthEnhanced = ({ onAuth }: { onAuth: () => void }) => {
     setError(null);
 
     if (!phone.trim()) {
-      setError(language === 'hindi' ? 'फोन नंबर आवश्यक है' : 'Phone number is required');
+      setError(language === 'hi' ? 'फोन नंबर आवश्यक है' : 'Phone number is required');
       return false;
     }
 
     if (!name.trim()) {
-      setError(language === 'hindi' ? 'नाम आवश्यक है' : 'Name is required');
+      setError(language === 'hi' ? 'नाम आवश्यक है' : 'Name is required');
       return false;
     }
 
     if (!otp.trim()) {
-      setError(language === 'hindi' ? 'OTP आवश्यक है' : 'OTP is required');
+      setError(language === 'hi' ? 'OTP आवश्यक है' : 'OTP is required');
       return false;
     }
 
     if (phone.length < 10) {
-      setError(language === 'hindi' ? 'फोन नंबर कम से कम 10 अंकों का होना चाहिए' : 'Phone number must be at least 10 digits');
+      setError(language === 'hi' ? 'फोन नंबर कम से कम 10 अंकों का होना चाहिए' : 'Phone number must be at least 10 digits');
       return false;
     }
 
@@ -133,11 +133,11 @@ const AuthEnhanced = ({ onAuth }: { onAuth: () => void }) => {
         success = await signUp(email, password, {
           name,
           phone,
-          location: language === 'hindi' ? 'गाँव: रामपुर, जिला: मेरठ, उत्तर प्रदेश' : 'Village: Rampur, District: Meerut, UP',
-          landSize: language === 'hindi' ? '2.5 एकड़' : '2.5 acres',
-          experience: language === 'hindi' ? '15 साल' : '15 years',
+          location: language === 'hi' ? 'गाँव: रामपुर, जिला: मेरठ, उत्तर प्रदेश' : 'Village: Rampur, District: Meerut, UP',
+          landSize: language === 'hi' ? '2.5 एकड़' : '2.5 acres',
+          experience: language === 'hi' ? '15 साल' : '15 years',
           language: language,
-          crops: language === 'hindi' ? ['गेहूं', 'धान', 'गन्ना', 'सरसों'] : ['Wheat', 'Rice', 'Sugarcane', 'Mustard'],
+          crops: language === 'hi' ? ['गेहूं', 'धान', 'गन्ना', 'सरसों'] : ['Wheat', 'Rice', 'Sugarcane', 'Mustard'],
           avatar: 'https://images.unsplash.com/photo-1607990281513-2c110a25bd8c?w=150&h=150&fit=crop&crop=face',
         });
       } else {
@@ -158,32 +158,37 @@ const AuthEnhanced = ({ onAuth }: { onAuth: () => void }) => {
   // Handle OTP sending
   const handleSendOTP = async () => {
     if (!phone.trim()) {
-      setError(language === 'hindi' ? 'फोन नंबर आवश्यक है' : 'Phone number is required');
+      setError(language === 'hi' ? 'फोन नंबर आवश्यक है' : 'Phone number is required');
       return;
     }
 
     if (phone.length < 10) {
-      setError(language === 'hindi' ? 'फोन नंबर कम से कम 10 अंकों का होना चाहिए' : 'Phone number must be at least 10 digits');
+      setError(language === 'hi' ? 'फोन नंबर कम से कम 10 अंकों का होना चाहिए' : 'Phone number must be at least 10 digits');
       return;
     }
 
-    const success = await sendOTP(phone);
-    if (success) {
-      setOtpSent(true);
-      setOtpTimer(60);
-      setCanResendOtp(false);
-      
-      // Start countdown timer
-      const timer = setInterval(() => {
-        setOtpTimer(prev => {
-          if (prev <= 1) {
-            clearInterval(timer);
-            setCanResendOtp(true);
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
+    setIsSubmitting(true);
+    try {
+      const success = await sendOTP(phone);
+      if (success) {
+        setOtpSent(true);
+        setOtpTimer(60);
+        setCanResendOtp(false);
+        
+        // Start countdown timer
+        const timer = setInterval(() => {
+          setOtpTimer(prev => {
+            if (prev <= 1) {
+              clearInterval(timer);
+              setCanResendOtp(true);
+              return 0;
+            }
+            return prev - 1;
+          });
+        }, 1000);
+      }
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -240,7 +245,7 @@ const AuthEnhanced = ({ onAuth }: { onAuth: () => void }) => {
           className="mb-6 flex items-center text-muted-foreground hover:text-foreground transition-colors"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
-          {language === 'hindi' ? 'वापस' : 'Back'}
+          {language === 'hi' ? 'वापस' : 'Back'}
         </button>
 
         {/* Logo */}
@@ -252,8 +257,8 @@ const AuthEnhanced = ({ onAuth }: { onAuth: () => void }) => {
           />
           <h1 className="text-2xl font-bold text-gradient text-center">
             {isSignUp 
-              ? (language === 'hindi' ? 'AgriSathi में शामिल हों' : 'Join AgriSathi')
-              : (language === 'hindi' ? 'AgriSathi में लॉगिन करें' : 'Login to AgriSathi')
+              ? (language === 'hi' ? 'AgriSathi में शामिल हों' : 'Join AgriSathi')
+              : (language === 'hi' ? 'AgriSathi में लॉगिन करें' : 'Login to AgriSathi')
             }
           </h1>
         </div>
@@ -269,7 +274,7 @@ const AuthEnhanced = ({ onAuth }: { onAuth: () => void }) => {
             }`}
           >
             <Mail className="w-4 h-4 mr-2" />
-            {language === 'hindi' ? 'ईमेल' : 'Email'}
+            {language === 'hi' ? 'ईमेल' : 'Email'}
           </button>
           <button
             onClick={() => switchAuthMethod('phone')}
@@ -280,7 +285,7 @@ const AuthEnhanced = ({ onAuth }: { onAuth: () => void }) => {
             }`}
           >
             <Phone className="w-4 h-4 mr-2" />
-            {language === 'hindi' ? 'फोन' : 'Phone'}
+            {language === 'hi' ? 'फोन' : 'Phone'}
           </button>
         </div>
 
@@ -298,13 +303,13 @@ const AuthEnhanced = ({ onAuth }: { onAuth: () => void }) => {
             {isSignUp && (
               <div className="space-y-2">
                 <label className="text-sm font-medium text-foreground">
-                  {language === 'hindi' ? 'पूरा नाम' : 'Full Name'}
+                  {language === 'hi' ? 'पूरा नाम' : 'Full Name'}
                 </label>
                 <div className="relative">
                   <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
                     type="text"
-                    placeholder={language === 'hindi' ? 'अपना नाम दर्ज करें' : 'Enter your name'}
+                    placeholder={language === 'hi' ? 'अपना नाम दर्ज करें' : 'Enter your name'}
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     className="pl-10"
@@ -317,13 +322,13 @@ const AuthEnhanced = ({ onAuth }: { onAuth: () => void }) => {
             {/* Email Field */}
             <div className="space-y-2">
               <label className="text-sm font-medium text-foreground">
-                {language === 'hindi' ? 'ईमेल पता' : 'Email Address'}
+                {language === 'hi' ? 'ईमेल पता' : 'Email Address'}
               </label>
               <div className="relative">
                 <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
                   type="email"
-                  placeholder={language === 'hindi' ? 'अपना ईमेल दर्ज करें' : 'Enter your email'}
+                  placeholder={language === 'hi' ? 'अपना ईमेल दर्ज करें' : 'Enter your email'}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="pl-10"
@@ -336,11 +341,11 @@ const AuthEnhanced = ({ onAuth }: { onAuth: () => void }) => {
             {isSignUp && (
               <div className="space-y-2">
                 <label className="text-sm font-medium text-foreground">
-                  {language === 'hindi' ? 'फोन नंबर' : 'Phone Number'}
+                  {language === 'hi' ? 'फोन नंबर' : 'Phone Number'}
                 </label>
                 <Input
                   type="tel"
-                  placeholder={language === 'hindi' ? '+91 98765 43210' : '+1 (555) 123-4567'}
+                  placeholder={language === 'hi' ? '+91 98765 43210' : '+1 (555) 123-4567'}
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   disabled={isSubmitting || isLoading}
@@ -351,13 +356,13 @@ const AuthEnhanced = ({ onAuth }: { onAuth: () => void }) => {
             {/* Password Field */}
             <div className="space-y-2">
               <label className="text-sm font-medium text-foreground">
-                {language === 'hindi' ? 'पासवर्ड' : 'Password'}
+                {language === 'hi' ? 'पासवर्ड' : 'Password'}
               </label>
               <div className="relative">
                 <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
                   type={showPassword ? 'text' : 'password'}
-                  placeholder={language === 'hindi' ? 'अपना पासवर्ड दर्ज करें' : 'Enter your password'}
+                  placeholder={language === 'hi' ? 'अपना पासवर्ड दर्ज करें' : 'Enter your password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="pl-10 pr-10"
@@ -378,13 +383,13 @@ const AuthEnhanced = ({ onAuth }: { onAuth: () => void }) => {
             {isSignUp && (
               <div className="space-y-2">
                 <label className="text-sm font-medium text-foreground">
-                  {language === 'hindi' ? 'पासवर्ड की पुष्टि करें' : 'Confirm Password'}
+                  {language === 'hi' ? 'पासवर्ड की पुष्टि करें' : 'Confirm Password'}
                 </label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
                     type={showConfirmPassword ? 'text' : 'password'}
-                    placeholder={language === 'hindi' ? 'पासवर्ड फिर से दर्ज करें' : 'Re-enter your password'}
+                    placeholder={language === 'hi' ? 'पासवर्ड फिर से दर्ज करें' : 'Re-enter your password'}
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     className="pl-10 pr-10"
@@ -412,14 +417,14 @@ const AuthEnhanced = ({ onAuth }: { onAuth: () => void }) => {
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   {isSignUp 
-                    ? (language === 'hindi' ? 'खाता बनाया जा रहा है...' : 'Creating account...')
-                    : (language === 'hindi' ? 'लॉगिन हो रहा है...' : 'Signing in...')
+                    ? (language === 'hi' ? 'खाता बनाया जा रहा है...' : 'Creating account...')
+                    : (language === 'hi' ? 'लॉगिन हो रहा है...' : 'Signing in...')
                   }
                 </>
               ) : (
                 isSignUp 
-                  ? (language === 'hindi' ? 'खाता बनाएं' : 'Create Account')
-                  : (language === 'hindi' ? 'लॉगिन करें' : 'Sign In')
+                  ? (language === 'hi' ? 'खाता बनाएं' : 'Create Account')
+                  : (language === 'hi' ? 'लॉगिन करें' : 'Sign In')
               )}
             </Button>
           </form>
@@ -431,13 +436,13 @@ const AuthEnhanced = ({ onAuth }: { onAuth: () => void }) => {
             {/* Name Field */}
             <div className="space-y-2">
               <label className="text-sm font-medium text-foreground">
-                {language === 'hindi' ? 'पूरा नाम' : 'Full Name'}
+                {language === 'hi' ? 'पूरा नाम' : 'Full Name'}
               </label>
               <div className="relative">
                 <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
                   type="text"
-                  placeholder={language === 'hindi' ? 'अपना नाम दर्ज करें' : 'Enter your name'}
+                  placeholder={language === 'hi' ? 'अपना नाम दर्ज करें' : 'Enter your name'}
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   className="pl-10"
@@ -449,13 +454,13 @@ const AuthEnhanced = ({ onAuth }: { onAuth: () => void }) => {
             {/* Phone Field */}
             <div className="space-y-2">
               <label className="text-sm font-medium text-foreground">
-                {language === 'hindi' ? 'फोन नंबर' : 'Phone Number'}
+                {language === 'hi' ? 'फोन नंबर' : 'Phone Number'}
               </label>
               <div className="relative">
                 <Phone className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
                   type="tel"
-                  placeholder={language === 'hindi' ? '+91 98765 43210' : '+1 (555) 123-4567'}
+                  placeholder={language === 'hi' ? '+91 98765 43210' : '+1 (555) 123-4567'}
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   className="pl-10"
@@ -476,12 +481,12 @@ const AuthEnhanced = ({ onAuth }: { onAuth: () => void }) => {
                   {isSubmitting || isLoading ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      {language === 'hindi' ? 'OTP भेजा जा रहा है...' : 'Sending OTP...'}
+                      {language === 'hi' ? 'OTP भेजा जा रहा है...' : 'Sending OTP...'}
                     </>
                   ) : (
                     <>
                       <MessageSquare className="mr-2 h-4 w-4" />
-                      {language === 'hindi' ? 'OTP भेजें' : 'Send OTP'}
+                      {language === 'hi' ? 'OTP भेजें' : 'Send OTP'}
                     </>
                   )}
                 </Button>
@@ -489,13 +494,13 @@ const AuthEnhanced = ({ onAuth }: { onAuth: () => void }) => {
             ) : (
               <div className="space-y-2">
                 <label className="text-sm font-medium text-foreground">
-                  {language === 'hindi' ? 'OTP दर्ज करें' : 'Enter OTP'}
+                  {language === 'hi' ? 'OTP दर्ज करें' : 'Enter OTP'}
                 </label>
                 <div className="relative">
                   <Shield className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
                     type="text"
-                    placeholder={language === 'hindi' ? '6 अंकों का OTP' : 'Enter 6-digit OTP'}
+                    placeholder={language === 'hi' ? '6 अंकों का OTP' : 'Enter 6-digit OTP'}
                     value={otp}
                     onChange={(e) => setOtp(e.target.value)}
                     className="pl-10"
@@ -505,11 +510,11 @@ const AuthEnhanced = ({ onAuth }: { onAuth: () => void }) => {
                 </div>
                 <div className="flex items-center justify-between text-sm text-muted-foreground">
                   <span>
-                    {language === 'hindi' ? 'OTP नहीं आया?' : "Didn't receive OTP?"}
+                    {language === 'hi' ? 'OTP नहीं आया?' : "Didn't receive OTP?"}
                   </span>
                   {otpTimer > 0 ? (
                     <span className="text-primary">
-                      {language === 'hindi' ? `${otpTimer} सेकंड` : `${otpTimer}s`}
+                      {language === 'hi' ? `${otpTimer} सेकंड` : `${otpTimer}s`}
                     </span>
                   ) : (
                     <button
@@ -518,7 +523,7 @@ const AuthEnhanced = ({ onAuth }: { onAuth: () => void }) => {
                       className="text-primary hover:text-primary/80 font-medium transition-colors"
                       disabled={!canResendOtp || isSubmitting || isLoading}
                     >
-                      {language === 'hindi' ? 'फिर से भेजें' : 'Resend'}
+                      {language === 'hi' ? 'फिर से भेजें' : 'Resend'}
                     </button>
                   )}
                 </div>
@@ -535,14 +540,14 @@ const AuthEnhanced = ({ onAuth }: { onAuth: () => void }) => {
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   {isSignUp 
-                    ? (language === 'hindi' ? 'खाता बनाया जा रहा है...' : 'Creating account...')
-                    : (language === 'hindi' ? 'लॉगिन हो रहा है...' : 'Signing in...')
+                    ? (language === 'hi' ? 'खाता बनाया जा रहा है...' : 'Creating account...')
+                    : (language === 'hi' ? 'लॉगिन हो रहा है...' : 'Signing in...')
                   }
                 </>
               ) : (
                 isSignUp 
-                  ? (language === 'hindi' ? 'OTP के साथ खाता बनाएं' : 'Create Account with OTP')
-                  : (language === 'hindi' ? 'OTP के साथ लॉगिन करें' : 'Sign In with OTP')
+                  ? (language === 'hi' ? 'OTP के साथ खाता बनाएं' : 'Create Account with OTP')
+                  : (language === 'hi' ? 'OTP के साथ लॉगिन करें' : 'Sign In with OTP')
               )}
             </Button>
           </form>
@@ -552,8 +557,8 @@ const AuthEnhanced = ({ onAuth }: { onAuth: () => void }) => {
         <div className="mt-8 text-center">
           <p className="text-sm text-muted-foreground">
             {isSignUp 
-              ? (language === 'hindi' ? 'पहले से ही खाता है?' : 'Already have an account?')
-              : (language === 'hindi' ? 'खाता नहीं है?' : "Don't have an account?")
+              ? (language === 'hi' ? 'पहले से ही खाता है?' : 'Already have an account?')
+              : (language === 'hi' ? 'खाता नहीं है?' : "Don't have an account?")
             }
             <button
               type="button"
@@ -567,8 +572,8 @@ const AuthEnhanced = ({ onAuth }: { onAuth: () => void }) => {
               disabled={isSubmitting || isLoading}
             >
               {isSignUp 
-                ? (language === 'hindi' ? 'लॉगिन करें' : 'Sign In')
-                : (language === 'hindi' ? 'खाता बनाएं' : 'Sign Up')
+                ? (language === 'hi' ? 'लॉगिन करें' : 'Sign In')
+                : (language === 'hi' ? 'खाता बनाएं' : 'Sign Up')
               }
             </button>
           </p>
@@ -577,7 +582,7 @@ const AuthEnhanced = ({ onAuth }: { onAuth: () => void }) => {
         {/* Terms and Conditions */}
         {isSignUp && (
           <div className="mt-6 text-xs text-muted-foreground text-center">
-            {language === 'hindi' 
+            {language === 'hi' 
               ? 'खाता बनाकर, आप हमारी शर्तों और गोपनीयता नीति से सहमत होते हैं'
               : 'By creating an account, you agree to our Terms and Privacy Policy'
             }

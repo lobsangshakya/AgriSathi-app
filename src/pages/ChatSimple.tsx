@@ -35,7 +35,7 @@ const ChatSimple = () => {
   const recognitionRef = useRef<any>(null);
 
   // Quick questions for farmers
-  const quickQuestions = language === 'hindi' ? [
+  const quickQuestions = language === 'hi' ? [
     'मेरे टमाटर के पौधे पीले क्यों हैं?',
     'आज का मौसम कैसा है?',
     'गेहूं का भाव क्या है?',
@@ -55,7 +55,7 @@ const ChatSimple = () => {
       console.log('[ChatSimple] Initializing welcome message');
       const welcomeMessage = {
         id: 'welcome',
-        content: language === 'hindi'
+        content: language === 'hi'
           ? ' नमस्ते किसान भाई! मैं आपका कृषि सहायक हूं। अपना सवाल पूछें।'
           : ' Hello! I am your farming assistant. Ask your question.',
         sender: 'bot',
@@ -72,7 +72,7 @@ const ChatSimple = () => {
       recognitionRef.current = new SpeechRecognition();
       recognitionRef.current.continuous = false;
       recognitionRef.current.interimResults = false;
-      recognitionRef.current.lang = language === 'hindi' ? 'hi-IN' : 'en-US';
+      recognitionRef.current.lang = language === 'hi' ? 'hi-IN' : 'en-US';
 
       recognitionRef.current.onresult = (event: any) => {
         const transcript = event.results[0][0].transcript;
@@ -83,8 +83,8 @@ const ChatSimple = () => {
       recognitionRef.current.onerror = () => {
         setIsListening(false);
         toast({
-          title: language === 'hindi' ? 'आवाज़ समस्या' : 'Voice Issue',
-          description: language === 'hindi'
+          title: language === 'hi' ? 'आवाज़ समस्या' : 'Voice Issue',
+          description: language === 'hi'
             ? 'फिर से कोशिश करें'
             : 'Please try again',
           variant: 'destructive',
@@ -141,7 +141,7 @@ const ChatSimple = () => {
       console.error('[ChatSimple] Error in handleSendMessage:', error);
       const errorMessage = {
         id: (Date.now() + 1).toString(),
-        content: language === 'hindi'
+        content: language === 'hi'
           ? 'क्षमा करें, समस्या हुई। फिर से कोशिश करें।'
           : 'Sorry, there was a problem. Please try again.',
         sender: 'bot',
@@ -157,8 +157,8 @@ const ChatSimple = () => {
   const handleVoiceInput = () => {
     if (!recognitionRef.current) {
       toast({
-        title: language === 'hindi' ? 'आवाज़ उपलब्ध नहीं' : 'Voice Not Available',
-        description: language === 'hindi'
+        title: language === 'hi' ? 'आवाज़ उपलब्ध नहीं' : 'Voice Not Available',
+        description: language === 'hi'
           ? 'आपके ब्राउज़र में आवाज़ सुविधा नहीं है'
           : 'Voice feature is not available in your browser',
         variant: 'destructive',
@@ -195,10 +195,10 @@ const ChatSimple = () => {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-xl font-bold text-gray-900">
-                {language === 'hindi' ? 'कृषि सहायक' : 'Farming Assistant'}
+                {language === 'hi' ? 'कृषि सहायक' : 'Farming Assistant'}
               </h1>
               <p className="text-sm text-gray-600">
-                {language === 'hindi' ? 'अपना सवाल पूछें' : 'Ask your question'}
+                {language === 'hi' ? 'अपना सवाल पूछें' : 'Ask your question'}
               </p>
             </div>
             <Button
@@ -206,7 +206,7 @@ const ChatSimple = () => {
               size="sm"
               onClick={() => window.history.back()}
             >
-              {language === 'hindi' ? 'वापस' : 'Back'}
+              {language === 'hi' ? 'वापस' : 'Back'}
             </Button>
           </div>
         </div>
@@ -217,7 +217,7 @@ const ChatSimple = () => {
         {messages.length <= 1 && (
           <div className="mb-4">
             <h3 className="text-sm font-medium text-gray-700 mb-3">
-              {language === 'hindi' ? 'त्वरित प्रश्न:' : 'Quick Questions:'}
+              {language === 'hi' ? 'त्वरित प्रश्न:' : 'Quick Questions:'}
             </h3>
             <div className="grid grid-cols-1 gap-2">
               {quickQuestions.map((question, index) => (
@@ -289,7 +289,7 @@ const ChatSimple = () => {
               onImageCapture={(imageData: string) => {
                 const imageMessage = {
                   id: Date.now().toString(),
-                  content: language === 'hindi'
+                  content: language === 'hi'
                     ? ' फसल की फोटो भेजी गई।'
                     : ' Crop photo sent.',
                   sender: 'user',
@@ -321,7 +321,7 @@ const ChatSimple = () => {
                 <Input
                   value={newMessage}
                   onChange={(e) => setNewMessage(e.target.value)}
-                  placeholder={language === 'hindi'
+                  placeholder={language === 'hi'
                     ? 'अपना सवाल यहाँ लिखें...'
                     : 'Type your question here...'
                   }
@@ -356,7 +356,7 @@ const ChatSimple = () => {
             </div>
 
             <div className="mt-2 text-xs text-gray-500 text-center">
-              {language === 'hindi'
+              {language === 'hi'
                 ? ' टिप: फसल की फोटो भेजकर बीमारी की पहचान कर सकते हैं'
                 : ' Tip: Send crop photos for disease detection'
               }

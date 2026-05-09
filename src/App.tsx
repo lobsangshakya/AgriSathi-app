@@ -22,6 +22,7 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import { useState, useEffect } from 'react';
 import AuthModalSimple from './components/AuthModalSimple';
 import { useLanguage } from '@/contexts/LanguageContext';
+import agriSathiLogo from '@/assets/agrisathi-logo.svg';
 
 const queryClient = new QueryClient();
 
@@ -45,7 +46,7 @@ const AppContent = () => {
           <div className="text-center">
             <div className="mb-8">
               <img 
-                src="/src/assets/AgriSathi Logo.png" 
+                src={agriSathiLogo}
                 alt="AgriSathi" 
                 className="w-24 h-24 mx-auto rounded-2xl shadow-lg"
               />

@@ -33,32 +33,32 @@ export default function AgriCredits() {
   const services = [
     {
       id: 'expert-chat',
-      name: language === 'hindi' ? 'विशेषज्ञ से बात' : 'Expert Chat',
-      description: language === 'hindi' ? 'कृषि विशेषज्ञ से सीधी बातचीत' : 'Direct chat with agriculture expert',
+      name: language === 'hi' ? 'विशेषज्ञ से बात' : 'Expert Chat',
+      description: language === 'hi' ? 'कृषि विशेषज्ञ से सीधी बातचीत' : 'Direct chat with agriculture expert',
       credits: 50,
       icon: MessageCircle,
       color: 'bg-blue-500'
     },
     {
       id: 'voice-call',
-      name: language === 'hindi' ? 'वॉइस कॉल' : 'Voice Call',
-      description: language === 'hindi' ? 'विशेषज्ञ से फोन पर बात' : 'Phone call with expert',
+      name: language === 'hi' ? 'वॉइस कॉल' : 'Voice Call',
+      description: language === 'hi' ? 'विशेषज्ञ से फोन पर बात' : 'Phone call with expert',
       credits: 100,
       icon: Phone,
       color: 'bg-green-500'
     },
     {
       id: 'disease-detection',
-      name: language === 'hindi' ? 'रोग पहचान' : 'Disease Detection',
-      description: language === 'hindi' ? 'फसल रोग की पहचान' : 'Crop disease identification',
+      name: language === 'hi' ? 'रोग पहचान' : 'Disease Detection',
+      description: language === 'hi' ? 'फसल रोग की पहचान' : 'Crop disease identification',
       credits: 25,
       icon: Camera,
       color: 'bg-orange-500'
     },
     {
       id: 'soil-analysis',
-      name: language === 'hindi' ? 'मिट्टी जांच' : 'Soil Analysis',
-      description: language === 'hindi' ? 'मिट्टी की गुणवत्ता जांच' : 'Soil quality analysis',
+      name: language === 'hi' ? 'मिट्टी जांच' : 'Soil Analysis',
+      description: language === 'hi' ? 'मिट्टी की गुणवत्ता जांच' : 'Soil quality analysis',
       credits: 30,
       icon: Leaf,
       color: 'bg-purple-500'
@@ -69,8 +69,8 @@ export default function AgriCredits() {
     if (user.agriCreds >= service.credits) {
       addAgriCreds(-service.credits, `Used ${service.name}`);
       toast({
-        title: language === 'hindi' ? 'सेवा शुरू की गई' : 'Service Started',
-        description: language === 'hindi' 
+        title: language === 'hi' ? 'सेवा शुरू की गई' : 'Service Started',
+        description: language === 'hi' 
           ? `${service.name} सेवा शुरू की गई। ${service.credits} क्रेडिट खर्च हुए।`
           : `${service.name} service started. ${service.credits} credits spent.`,
       });
@@ -92,8 +92,8 @@ export default function AgriCredits() {
       }
     } else {
       toast({
-        title: language === 'hindi' ? 'अपर्याप्त क्रेडिट' : 'Insufficient Credits',
-        description: language === 'hindi' 
+        title: language === 'hi' ? 'अपर्याप्त क्रेडिट' : 'Insufficient Credits',
+        description: language === 'hi' 
           ? `आपके पास पर्याप्त क्रेडिट नहीं हैं। ${service.credits} क्रेडिट की आवश्यकता है।`
           : `You don't have enough credits. ${service.credits} credits required.`,
         variant: "destructive",
@@ -104,30 +104,30 @@ export default function AgriCredits() {
   const earningMethods = [
     {
       id: 'daily-login',
-      name: language === 'hindi' ? 'दैनिक लॉगिन' : 'Daily Login',
+      name: language === 'hi' ? 'दैनिक लॉगिन' : 'Daily Login',
       credits: 10,
       icon: Star,
-      description: language === 'hindi' ? 'रोज लॉगिन करें' : 'Login daily'
+      description: language === 'hi' ? 'रोज लॉगिन करें' : 'Login daily'
     },
     {
       id: 'community-post',
-      name: language === 'hindi' ? 'समुदाय पोस्ट' : 'Community Post',
+      name: language === 'hi' ? 'समुदाय पोस्ट' : 'Community Post',
       credits: 15,
       icon: Users,
-      description: language === 'hindi' ? 'समुदाय में पोस्ट करें' : 'Post in community'
+      description: language === 'hi' ? 'समुदाय में पोस्ट करें' : 'Post in community'
     },
     {
       id: 'refer-friend',
-      name: language === 'hindi' ? 'दोस्त को भेजें' : 'Refer Friend',
+      name: language === 'hi' ? 'दोस्त को भेजें' : 'Refer Friend',
       credits: 50,
       icon: Gift,
-      description: language === 'hindi' ? 'दोस्त को ऐप भेजें' : 'Refer app to friend'
+      description: language === 'hi' ? 'दोस्त को ऐप भेजें' : 'Refer app to friend'
     }
   ];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50">
-      <Header title={language === 'hindi' ? 'AgriCredits' : 'AgriCredits'} />
+      <Header title={language === 'hi' ? 'AgriCredits' : 'AgriCredits'} />
       
       <div className="p-4 space-y-6">
         {/* Credits Display */}
@@ -138,7 +138,7 @@ export default function AgriCredits() {
               <span className="text-3xl font-bold">{user.agriCreds}</span>
             </div>
             <p className="text-lg opacity-90">
-              {language === 'hindi' ? 'आपके AgriCredits' : 'Your AgriCredits'}
+              {language === 'hi' ? 'आपके AgriCredits' : 'Your AgriCredits'}
             </p>
           </CardContent>
         </Card>
@@ -151,10 +151,10 @@ export default function AgriCredits() {
                 <MessageCircle className="h-6 w-6" />
                 <div>
                   <h3 className="font-semibold">
-                    {language === 'hindi' ? 'विशेषज्ञ चैट' : 'Expert Chat'}
+                    {language === 'hi' ? 'विशेषज्ञ चैट' : 'Expert Chat'}
                   </h3>
                   <p className="text-sm opacity-90">
-                    {language === 'hindi' 
+                    {language === 'hi' 
                       ? '50 क्रेडिट की आवश्यकता है' 
                       : 'Requires 50 credits'
                     }
@@ -168,7 +168,7 @@ export default function AgriCredits() {
         {/* Services */}
         <div>
           <h2 className="text-xl font-semibold mb-4 text-gray-800">
-            {language === 'hindi' ? 'उपलब्ध सेवाएं' : 'Available Services'}
+            {language === 'hi' ? 'उपलब्ध सेवाएं' : 'Available Services'}
           </h2>
           <div className="grid grid-cols-1 gap-4">
             {services.map((service) => {
@@ -194,7 +194,7 @@ export default function AgriCredits() {
                       </div>
                       <div className="text-right">
                         <Badge variant={canAfford ? "default" : "secondary"}>
-                          {service.credits} {language === 'hindi' ? 'क्रेडिट' : 'Credits'}
+                          {service.credits} {language === 'hi' ? 'क्रेडिट' : 'Credits'}
                         </Badge>
                       </div>
                     </div>
@@ -208,7 +208,7 @@ export default function AgriCredits() {
         {/* How to Earn */}
         <div>
           <h2 className="text-xl font-semibold mb-4 text-gray-800">
-            {language === 'hindi' ? 'क्रेडिट कैसे कमाएं' : 'How to Earn Credits'}
+            {language === 'hi' ? 'क्रेडिट कैसे कमाएं' : 'How to Earn Credits'}
           </h2>
           <div className="grid grid-cols-1 gap-3">
             {earningMethods.map((method) => {
@@ -243,14 +243,14 @@ export default function AgriCredits() {
             className="h-12"
           >
             <Wallet className="h-4 w-4 mr-2" />
-            {language === 'hindi' ? 'वॉलेट' : 'Wallet'}
+            {language === 'hi' ? 'वॉलेट' : 'Wallet'}
           </Button>
           <Button 
             variant="outline" 
             onClick={() => navigate(-1)}
             className="h-12"
           >
-            {language === 'hindi' ? 'वापस जाएं' : 'Go Back'}
+            {language === 'hi' ? 'वापस जाएं' : 'Go Back'}
           </Button>
         </div>
       </div>

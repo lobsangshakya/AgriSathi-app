@@ -1,7 +1,7 @@
 /**
- * Supabase Database Client Configuration
- * Optional: only created when VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY are set.
- * When not configured, app uses mock auth (no crash).
+ * Supabase Client Configuration
+ * Created when VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY are set.
+ * Falls back to null (mock auth) when unconfigured.
  */
 
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
@@ -10,11 +10,17 @@ const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string | undefined;
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined;
 const PLACEHOLDER_URL = 'https://your-project-id.supabase.co';
 
-const isConfigured =
-  !!SUPABASE_URL &&
-  !!SUPABASE_ANON_KEY &&
-  SUPABASE_URL !== PLACEHOLDER_URL &&
-  !String(SUPABASE_ANON_KEY).includes('your_');
+// A valid Supabase anon key is a JWT — it must start with "eyJ"
+const urlMissing = !SUPABASE_URL || SUPABASE_URL === PLACEHOLDER_URL;
+const keyMissing = !SUPABASE_ANON_KEY || SUPABASE_ANON_KEY === 'your-anon-key' || !SUPABASE_ANON_KEY.startsWith('eyJ');
+const isConfigured = !urlMissing && !keyMissing;
+
+if (!isConfigured) {
+  const missingVars: string[] = [];
+  if (urlMissing) missingVars.push('VITE_SUPABASE_URL');
+  if (keyMissing) missingVars.push('VITE_SUPABASE_ANON_KEY');
+  console.warn(`[AgriSathi] Supabase not configured: ${missingVars.join(', ')} is missing or placeholder`);
+}
 
 export const supabase: SupabaseClient | null = isConfigured
   ? createClient(SUPABASE_URL!, SUPABASE_ANON_KEY!, {
@@ -23,11 +29,10 @@ export const supabase: SupabaseClient | null = isConfigured
         persistSession: true,
         detectSessionInUrl: true,
       },
-      realtime: { params: { eventsPerSecond: 10 } },
     })
   : null;
 
-// Database types for TypeScript support
+// Database types
 export type Database = {
   public: {
     Tables: {

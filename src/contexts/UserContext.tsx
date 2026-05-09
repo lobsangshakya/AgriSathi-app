@@ -88,8 +88,10 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     isManual: boolean;
   } | null>(null);
 
-  // Convert UnifiedUserProfile to User format
+  // Convert UserProfile (DB shape) to User format used by the UI
   const convertToUser = (profile: UnifiedUserProfile): User => {
+    const landSize = profile.land_size || profile.landSize || 'Not specified';
+    const joinDate = profile.join_date || profile.joinDate;
     return {
       id: profile.id,
       name: profile.name,
@@ -97,12 +99,12 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
       avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${profile.id}`,
       email: profile.email,
       phone: profile.phone || '',
-      landSize: profile.landSize || 'Not specified',
+      landSize,
       experience: profile.experience || 'Not specified',
-      agriCreds: 100, // Default credits
-      joinDate: new Date(profile.joinDate).toLocaleDateString(),
-      language: profile.language,
-      crops: profile.crops,
+      agriCreds: profile.agri_creds ?? 100,
+      joinDate: joinDate ? new Date(joinDate).toLocaleDateString() : new Date().toLocaleDateString(),
+      language: profile.language || 'hindi',
+      crops: profile.crops || [],
       stats: {
         postsShared: 0,
         helpfulAnswers: 0,

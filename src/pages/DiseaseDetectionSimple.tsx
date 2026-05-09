@@ -82,8 +82,8 @@ const DiseaseDetectionSimple = () => {
   const startAnalysis = async () => {
     if (!selectedImage) {
       toast({
-        title: language === 'hindi' ? 'गलती' : 'Error',
-        description: language === 'hindi' 
+        title: language === 'hi' ? 'गलती' : 'Error',
+        description: language === 'hi' 
           ? 'कृपया पहले एक छवि अपलोड करें' 
           : 'Please upload an image first',
         variant: 'destructive',
@@ -97,15 +97,15 @@ const DiseaseDetectionSimple = () => {
       const result = await diseaseDetectionService.analyzeImage(selectedImage as any);
       setAnalysisResult(result.result as any);
       toast({
-        title: language === 'hindi' ? 'विश्लेषण पूर्ण' : 'Analysis Complete',
-        description: language === 'hindi'
+        title: language === 'hi' ? 'विश्लेषण पूर्ण' : 'Analysis Complete',
+        description: language === 'hi'
           ? 'बीमारी की पहचान हो गई है। नीचे देखें।'
           : 'Disease identified. See results below.',
       });
     } catch (error) {
       toast({
-        title: language === 'hindi' ? 'गलती' : 'Error',
-        description: language === 'hindi' 
+        title: language === 'hi' ? 'गलती' : 'Error',
+        description: language === 'hi' 
           ? 'विश्लेषण में समस्या' 
           : 'Analysis failed',
         variant: 'destructive',
@@ -141,10 +141,10 @@ const DiseaseDetectionSimple = () => {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-xl font-bold text-gray-900">
-                {language === 'hindi' ? 'फसल जांच' : 'Crop Scanner'}
+                {language === 'hi' ? 'फसल जांच' : 'Crop Scanner'}
               </h1>
               <p className="text-sm text-gray-600">
-                {language === 'hindi' ? 'बीमारी की पहचान करें' : 'Detect crop diseases'}
+                {language === 'hi' ? 'बीमारी की पहचान करें' : 'Detect crop diseases'}
               </p>
             </div>
             <Button
@@ -152,7 +152,7 @@ const DiseaseDetectionSimple = () => {
               size="sm"
               onClick={() => window.history.back()}
             >
-              {language === 'hindi' ? 'वापस' : 'Back'}
+              {language === 'hi' ? 'वापस' : 'Back'}
             </Button>
           </div>
         </div>
@@ -164,19 +164,19 @@ const DiseaseDetectionSimple = () => {
             {/* Instructions */}
             <div className="mb-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-3">
-                {language === 'hindi' ? 'फसल की फोटो अपलोड करें' : 'Upload Crop Photo'}
+                {language === 'hi' ? 'फसल की फोटो अपलोड करें' : 'Upload Crop Photo'}
               </h3>
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                 <div className="flex items-start gap-3">
                   <Camera className="w-5 h-5 text-blue-600 mt-1" />
                   <div>
                     <h4 className="font-medium text-gray-900 mb-2">
-                      {language === 'hindi' ? 'अच्छी तस्वीरें के लिए:' : 'For best results:'}
+                      {language === 'hi' ? 'अच्छी तस्वीरें के लिए:' : 'For best results:'}
                     </h4>
                     <ul className="text-sm text-gray-700 space-y-1">
-                      <li>• {language === 'hindi' ? 'पत्तियों की स्पष्ट फोटो लें' : 'Take clear photos of leaves'}</li>
-                      <li>• {language === 'hindi' ? 'धुप में फोटो खींचें' : 'Take photos in daylight'}</li>
-                      <li>• {language === 'hindi' ? 'बीमारी के लक्षण दिखें' : 'Show disease symptoms'}</li>
+                      <li>• {language === 'hi' ? 'पत्तियों की स्पष्ट फोटो लें' : 'Take clear photos of leaves'}</li>
+                      <li>• {language === 'hi' ? 'धुप में फोटो खींचें' : 'Take photos in daylight'}</li>
+                      <li>• {language === 'hi' ? 'बीमारी के लक्षण दिखें' : 'Show disease symptoms'}</li>
                     </ul>
                   </div>
                 </div>
@@ -199,17 +199,17 @@ const DiseaseDetectionSimple = () => {
                   <Upload className="w-12 h-12 text-gray-400 mx-auto" />
                 </div>
                 <h4 className="text-lg font-medium text-gray-900 mb-2">
-                  {language === 'hindi' ? 'फोटो अपलोड करें' : 'Upload Photo'}
+                  {language === 'hi' ? 'फोटो अपलोड करें' : 'Upload Photo'}
                 </h4>
                 <p className="text-sm text-gray-600 mb-4">
-                  {language === 'hindi' 
+                  {language === 'hi' 
                     ? 'फ़ाइल खींचें या यहां डालें' 
                     : 'Drag and drop or click to upload'}
                 </p>
                 <div className="flex gap-2 justify-center">
                   <Button variant="outline" size="sm">
                     <FileImage className="w-4 h-4 mr-2" />
-                    {language === 'hindi' ? 'गैलरी' : 'Gallery'}
+                    {language === 'hi' ? 'गैलरी' : 'Gallery'}
                   </Button>
                   <Button 
                     variant="outline" 
@@ -220,11 +220,11 @@ const DiseaseDetectionSimple = () => {
                     }}
                   >
                     <Camera className="w-4 h-4 mr-2" />
-                    {language === 'hindi' ? 'कैमरा' : 'Camera'}
+                    {language === 'hi' ? 'कैमरा' : 'Camera'}
                   </Button>
                 </div>
                 <p className="text-xs text-gray-500 mt-4">
-                  {language === 'hindi' 
+                  {language === 'hi' 
                     ? 'समर्थित: JPG, PNG (अधिकतम 10MB)' 
                     : 'Supported: JPG, PNG (max 10MB)'}
                 </p>
@@ -244,7 +244,7 @@ const DiseaseDetectionSimple = () => {
         {selectedImage && !analysisResult && (
           <div className="mb-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-3">
-              {language === 'hindi' ? 'अपलोड की गई फोटो' : 'Uploaded Photo'}
+              {language === 'hi' ? 'अपलोड की गई फोटो' : 'Uploaded Photo'}
             </h3>
             <Card className="overflow-hidden">
               <div className="relative">
@@ -263,12 +263,12 @@ const DiseaseDetectionSimple = () => {
                   {isAnalyzing ? (
                     <>
                       <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-                      {language === 'hindi' ? 'विश्लेषण जारी...' : 'Analyzing...'}
+                      {language === 'hi' ? 'विश्लेषण जारी...' : 'Analyzing...'}
                     </>
                   ) : (
                     <>
                       <Scan className="w-4 h-4 mr-2" />
-                      {language === 'hindi' ? 'विश्लेषण शुरू करें' : 'Start Analysis'}
+                      {language === 'hi' ? 'विश्लेषण शुरू करें' : 'Start Analysis'}
                     </>
                   )}
                 </Button>
@@ -281,7 +281,7 @@ const DiseaseDetectionSimple = () => {
         {analysisResult && (
           <div>
             <h3 className="text-lg font-semibold text-gray-900 mb-3">
-              {language === 'hindi' ? 'विश्लेषण परिणाम' : 'Analysis Results'}
+              {language === 'hi' ? 'विश्लेषण परिणाम' : 'Analysis Results'}
             </h3>
             <Card className="overflow-hidden">
               <div className="p-4">
@@ -292,7 +292,7 @@ const DiseaseDetectionSimple = () => {
                     <Badge className={getSeverityColor(analysisResult.severity)}>
                       {getSeverityIcon(analysisResult.severity)}
                       <span className="ml-1">
-                        {language === 'hindi' ? analysisResult.severity : analysisResult.severity}
+                        {language === 'hi' ? analysisResult.severity : analysisResult.severity}
                       </span>
                     </Badge>
                   </div>
@@ -304,7 +304,7 @@ const DiseaseDetectionSimple = () => {
                       />
                     </div>
                     <span className="text-sm font-medium text-gray-600">
-                      {analysisResult.confidence}% {language === 'hindi' ? 'विश्वास' : 'confidence'}
+                      {analysisResult.confidence}% {language === 'hi' ? 'विश्वास' : 'confidence'}
                     </span>
                   </div>
                 </div>
@@ -313,7 +313,7 @@ const DiseaseDetectionSimple = () => {
                 <div className="mb-4">
                   <h5 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
                     <CheckCircle className="w-4 h-4 text-green-500" />
-                    {language === 'hindi' ? 'उपचार' : 'Treatment'}
+                    {language === 'hi' ? 'उपचार' : 'Treatment'}
                   </h5>
                   <ul className="space-y-1">
                     {analysisResult.treatment.map((treatment, index) => (
@@ -334,7 +334,7 @@ const DiseaseDetectionSimple = () => {
                     className="flex-1"
                   >
                     <ArrowRight className="w-4 h-4 mr-2" />
-                    {language === 'hindi' ? 'विशेषज्ञ से बात करें' : 'Talk to Expert'}
+                    {language === 'hi' ? 'विशेषज्ञ से बात करें' : 'Talk to Expert'}
                   </Button>
                   <Button 
                     variant="outline" 

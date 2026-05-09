@@ -85,7 +85,7 @@ const DashboardSimple = () => {
                 {t('agriSathi')}
               </h1>
               <p className="text-xs font-medium text-gray-500 mt-0.5">
-                {user?.name || t('farmerName')} | ${currentTime.toLocaleTimeString(language === 'hi' ? 'hi-IN' : 'en-US', { hour: '2-digit', minute: '2-digit' })}
+                {user?.name || t('farmerName')} | {currentTime.toLocaleTimeString(language === 'hi' ? 'hi-IN' : 'en-US', { hour: '2-digit', minute: '2-digit' })}
               </p>
             </div>
             <Button

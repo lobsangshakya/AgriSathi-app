@@ -50,7 +50,7 @@ export const WalletProvider: React.FC<{ children: ReactNode }> = ({ children }) 
   const [isConnecting, setIsConnecting] = useState(false);
   const [isTransacting, setIsTransacting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [provider, setProvider] = useState<ethers.providers.Web3Provider | null>(null);
+  const [provider, setProvider] = useState<ethers.BrowserProvider | null>(null);
   const [contract, setContract] = useState<ethers.Contract | null>(null);
 
   // Initialize wallet connection
@@ -63,16 +63,20 @@ export const WalletProvider: React.FC<{ children: ReactNode }> = ({ children }) 
       const ethereumProvider = await detectEthereumProvider();
       
       if (ethereumProvider) {
-        const web3Provider = new ethers.providers.Web3Provider(ethereumProvider);
+        // ethers v6: BrowserProvider replaces providers.Web3Provider
+        const web3Provider = new ethers.BrowserProvider(ethereumProvider as any);
         setProvider(web3Provider);
         
         // Create contract instance
-        const agriCredsContract = new ethers.Contract(
-          AGRICREDS_CONTRACT_ADDRESS,
-          AGRICREDS_ABI,
-          web3Provider.getSigner()
-        );
-        setContract(agriCredsContract);
+        const signer = await web3Provider.getSigner().catch(() => null);
+        if (signer) {
+          const agriCredsContract = new ethers.Contract(
+            AGRICREDS_CONTRACT_ADDRESS,
+            AGRICREDS_ABI,
+            signer
+          );
+          setContract(agriCredsContract);
+        }
         
         // Check if already connected
         const accounts = await (ethereumProvider as any).request({ method: 'eth_accounts' });
@@ -81,12 +85,12 @@ export const WalletProvider: React.FC<{ children: ReactNode }> = ({ children }) 
         }
         
         // Listen for account changes
-        ethereumProvider.on('accountsChanged', handleAccountsChanged);
-        ethereumProvider.on('chainChanged', () => window.location.reload());
+        (ethereumProvider as any).on('accountsChanged', handleAccountsChanged);
+        (ethereumProvider as any).on('chainChanged', () => window.location.reload());
       }
     } catch (error) {
       console.error('Failed to initialize wallet:', error);
-      setError(language === 'hindi' ? 'वॉलेट प्रारंभ करने में त्रुटि' : 'Failed to initialize wallet');
+      // Non-fatal — wallet is optional
     }
   };
 
@@ -106,7 +110,8 @@ export const WalletProvider: React.FC<{ children: ReactNode }> = ({ children }) 
       // Get ETH balance
       if (provider) {
         const ethBalance = await provider.getBalance(account);
-        setBalance(ethers.utils.formatEther(ethBalance));
+        // ethers v6: formatEther is a top-level function
+        setBalance(ethers.formatEther(ethBalance));
         
         // Get AgriCreds balance (mock for demo)
         setAgriCredsBalance(Math.floor(Math.random() * 1000) + 100);
@@ -117,8 +122,8 @@ export const WalletProvider: React.FC<{ children: ReactNode }> = ({ children }) 
   const connectWallet = async () => {
     if (!provider) {
       toast({
-        title: language === 'hindi' ? 'MetaMask नहीं मिला' : 'MetaMask not found',
-        description: language === 'hindi' 
+        title: language === 'hi' ? 'MetaMask नहीं मिला' : 'MetaMask not found',
+        description: language === 'hi' 
           ? 'कृपया MetaMask इंस्टॉल करें और पेज को रिफ्रेश करें'
           : 'Please install MetaMask and refresh the page',
         variant: "destructive",
@@ -134,21 +139,21 @@ export const WalletProvider: React.FC<{ children: ReactNode }> = ({ children }) 
       await handleAccountsChanged(accounts);
       
       toast({
-        title: language === 'hindi' ? 'वॉलेट कनेक्ट हो गया' : 'Wallet Connected',
-        description: language === 'hindi' 
+        title: language === 'hi' ? 'वॉलेट कनेक्ट हो गया' : 'Wallet Connected',
+        description: language === 'hi' 
           ? 'आपका MetaMask वॉलेट सफलतापूर्वक कनेक्ट हो गया है'
           : 'Your MetaMask wallet has been connected successfully',
       });
     } catch (error: any) {
       console.error('Failed to connect wallet:', error);
       setError(
-        language === 'hindi' 
+        language === 'hi' 
           ? 'वॉलेट कनेक्ट करने में त्रुटि: ' + (error.message || 'अज्ञात त्रुटि')
           : 'Failed to connect wallet: ' + (error.message || 'Unknown error')
       );
       
       toast({
-        title: language === 'hindi' ? 'कनेक्शन विफल' : 'Connection Failed',
+        title: language === 'hi' ? 'कनेक्शन विफल' : 'Connection Failed',
         description: error.message || 'Failed to connect wallet',
         variant: "destructive",
       });
@@ -165,8 +170,8 @@ export const WalletProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     setError(null);
     
     toast({
-      title: language === 'hindi' ? 'वॉलेट डिस्कनेक्ट' : 'Wallet Disconnected',
-      description: language === 'hindi' 
+      title: language === 'hi' ? 'वॉलेट डिस्कनेक्ट' : 'Wallet Disconnected',
+      description: language === 'hi' 
         ? 'आपका वॉलेट डिस्कनेक्ट हो गया है'
         : 'Your wallet has been disconnected',
     });
@@ -175,8 +180,8 @@ export const WalletProvider: React.FC<{ children: ReactNode }> = ({ children }) 
   const sendAgriCreds = async (to: string, amount: number) => {
     if (!contract || !account) {
       toast({
-        title: language === 'hindi' ? 'वॉलेट कनेक्ट नहीं' : 'Wallet not connected',
-        description: language === 'hindi' 
+        title: language === 'hi' ? 'वॉलेट कनेक्ट नहीं' : 'Wallet not connected',
+        description: language === 'hi' 
           ? 'कृपया पहले अपना वॉलेट कनेक्ट करें'
           : 'Please connect your wallet first',
         variant: "destructive",
@@ -186,8 +191,8 @@ export const WalletProvider: React.FC<{ children: ReactNode }> = ({ children }) 
 
     if (agriCredsBalance < amount) {
       toast({
-        title: language === 'hindi' ? 'अपर्याप्त बैलेंस' : 'Insufficient Balance',
-        description: language === 'hindi' 
+        title: language === 'hi' ? 'अपर्याप्त बैलेंस' : 'Insufficient Balance',
+        description: language === 'hi' 
           ? 'आपके पास पर्याप्त AgriCreds नहीं हैं'
           : 'You don\'t have enough AgriCreds',
         variant: "destructive",
@@ -206,21 +211,21 @@ export const WalletProvider: React.FC<{ children: ReactNode }> = ({ children }) 
       setAgriCredsBalance(prev => prev - amount);
       
       toast({
-        title: language === 'hindi' ? 'AgriCreds भेजे गए' : 'AgriCreds Sent',
-        description: language === 'hindi' 
+        title: language === 'hi' ? 'AgriCreds भेजे गए' : 'AgriCreds Sent',
+        description: language === 'hi' 
           ? `${amount} AgriCreds सफलतापूर्वक भेजे गए`
           : `${amount} AgriCreds sent successfully`,
       });
     } catch (error: any) {
       console.error('Failed to send AgriCreds:', error);
       setError(
-        language === 'hindi' 
+        language === 'hi' 
           ? 'AgriCreds भेजने में त्रुटि: ' + (error.message || 'अज्ञात त्रुटि')
           : 'Failed to send AgriCreds: ' + (error.message || 'Unknown error')
       );
       
       toast({
-        title: language === 'hindi' ? 'लेन-देन विफल' : 'Transaction Failed',
+        title: language === 'hi' ? 'लेन-देन विफल' : 'Transaction Failed',
         description: error.message || 'Failed to send AgriCreds',
         variant: "destructive",
       });
@@ -232,8 +237,8 @@ export const WalletProvider: React.FC<{ children: ReactNode }> = ({ children }) 
   const buyAgriCreds = async (amount: number) => {
     if (!provider || !account) {
       toast({
-        title: language === 'hindi' ? 'वॉलेट कनेक्ट नहीं' : 'Wallet not connected',
-        description: language === 'hindi' 
+        title: language === 'hi' ? 'वॉलेट कनेक्ट नहीं' : 'Wallet not connected',
+        description: language === 'hi' 
           ? 'कृपया पहले अपना वॉलेट कनेक्ट करें'
           : 'Please connect your wallet first',
         variant: "destructive",
@@ -246,8 +251,8 @@ export const WalletProvider: React.FC<{ children: ReactNode }> = ({ children }) 
 
     if (currentBalance < ethRequired) {
       toast({
-        title: language === 'hindi' ? 'अपर्याप्त ETH' : 'Insufficient ETH',
-        description: language === 'hindi' 
+        title: language === 'hi' ? 'अपर्याप्त ETH' : 'Insufficient ETH',
+        description: language === 'hi' 
           ? `आपको ${ethRequired.toFixed(4)} ETH की आवश्यकता है`
           : `You need ${ethRequired.toFixed(4)} ETH`,
         variant: "destructive",
@@ -267,21 +272,21 @@ export const WalletProvider: React.FC<{ children: ReactNode }> = ({ children }) 
       setBalance(prev => (parseFloat(prev) - ethRequired).toString());
       
       toast({
-        title: language === 'hindi' ? 'AgriCreds खरीदे गए' : 'AgriCreds Purchased',
-        description: language === 'hindi' 
+        title: language === 'hi' ? 'AgriCreds खरीदे गए' : 'AgriCreds Purchased',
+        description: language === 'hi' 
           ? `${amount} AgriCreds सफलतापूर्वक खरीदे गए`
           : `${amount} AgriCreds purchased successfully`,
       });
     } catch (error: any) {
       console.error('Failed to buy AgriCreds:', error);
       setError(
-        language === 'hindi' 
+        language === 'hi' 
           ? 'AgriCreds खरीदने में त्रुटि: ' + (error.message || 'अज्ञात त्रुटि')
           : 'Failed to buy AgriCreds: ' + (error.message || 'Unknown error')
       );
       
       toast({
-        title: language === 'hindi' ? 'खरीद विफल' : 'Purchase Failed',
+        title: language === 'hi' ? 'खरीद विफल' : 'Purchase Failed',
         description: error.message || 'Failed to buy AgriCreds',
         variant: "destructive",
       });
@@ -293,8 +298,8 @@ export const WalletProvider: React.FC<{ children: ReactNode }> = ({ children }) 
   const sellAgriCreds = async (amount: number) => {
     if (!provider || !account) {
       toast({
-        title: language === 'hindi' ? 'वॉलेट कनेक्ट नहीं' : 'Wallet not connected',
-        description: language === 'hindi' 
+        title: language === 'hi' ? 'वॉलेट कनेक्ट नहीं' : 'Wallet not connected',
+        description: language === 'hi' 
           ? 'कृपया पहले अपना वॉलेट कनेक्ट करें'
           : 'Please connect your wallet first',
         variant: "destructive",
@@ -304,8 +309,8 @@ export const WalletProvider: React.FC<{ children: ReactNode }> = ({ children }) 
 
     if (agriCredsBalance < amount) {
       toast({
-        title: language === 'hindi' ? 'अपर्याप्त AgriCreds' : 'Insufficient AgriCreds',
-        description: language === 'hindi' 
+        title: language === 'hi' ? 'अपर्याप्त AgriCreds' : 'Insufficient AgriCreds',
+        description: language === 'hi' 
           ? 'आपके पास पर्याप्त AgriCreds नहीं हैं'
           : 'You don\'t have enough AgriCreds',
         variant: "destructive",
@@ -327,21 +332,21 @@ export const WalletProvider: React.FC<{ children: ReactNode }> = ({ children }) 
       setBalance(prev => (parseFloat(prev) + ethReceived).toString());
       
       toast({
-        title: language === 'hindi' ? 'AgriCreds बेचे गए' : 'AgriCreds Sold',
-        description: language === 'hindi' 
+        title: language === 'hi' ? 'AgriCreds बेचे गए' : 'AgriCreds Sold',
+        description: language === 'hi' 
           ? `${amount} AgriCreds सफलतापूर्वक बेचे गए`
           : `${amount} AgriCreds sold successfully`,
       });
     } catch (error: any) {
       console.error('Failed to sell AgriCreds:', error);
       setError(
-        language === 'hindi' 
+        language === 'hi' 
           ? 'AgriCreds बेचने में त्रुटि: ' + (error.message || 'अज्ञात त्रुटि')
           : 'Failed to sell AgriCreds: ' + (error.message || 'Unknown error')
       );
       
       toast({
-        title: language === 'hindi' ? 'बिक्री विफल' : 'Sale Failed',
+        title: language === 'hi' ? 'बिक्री विफल' : 'Sale Failed',
         description: error.message || 'Failed to sell AgriCreds',
         variant: "destructive",
       });

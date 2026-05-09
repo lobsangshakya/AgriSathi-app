@@ -51,8 +51,8 @@ const Profile = () => {
 
   const handleSettings = () => {
     toast({
-      title: language === 'hindi' ? 'सेटिंग्स' : 'Settings',
-      description: language === 'hindi' 
+      title: language === 'hi' ? 'सेटिंग्स' : 'Settings',
+      description: language === 'hi' 
         ? 'सेटिंग्स पेज जल्द ही उपलब्ध होगा'
         : 'Settings page coming soon',
     });
@@ -63,8 +63,8 @@ const Profile = () => {
   const handleChangeLanguage = () => {
     // This will be handled by the language toggle in header
     toast({
-      title: language === 'hindi' ? 'भाषा बदलें' : 'Change Language',
-      description: language === 'hindi' 
+      title: language === 'hi' ? 'भाषा बदलें' : 'Change Language',
+      description: language === 'hi' 
         ? 'हेडर में भाषा बटन का उपयोग करें'
         : 'Use the language button in the header',
     });
@@ -103,7 +103,7 @@ const Profile = () => {
               <span className="text-2xl font-bold">{user.agriCreds}</span>
             </div>
             <p className="text-sm opacity-90">
-              {language === 'hindi' ? 'कुल AgriCreds - देखने के लिए क्लिक करें' : 'Total AgriCreds - Click to view'}
+              {language === 'hi' ? 'कुल AgriCreds - देखने के लिए क्लिक करें' : 'Total AgriCreds - Click to view'}
             </p>
           </Card>
         </Card>
