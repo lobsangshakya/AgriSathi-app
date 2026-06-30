@@ -13,11 +13,9 @@ import Wallet from "./pages/Wallet";
 import ServiceConfirmation from "./pages/ServiceConfirmation";
 import NotFound from "./pages/NotFound";
 import { Layout } from "./components/Layout";
-import { BottomNavigationEnhanced } from "./components/BottomNavigationEnhanced";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { UserProvider, useUser } from "./contexts/UserContext";
 import { WalletProvider } from "./contexts/WalletContext";
-import Auth from "./pages/AuthEnhanced";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { useState, useEffect } from 'react';
 import AuthModalSimple from './components/AuthModalSimple';
@@ -77,18 +75,17 @@ const AppContent = () => {
           <Route path="/profile" element={<Profile />} />
           <Route path="/disease-detection" element={<DiseaseDetection />} />
           <Route path="/chat" element={<Chat />} />
-                    <Route path="/agri-credits" element={<AgriCredits />} />
+          <Route path="/agri-credits" element={<AgriCredits />} />
           <Route path="/wallet" element={<Wallet />} />
           <Route path="/service-confirmation" element={<ServiceConfirmation />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Layout>
     </ErrorBoundary>
   );
-};
+}
 
-const App = () => {
+export default function App() {
   return (
     <ErrorBoundary>
       <LanguageProvider>
@@ -108,6 +105,4 @@ const App = () => {
       </LanguageProvider>
     </ErrorBoundary>
   );
-};
-
-export default App;
+}
